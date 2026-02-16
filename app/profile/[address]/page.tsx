@@ -53,12 +53,10 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
       });
       setBadge(badgeResult as number);
 
-      // Fetch user's dares (scan all dares)
+      // Fetch user's dares (scan last 200)
       const total = Number(dareCount as bigint);
       const userDaresList: DareData[] = [];
-
-      const batchSize = 50;
-      const start = Math.max(0, total - 200); // Scan last 200 dares max
+      const start = Math.max(0, total - 200);
 
       for (let i = total - 1; i >= start && userDaresList.length < 50; i--) {
         try {
@@ -97,7 +95,9 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
               status: result[11],
             });
           }
-        } catch {}
+        } catch {
+          // ignore bad dare
+        }
       }
 
       setUserDares(userDaresList);
@@ -126,30 +126,31 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
       <Header />
 
       <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to feed
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1 text-[11px] text-gray-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
             </span>
             On‑chain profile
           </div>
         </div>
 
         {/* Profile Header */}
-        <div className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-950/80 px-4 py-4 flex items-center justify-between gap-4">
+        <div className="mb-6 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] px-4 py-4 flex items-center justify-between gap-4 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/20 text-primary text-lg font-bold">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.18)] text-[#f5d566] text-lg font-bold">
               {profileAddress.slice(2, 4).toUpperCase()}
-              <span className="absolute inset-0 rounded-2xl border border-primary/40 blur-[1px]" />
+              <span className="absolute inset-0 rounded-2xl border border-[rgba(212,175,55,0.6)] blur-[1px]" />
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
@@ -160,7 +161,7 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-400" />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-gray-400 hover:text-white" />
+                    <Copy className="h-3.5 w-3.5 text-white/50 hover:text-white" />
                   )}
                 </button>
                 <a
@@ -170,24 +171,24 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
                   className="shrink-0"
                   aria-label="View on BaseScan"
                 >
-                  <ExternalLink className="h-3.5 w-3.5 text-gray-400 hover:text-white" />
+                  <ExternalLink className="h-3.5 w-3.5 text-white/50 hover:text-white" />
                 </a>
               </div>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-white/55">
                 {isOwnProfile ? "Your on‑chain dare history" : "Public dare profile"}
               </span>
             </div>
           </div>
 
-          <div className="hidden sm:flex flex-col items-end text-xs text-gray-400">
-            <div className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2 py-1 border border-neutral-700">
-              <Trophy className="h-3.5 w-3.5 text-amber-400" />
+          <div className="hidden sm:flex flex-col items-end text-xs text-white/60">
+            <div className="inline-flex items-center gap-1 rounded-full bg-[rgba(10,10,10,0.95)] px-2 py-1 border border-white/10">
+              <Trophy className="h-3.5 w-3.5 text-[#f5d566]" />
               <span className="font-mono">
                 Wins: {stats ? Number(stats.totalWins) : 0}
               </span>
             </div>
             {isOwnProfile && (
-              <span className="mt-1 inline-flex items-center text-[11px] text-primary gap-1">
+              <span className="mt-1 inline-flex items-center text-[11px] text-[#f5d566] gap-1">
                 <Sparkles className="h-3 w-3" />
                 Your Profile
               </span>
@@ -195,27 +196,29 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
           </div>
         </div>
 
+        {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
           </div>
         )}
 
+        {/* Content */}
         {!loading && stats && (
           <>
             <UserStatsCard stats={stats} badge={badge} address={profileAddress} />
 
             <Tabs defaultValue="active" className="mt-8">
-              <TabsList className="grid w-full grid-cols-2 bg-neutral-900 rounded-full p-1 border border-neutral-800">
+              <TabsList className="grid w-full grid-cols-2 bg-[rgba(10,10,10,0.95)] rounded-full p-1 border border-white/10">
                 <TabsTrigger
                   value="active"
-                  className="text-gray-300 data-[state=active]:bg-primary data-[state=active]:text-black rounded-full text-sm"
+                  className="text-white/70 data-[state=active]:bg-[#f5d566] data-[state=active]:text-black rounded-full text-sm"
                 >
                   Active ({activeDares.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
-                  className="text-gray-300 data-[state=active]:bg-neutral-700 data-[state=active]:text-white rounded-full text-sm"
+                  className="text-white/70 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/15 rounded-full text-sm"
                 >
                   History ({pastDares.length})
                 </TabsTrigger>
@@ -223,7 +226,7 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
 
               <TabsContent value="active" className="mt-4">
                 {activeDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-gray-400">
+                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-white/60">
                     No active dares
                   </div>
                 ) : (
@@ -237,7 +240,7 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
 
               <TabsContent value="history" className="mt-4">
                 {pastDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-gray-400">
+                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-white/60">
                     No past dares
                   </div>
                 ) : (

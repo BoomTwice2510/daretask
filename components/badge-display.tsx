@@ -26,21 +26,21 @@ export function BadgeDisplay({ badge, size = "md", showLabel = true }: BadgeDisp
   const color = getBadgeColor(badge);
 
   const sizeClasses = {
-    sm: "text-xs gap-1 px-2 py-0.5",
-    md: "text-sm gap-1.5 px-2.5 py-1",
-    lg: "text-base gap-2 px-3 py-1.5",
+    sm: "text-[11px] gap-1 px-2 py-0.5",
+    md: "text-xs gap-1.5 px-2.5 py-1",
+    lg: "text-sm gap-2 px-3 py-1.5",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-neutral-900 text-white",
+        "inline-flex items-center rounded-full border border-[rgba(212,175,55,0.35)] bg-[rgba(10,10,10,0.9)] text-white/90 shadow-[0_0_18px_rgba(0,0,0,0.6)]",
         color,
         sizeClasses[size]
       )}
     >
       {BADGE_ICONS[badge]}
-      {showLabel && label}
+      {showLabel && <span className="whitespace-nowrap">{label}</span>}
     </span>
   );
 }

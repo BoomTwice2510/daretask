@@ -42,14 +42,18 @@ export function DareTimeline({ status }: DareTimelineProps) {
             <div className="flex flex-col items-center gap-1 flex-1">
               <div
                 className={cn(
-                  "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors",
-                  isComplete && "bg-emerald-500 text-black",
-                  isActive && !isDisputed && "bg-primary text-primary-foreground",
-                  isDisputed && "bg-red-500 text-black",
+                  "flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-colors border",
+                  isComplete &&
+                    "bg-emerald-500 text-black border-emerald-400 shadow-[0_0_14px_rgba(16,185,129,0.7)]",
+                  isActive &&
+                    !isDisputed &&
+                    "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_14px_rgba(245,213,102,0.7)]",
+                  isDisputed &&
+                    "bg-red-500 text-black border-red-400 shadow-[0_0_14px_rgba(248,113,113,0.7)]",
                   !isComplete &&
                     !isActive &&
                     !isDisputed &&
-                    "bg-neutral-800 text-gray-400"
+                    "bg-black border-white/10 text-white/50"
                 )}
               >
                 {isComplete ? (
@@ -62,12 +66,12 @@ export function DareTimeline({ status }: DareTimelineProps) {
                 className={cn(
                   "text-[10px] font-medium",
                   isComplete && "text-emerald-400",
-                  isActive && !isDisputed && "text-primary",
+                  isActive && !isDisputed && "text-[#f5d566]",
                   isDisputed && "text-red-400",
                   !isComplete &&
                     !isActive &&
                     !isDisputed &&
-                    "text-gray-500"
+                    "text-white/45"
                 )}
               >
                 {isDisputed ? "Disputed" : step.label}
@@ -79,7 +83,7 @@ export function DareTimeline({ status }: DareTimelineProps) {
                   "h-0.5 flex-1 -mt-4",
                   i < activeIndex || status === DareStatus.Resolved
                     ? "bg-emerald-500"
-                    : "bg-neutral-800"
+                    : "bg-white/10"
                 )}
               />
             )}

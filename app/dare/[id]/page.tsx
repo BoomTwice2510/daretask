@@ -62,7 +62,9 @@ export default function DareDetailPage({ params }: { params: Promise<{ id: strin
         try {
           const winner = (await readContract("winnerOf", [BigInt(dareId)])) as string;
           setWinnerAddress(winner);
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
     } catch (err) {
       setError("Failed to load dare data");
@@ -84,16 +86,16 @@ export default function DareDetailPage({ params }: { params: Promise<{ id: strin
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to feed
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-[11px] text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
             </span>
             On‑chain dare detail
           </div>
@@ -103,11 +105,11 @@ export default function DareDetailPage({ params }: { params: Promise<{ id: strin
         {dare && !loading && !error && (
           <section className="mb-4 flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-bold text-white">
                 Dare #{dareId}
               </h1>
-              <p className="mt-1 text-xs text-gray-400 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-primary" />
+              <p className="mt-1 text-xs text-white/60 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-[#f5d566]" />
                 Created at{" "}
                 {new Date(Number(dare.createdAt) * 1000).toLocaleString()}
               </p>
@@ -134,7 +136,7 @@ export default function DareDetailPage({ params }: { params: Promise<{ id: strin
         {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
           </div>
         )}
 
@@ -148,7 +150,7 @@ export default function DareDetailPage({ params }: { params: Promise<{ id: strin
 
         {/* Dare content */}
         {dare && !loading && !error && (
-          <div className="rounded-2xl border border-neutral-800 bg-neutral-950/90 p-5 md:p-6 shadow-[0_0_40px_rgba(15,23,42,0.7)]">
+          <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
             <DareDetail dare={dare} onRefresh={fetchDare} />
           </div>
         )}

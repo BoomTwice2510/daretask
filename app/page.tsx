@@ -9,72 +9,91 @@ import { Plus, Zap, Sparkles } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-foreground">
       <Header />
 
       <main className="mx-auto max-w-4xl px-4 pb-24">
         {/* Hero */}
-        <section className="relative flex flex-col items-center text-center py-12 md:py-16 gap-6 md:gap-8">
-          {/* subtle glow background */}
+        <section className="relative flex flex-col items-center text-center py-16 md:py-20 gap-8">
+          {/* subtle gold glow background */}
           <div className="pointer-events-none absolute inset-x-0 -top-10 -z-10 flex justify-center">
-            <div className="h-40 w-72 md:w-96 bg-primary/30 blur-3xl opacity-40" />
+            <div className="h-56 w-80 md:w-[26rem] bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.32),transparent_60%)] blur-3xl opacity-80" />
           </div>
 
-          <div className="relative rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(59,130,246,0.5)] w-24 h-24 md:w-32 md:h-32 bg-neutral-900 border border-primary/40">
+          {/* Logo in gold ring */}
+          <div className="relative rounded-full overflow-hidden w-28 h-28 md:w-32 md:h-32 bg-black border border-[rgba(212,175,55,0.5)] shadow-[0_0_60px_rgba(212,175,55,0.45)] flex items-center justify-center">
             <Image
-              src="/images/logo.png"
+              src="/images/logo-gold.png"
               alt="Dare Protocol"
               width={128}
               height={128}
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              className="object-contain w-full h-full"
               priority
             />
           </div>
 
-          <div className="max-w-lg">
-            <div className="mb-3 flex items-center justify-center gap-2 text-[11px] text-gray-400">
+          <div className="max-w-xl">
+            <div className="mb-4 flex items-center justify-center gap-2 text-[11px] text-[#e6c547]/80">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-70" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
               </span>
-              On‑chain dares on Base Sepolia
+              <span className="uppercase tracking-[0.18em] text-[10px] text-[#f5d566]/80">
+                Base Sepolia • On‑chain dares
+              </span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold text-white text-balance leading-tight">
-              Stake. Dare. Win.
+
+            <h1
+              className="text-3xl md:text-5xl font-bold text-balance leading-tight"
+              style={{
+                background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Dare. Stake. Prove it.
             </h1>
-            <p className="text-sm md:text-base text-gray-400 mt-3 md:mt-4 text-pretty">
-              Create or accept on-chain dares with real stakes on Base Sepolia. Earn XP,
-              climb the leaderboard, and build your on‑chain legend.
+
+            <p className="text-sm md:text-base text-white/70 mt-4 text-pretty">
+              Put real stakes behind real commitments. No screenshots. No promises. No excuses.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <Link href="/create">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-6 md:h-12 md:px-8 text-base md:text-lg font-semibold shadow-lg shadow-primary/40">
+              <Button
+                className="h-11 px-7 md:h-12 md:px-10 text-base md:text-lg font-semibold shadow-lg transition-transform active:scale-95"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #d4af37, #e6c547)",
+                  color: "#000",
+                  boxShadow: "0 18px 40px rgba(212,175,55,0.45)",
+                }}
+              >
                 <Plus className="mr-2 h-5 w-5" />
                 Create a Dare
               </Button>
             </Link>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <Sparkles className="h-4 w-4 text-amber-300" />
-              <span>Win dares to earn XP and badges</span>
+            <div className="flex items-center gap-2 text-xs text-white/60">
+              <Sparkles className="h-4 w-4 text-[#f5d566]" />
+              <span>Win dares to earn XP and unlock your on‑chain reputation.</span>
             </div>
           </div>
         </section>
 
         {/* Stats bar */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 py-4 mb-8 px-3 md:px-4 rounded-lg md:rounded-xl bg-neutral-900/90 border border-neutral-800 backdrop-blur-sm">
-          <div className="flex items-center gap-1.5 text-xs md:text-sm text-gray-400">
-            <Zap className="h-4 w-4 text-primary flex-shrink-0 animate-pulse" />
+        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 py-4 mb-8 px-3 md:px-4 rounded-2xl border border-[rgba(212,175,55,0.24)] bg-[rgba(10,10,10,0.9)] backdrop-blur-md">
+          <div className="flex items-center gap-1.5 text-xs md:text-sm text-white/70">
+            <Zap className="h-4 w-4 text-[#f5d566] flex-shrink-0 animate-pulse" />
             <span>Network</span>
-            <span className="font-semibold text-sky-400">Base Sepolia</span>
+            <span className="font-semibold text-[#e6c547]">Base Sepolia</span>
           </div>
-          <div className="h-3 w-px bg-neutral-800 hidden md:block" />
-          <span className="text-xs md:text-sm text-gray-400 text-center flex items-center gap-1">
-            <span className="text-white font-mono text-[11px] md:text-xs">
+          <div className="h-3 w-px bg-white/10 hidden md:block" />
+          <span className="text-xs md:text-sm text-white/60 text-center flex items-center gap-1">
+            <span className="font-mono text-[11px] md:text-xs text-[#f5f5f5]">
               0xee48...8586
             </span>
-            <span className="hidden sm:inline text-[11px] text-gray-500">
+            <span className="hidden sm:inline text-[11px] text-white/40">
               • Dare Protocol contract
             </span>
           </span>
@@ -87,7 +106,13 @@ export default function HomePage() {
       {/* Mobile FAB */}
       <Link
         href="/create"
-        className="fixed bottom-6 right-6 z-50 md:hidden flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 active:scale-95 transition-transform"
+        className="fixed bottom-6 right-6 z-50 md:hidden flex h-14 w-14 items-center justify-center rounded-full shadow-lg active:scale-95 transition-transform"
+        style={{
+          background:
+            "linear-gradient(135deg, #d4af37, #e6c547)",
+          color: "#000",
+          boxShadow: "0 18px 40px rgba(212,175,55,0.45)",
+        }}
         aria-label="Create Dare"
       >
         <Plus className="h-6 w-6" />

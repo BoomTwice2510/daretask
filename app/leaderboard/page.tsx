@@ -37,7 +37,7 @@ export default function LeaderboardPage() {
       const count = (await readContract("dareCount")) as bigint;
       const total = Number(count);
 
-      // Collect unique addresses from dares
+      // Collect unique addresses from recent dares
       const addressSet = new Set<string>();
       const start = Math.max(0, total - 200);
 
@@ -61,7 +61,9 @@ export default function LeaderboardPage() {
           if (result[1] !== "0x0000000000000000000000000000000000000000") {
             addressSet.add(result[1]);
           }
-        } catch {}
+        } catch {
+          // ignore broken dare reads
+        }
       }
 
       // Fetch stats for each address
@@ -84,7 +86,9 @@ export default function LeaderboardPage() {
               volume: s[5],
               badge: badgeResult as number,
             });
-          } catch {}
+          } catch {
+            // ignore this user
+          }
         })
       );
 
@@ -117,41 +121,52 @@ export default function LeaderboardPage() {
       <Header />
 
       <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
+        {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to feed
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[11px] text-amber-200">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
             </span>
             Live leaderboard
           </div>
         </div>
 
+        {/* Hero */}
         <section className="mb-6 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/15 border border-primary/40 shadow-[0_0_30px_rgba(59,130,246,0.5)]">
-              <Crown className="h-6 w-6 text-primary animate-bounce" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.15)] border border-[rgba(212,175,55,0.45)] shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
+              <Crown className="h-6 w-6 text-[#f5d566] animate-bounce" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Leaderboard</h1>
-              <p className="text-xs md:text-sm text-gray-400">
+              <h1
+                className="text-2xl md:text-3xl font-bold tracking-tight"
+                style={{
+                  background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Leaderboard
+              </h1>
+              <p className="text-xs md:text-sm text-white/70">
                 Ranked by XP, wins, or total on‑chain volume across all dares.
               </p>
             </div>
           </div>
 
           {sortedEntries.length > 0 && (
-            <div className="hidden md:flex flex-col items-end text-xs text-gray-400">
-              <div className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-2 py-1 border border-neutral-700">
-                <Sparkles className="h-3 w-3 text-primary" />
+            <div className="hidden md:flex flex-col items-end text-xs text-white/60">
+              <div className="inline-flex items-center gap-1 rounded-full bg-[rgba(10,10,10,0.95)] px-2 py-1 border border-white/10">
+                <Sparkles className="h-3 w-3 text-[#f5d566]" />
                 <span className="font-mono">
                   Total players: {sortedEntries.length}
                 </span>
@@ -168,8 +183,8 @@ export default function LeaderboardPage() {
               onClick={() => setSortBy(tab.key)}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 sortBy === tab.key
-                  ? "bg-primary text-black shadow-lg shadow-primary/40"
-                  : "bg-neutral-900 text-gray-400 hover:text-white hover:bg-neutral-800"
+                  ? "bg-[#f5d566] text-black shadow-[0_0_25px_rgba(245,213,102,0.6)]"
+                  : "bg-[rgba(15,15,15,0.95)] text-white/60 hover:text-white hover:bg-black border border-white/10"
               }`}
             >
               {tab.icon}
@@ -178,41 +193,44 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
+        {/* Loading */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
           </div>
         )}
 
+        {/* Empty state */}
         {!loading && sortedEntries.length === 0 && (
-          <p className="text-center text-sm text-gray-400 py-16">
+          <p className="text-center text-sm text-white/60 py-16">
             No players found yet. Be the first to create a dare.
           </p>
         )}
 
+        {/* List */}
         {!loading && sortedEntries.length > 0 && (
           <div className="flex flex-col gap-2">
             {sortedEntries.map((entry, index) => (
               <Link
                 key={entry.address}
                 href={`/profile/${entry.address}`}
-                className="flex items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-950/90 p-3 hover:border-primary/50 hover:bg-neutral-900/90 transition-colors"
+                className="flex items-center gap-3 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-3 hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-colors"
               >
                 {/* Rank */}
                 <div
                   className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
                     index === 0
-                      ? "bg-primary/25 text-primary"
+                      ? "bg-[rgba(245,213,102,0.18)] text-[#f5d566]"
                       : index === 1
-                      ? "bg-sky-500/20 text-sky-400"
+                      ? "bg-white/10 text-white"
                       : index === 2
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-neutral-900 text-gray-400"
+                      ? "bg-white/5 text-white/80"
+                      : "bg-black text-white/60"
                   }`}
                 >
                   {index + 1}
                   {index === 0 && (
-                    <span className="absolute inset-0 rounded-full border border-primary/50 animate-pulse" />
+                    <span className="absolute inset-0 rounded-full border border-[#f5d566] animate-pulse" />
                   )}
                 </div>
 
@@ -231,7 +249,7 @@ export default function LeaderboardPage() {
                     {sortBy === "wins" && `${Number(entry.wins)}W / ${Number(entry.losses)}L`}
                     {sortBy === "volume" && `${formatStake(entry.volume)} ETH`}
                   </div>
-                  <div className="text-[11px] text-gray-500">
+                  <div className="text-[11px] text-white/55">
                     Wins: {Number(entry.wins)} • Vol: {formatStake(entry.volume)} ETH
                   </div>
                 </div>

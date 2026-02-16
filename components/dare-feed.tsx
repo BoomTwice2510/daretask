@@ -5,7 +5,6 @@ import { useWeb3 } from "@/lib/web3-provider";
 import { DareCard } from "@/components/dare-card";
 import { Button } from "@/components/ui/button";
 import type { DareData } from "@/lib/types";
-import { STATUS_LABELS } from "@/lib/contract";
 import { Loader2, RefreshCw, Filter, AlertCircle } from "lucide-react";
 
 type FilterStatus = "all" | "0" | "1" | "2" | "3" | "4" | "5";
@@ -111,15 +110,15 @@ export function DareFeed() {
             <button
               key={opt.value}
               onClick={() => setFilter(opt.value)}
-              className={`shrink-0 rounded-lg px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200 ${
+              className={`shrink-0 rounded-full px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200 border ${
                 filter === opt.value
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30 scale-100"
-                  : "bg-neutral-900 text-gray-400 hover:text-white hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700"
+                  ? "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_22px_rgba(245,213,102,0.7)] scale-[1.02]"
+                  : "bg-[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
               }`}
             >
               <span className="block">{opt.label}</span>
               {filter !== opt.value && (
-                <span className="text-xs text-gray-500">
+                <span className="text-[11px] text-white/45">
                   {opt.value === "all"
                     ? dares.length
                     : dares.filter((d) => d.status === parseInt(opt.value)).length}
@@ -133,9 +132,9 @@ export function DareFeed() {
           size="icon"
           onClick={fetchDares}
           disabled={loading}
-          className="h-10 w-10 shrink-0 text-gray-400 hover:text-white hover:bg-neutral-900"
+          className="h-10 w-10 shrink-0 text-white/60 hover:text-white hover:bg-black border border-white/10 rounded-full"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin text-[#f5d566]" : ""}`} />
         </Button>
       </div>
 
@@ -154,7 +153,7 @@ export function DareFeed() {
               variant="ghost"
               size="sm"
               onClick={fetchDares}
-              className="mt-3 text-red-400 hover:text-red-400 hover:bg-red-500/10 h-8 px-3"
+              className="mt-3 text-red-300 hover:text-red-300 hover:bg-red-500/10 h-8 px-3"
             >
               <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
               Try Again
@@ -166,16 +165,16 @@ export function DareFeed() {
       {/* Loading State */}
       {loading && (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
         </div>
       )}
 
       {/* Empty State */}
       {!loading && filteredDares.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Filter className="h-12 w-12 text-gray-500 mb-3" />
+          <Filter className="h-12 w-12 text-white/40 mb-3" />
           <p className="text-white font-medium">No dares found</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-white/60 mt-1">
             {filter !== "all" ? "Try a different filter" : "Be the first to create a dare"}
           </p>
         </div>

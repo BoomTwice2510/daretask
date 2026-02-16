@@ -37,28 +37,35 @@ export default function FAQ() {
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* Hero */}
         <section className="mb-8 flex flex-col gap-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950 px-3 py-1 text-xs text-gray-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-xs text-[#f5d566] backdrop-blur-md">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
             </span>
             Need help? Start here.
           </div>
 
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-1">
+              <h1
+                className="text-3xl md:text-4xl font-bold tracking-tight mb-1"
+                style={{
+                  background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 Frequently Asked Questions
               </h1>
-              <p className="text-sm md:text-base text-gray-400 max-w-xl">
+              <p className="text-sm md:text-base text-white/70 max-w-xl">
                 Quick answers about staking, dares, and how the Dare Protocol behaves
                 on Base Sepolia.
               </p>
             </div>
 
-            <div className="hidden md:flex items-center justify-center rounded-2xl border border-primary/40 bg-primary/10 px-4 py-3 shadow-[0_0_40px_rgba(59,130,246,0.35)]">
-              <MessageCircle className="h-6 w-6 text-primary animate-bounce mr-2" />
-              <span className="text-xs font-medium text-primary uppercase tracking-wide">
+            <div className="hidden md:flex items-center justify-center rounded-2xl border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.95)] px-4 py-3 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
+              <MessageCircle className="h-6 w-6 text-[#f5d566] animate-bounce mr-2" />
+              <span className="text-xs font-medium text-[#f5d566] uppercase tracking-wide">
                 Support • On‑chain
               </span>
             </div>
@@ -72,7 +79,7 @@ export default function FAQ() {
             return (
               <div
                 key={item.q}
-                className="rounded-2xl border border-neutral-800 bg-neutral-950/80 hover:border-primary/50 hover:bg-neutral-900/80 transition-colors"
+                className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-colors"
               >
                 <button
                   type="button"
@@ -80,22 +87,22 @@ export default function FAQ() {
                   className="w-full flex items-center justify-between gap-3 px-4 py-3 md:px-5 md:py-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                      <Sparkles className="h-4 w-4 text-primary" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(245,213,102,0.12)]">
+                      <Sparkles className="h-4 w-4 text-[#f5d566]" />
                     </div>
-                    <span className="text-sm md:text-base font-medium text-left">
+                    <span className="text-sm md:text-base font-medium text-left text-white">
                       {item.q}
                     </span>
                   </div>
                   <ChevronDown
-                    className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                    className={`h-4 w-4 text-white/60 transition-transform duration-200 ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   />
                 </button>
 
                 <div
-                  className={`px-4 pb-3 md:px-5 md:pb-4 text-sm text-gray-300 transition-all duration-200 ${
+                  className={`px-4 pb-3 md:px-5 md:pb-4 text-sm text-white/70 transition-all duration-200 ${
                     isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0 overflow-hidden"
                   }`}
                 >
@@ -106,7 +113,7 @@ export default function FAQ() {
           })}
         </section>
 
-        <p className="mt-8 text-xs text-gray-500">
+        <p className="mt-8 text-xs text-white/45">
           Still confused? Check the How It Works page or inspect the on‑chain contract
           directly on Base Sepolia.
         </p>

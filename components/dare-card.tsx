@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { DareData } from "@/lib/types";
@@ -85,71 +86,80 @@ export function DareCard({ dare }: DareCardProps) {
   }
 
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-4 transition-all duration-200 hover:border-primary/60 hover:bg-neutral-900">
-      <Link href={`/dare/${dare.id}`} className="block group">
+    <div
+      className="rounded-2xl border border-[rgba(212,175,55,0.36)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_40px_rgba(0,0,0,0.85)] transition-all duration-300 space-y-3 hover:-translate-y-[1px]"
+    >
+      <Link href={`/dare/${dare.id}`} className="block group space-y-3">
         {/* Status + Time row */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between">
           <span
             className={cn(
-              "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+              "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold border border-white/10 bg-black/70",
               statusColor
             )}
           >
             {statusLabel}
           </span>
-          <span className="flex items-center gap-1 text-xs text-gray-400">
-            <Clock className="h-3 w-3" />
+          <span className="flex items-center gap-1 text-xs text-white/70">
+            <Clock className="h-3 w-3 text-[#f5d566]" />
             {isOpen || isRunning ? timeRemaining(dare.deadline) : timeAgo(dare.createdAt)}
           </span>
         </div>
 
         {/* Description */}
-        <p className="text-sm font-medium text-white mb-3 line-clamp-2 leading-relaxed">
+        <p className="text-sm md:text-[15px] font-medium text-white mb-1 line-clamp-2 leading-relaxed">
           {dare.description}
         </p>
 
         {/* Stake */}
-        <div className="flex items-center gap-2 mb-3 rounded-lg bg-neutral-900 px-3 py-2">
-          <div className="h-5 w-5 rounded-full overflow-hidden bg-neutral-950 flex-shrink-0">
+        <div className="flex items-center gap-2 mb-1 rounded-xl px-3 py-2 bg-[rgba(10,10,10,0.9)] border border-white/10">
+          <div className="h-6 w-6 rounded-full overflow-hidden bg-black flex-shrink-0">
             <Image
               src={tokenMeta.icon}
               alt={tokenMeta.symbol}
-              width={20}
-              height={20}
+              width={24}
+              height={24}
               className="h-full w-full object-contain"
             />
           </div>
-          <span className="font-mono text-sm font-semibold text-white">
+          <span className="font-mono text-sm font-semibold text-[#f5f5f5]">
             {stakeFormatted} {tokenMeta.symbol}
           </span>
           {isOpen && (
-            <span className="ml-auto text-xs text-gray-400">
-              Total pot: {formatStake(dare.stake * 2n)} {tokenMeta.symbol}
+            <span className="ml-auto text-[11px] text-white/60">
+              Pool:{" "}
+              <span className="font-mono text-[#f5d566]">
+                {formatStake(dare.stake * 2n)} {tokenMeta.symbol}
+              </span>
             </span>
           )}
         </div>
 
         {/* Creator / Accepter */}
-        <div className="flex items-center justify-between text-xs text-gray-400">
-          <div className="flex items-center gap-1">
-            <User className="h-3 w-3" />
-            <span>{shortenAddress(dare.creator)}</span>
+        <div className="flex items-center justify-between text-xs text-white/70">
+          <div className="flex items-center gap-1.5">
+            <User className="h-3.5 w-3.5 text-white/60" />
+            <span className="font-mono text-[11px]">
+              {shortenAddress(dare.creator)}
+            </span>
           </div>
           {dare.accepter !== ZERO_ADDRESS &&
             dare.accepter !== "0x0000000000000000000000000000000000000000" && (
-              <div className="flex items-center gap-1">
-                <span>vs</span>
-                <span>{shortenAddress(dare.accepter)}</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-white/50">vs</span>
+                <span className="font-mono text-[11px]">
+                  {shortenAddress(dare.accepter)}
+                </span>
               </div>
             )}
-          <ArrowRight className="h-3.5 w-3.5 text-gray-500 group-hover:text-primary transition-colors" />
+          <ArrowRight className="h-3.5 w-3.5 text-white/40 group-hover:text-[#f5d566] transition-colors" />
         </div>
       </Link>
 
       {/* Share row */}
-      <div className="mt-3 pt-2 border-t border-neutral-800 flex items-center justify-between">
-        <span className="text-[11px] text-gray-500 flex items-center gap-1">
-          <Share2 className="h-3 w-3" />
+      <div className="mt-2 pt-2 border-t border-white/10 flex items-center justify-between">
+        <span className="text-[11px] text-white/60 flex items-center gap-1">
+          <Share2 className="h-3 w-3 text-[#f5d566]" />
           Share dare
         </span>
         <div className="flex items-center gap-2">
@@ -157,7 +167,7 @@ export function DareCard({ dare }: DareCardProps) {
           <button
             type="button"
             onClick={() => handleShare("x")}
-            className="h-7 w-7 rounded-full border border-neutral-700 bg-neutral-950 flex items-center justify-center hover:border-pink-500/70 transition-colors"
+            className="h-7 w-7 rounded-full border border-white/15 bg-black flex items-center justify-center hover:border-[#f5d566]/80 transition-colors"
             aria-label="Share to X"
           >
             <Image
@@ -172,7 +182,7 @@ export function DareCard({ dare }: DareCardProps) {
           <button
             type="button"
             onClick={() => handleShare("whatsapp")}
-            className="h-7 w-7 rounded-full border border-neutral-700 bg-neutral-950 flex items-center justify-center hover:border-emerald-500/80 transition-colors"
+            className="h-7 w-7 rounded-full border border-white/15 bg-black flex items-center justify-center hover:border-emerald-400/80 transition-colors"
             aria-label="Share to WhatsApp"
           >
             <Image
@@ -187,7 +197,7 @@ export function DareCard({ dare }: DareCardProps) {
           <button
             type="button"
             onClick={() => handleShare("farcaster")}
-            className="h-7 w-7 rounded-full border border-neutral-700 bg-neutral-950 flex items-center justify-center hover:border-violet-500/80 transition-colors"
+            className="h-7 w-7 rounded-full border border-white/15 bg-black flex items-center justify-center hover:border-violet-400/80 transition-colors"
             aria-label="Share to Farcaster"
           >
             <Image

@@ -15,7 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Loader2, AlertCircle, Coins, Zap, CheckCircle2, X } from "lucide-react";
 import { parseEther, type Address } from "viem";
 import Image from "next/image";
@@ -355,52 +354,49 @@ function FlashTaskBar({ onApplyTemplate }: FlashTaskBarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string>("build");
   const activeCategory =
-    FLASH_TASK_CATEGORIES.find((c) => c.id === activeCategoryId) ?? FLASH_TASK_CATEGORIES[0];
+    FLASH_TASK_CATEGORIES.find((c) => c.id === activeCategoryId) ??
+    FLASH_TASK_CATEGORIES[0];
 
   return (
     <div className="relative mb-4">
-      {/* Tab header (compact, glassy) */}
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/80 px-3 py-2 text-left hover:border-pink-500/70 hover:bg-neutral-900 transition-colors"
+        className="flex w-full items-center justify-between rounded-lg border border-[rgba(212,175,55,0.35)] bg-[rgba(10,10,10,0.9)] px-3 py-2 text-left hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-colors"
       >
         <div className="flex items-center gap-2">
-          <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-pink-500/20">
-            <span className="absolute inset-0 rounded-full bg-pink-500/40 blur-md opacity-40 group-hover:opacity-70 transition-opacity" />
-            <Zap className="relative h-4 w-4 text-pink-300" />
+          <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)]">
+            <span className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.45)] blur-md opacity-50" />
+            <Zap className="relative h-4 w-4 text-[#f5d566]" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-semibold uppercase tracking-wide text-pink-300">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f5d566]">
               Flash Task
             </span>
-            <span className="text-[11px] text-gray-400">
+            <span className="text-[11px] text-white/60">
               Tap to browse quick templates (optional)
             </span>
           </div>
         </div>
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-white/55">
           {isOpen ? "Hide" : "Show"} • {FLASH_TASK_CATEGORIES.length} categories
         </span>
       </button>
 
-      {/* Floating panel – feels like it opens over the form, not pushing layout */}
       <div
         className={cn(
-          "absolute left-0 right-0 z-20 mt-2 origin-top rounded-xl border border-pink-500/40 bg-neutral-950/98 shadow-[0_18px_60px_rgba(236,72,153,0.35)] backdrop-blur-xl transition-all",
+          "absolute left-0 right-0 z-20 mt-2 origin-top rounded-xl border border-[rgba(212,175,55,0.4)] bg-[rgba(5,5,5,0.98)] shadow-[0_18px_60px_rgba(0,0,0,0.85)] backdrop-blur-xl transition-all",
           isOpen
             ? "pointer-events-auto scale-100 opacity-100"
             : "pointer-events-none scale-95 opacity-0"
         )}
       >
-        {/* top accent line */}
-        <div className="h-0.5 w-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-sky-500" />
+        <div className="h-0.5 w-full bg-gradient-to-r from-[#d4af37] via-[#e6c547] to-[#f5d566]" />
 
         <div className="p-3 md:p-4">
-          {/* Category pills – no visible scrollbar, gradient fade at edges */}
           <div className="relative mb-3">
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-neutral-950 via-neutral-950/40 to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-neutral-950 via-neutral-950/40 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-black via-black/40 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-black via-black/40 to-transparent" />
             <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1 pr-2">
               {FLASH_TASK_CATEGORIES.map((cat) => (
                 <button
@@ -410,8 +406,8 @@ function FlashTaskBar({ onApplyTemplate }: FlashTaskBarProps) {
                   className={cn(
                     "whitespace-nowrap rounded-full border px-3 py-1 text-xs md:text-[13px] transition-colors",
                     cat.id === activeCategoryId
-                      ? "border-pink-500 bg-pink-500/20 text-pink-100"
-                      : "border-neutral-700 bg-neutral-900/80 text-gray-300 hover:border-pink-500/60 hover:text-pink-100"
+                      ? "border-[rgba(245,213,102,0.9)] bg-[rgba(245,213,102,0.16)] text-[#fefce8]"
+                      : "border-white/10 bg-black/70 text-white/70 hover:border-[rgba(245,213,102,0.7)] hover:text-[#fefce8]"
                   )}
                 >
                   <span className="mr-1">{cat.emoji}</span>
@@ -421,7 +417,6 @@ function FlashTaskBar({ onApplyTemplate }: FlashTaskBarProps) {
             </div>
           </div>
 
-          {/* Templates */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[260px] overflow-y-auto pr-1 no-scrollbar">
             {activeCategory.templates.map((t) => {
               const dur = secondsToDuration(t.deadline);
@@ -430,25 +425,25 @@ function FlashTaskBar({ onApplyTemplate }: FlashTaskBarProps) {
                   key={t.id}
                   type="button"
                   onClick={() => onApplyTemplate(t, activeCategory)}
-                  className="group relative flex flex-col items-start rounded-lg border border-neutral-800 bg-neutral-900/90 px-3 py-2 text-left hover:border-pink-500/80 hover:bg-neutral-900 transition-all"
+                  className="group relative flex flex-col items-start rounded-lg border border-white/10 bg-black/90 px-3 py-2 text-left hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-all"
                 >
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-pink-500/10 via-transparent to-fuchsia-500/10 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity" />
-                  <p className="relative text-[11px] font-semibold text-pink-300 mb-0.5">
+                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[rgba(245,213,102,0.12)] via-transparent to-[rgba(212,175,55,0.12)] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity" />
+                  <p className="relative text-[11px] font-semibold text-[#f5d566] mb-0.5">
                     {activeCategory.emoji} {activeCategory.name}
                   </p>
                   <p className="relative text-sm font-semibold text-white mb-0.5 line-clamp-1">
                     {t.title}
                   </p>
-                  <p className="relative text-[11px] text-gray-400 mb-1 line-clamp-2">
+                  <p className="relative text-[11px] text-white/65 mb-1 line-clamp-2">
                     {t.description}
                   </p>
-                  <div className="relative flex items-center justify-between w-full text-[10px] text-gray-400">
+                  <div className="relative flex items-center justify-between w-full text-[10px] text-white/60">
                     <span>
                       ⏱ {dur.value} {dur.type === "hours" ? "hr" : "day"}
                       {dur.value !== 1 ? "s" : ""}
                     </span>
-                    <span className="text-[10px] text-amber-300">{t.failureRate}</span>
-                    <span className="ml-auto text-[10px] text-pink-300">Tap to paste</span>
+                    <span className="text-[10px] text-[#fbbf24]">{t.failureRate}</span>
+                    <span className="ml-auto text-[10px] text-[#f5d566]">Tap to paste</span>
                   </div>
                 </button>
               );
@@ -460,7 +455,7 @@ function FlashTaskBar({ onApplyTemplate }: FlashTaskBarProps) {
   );
 }
 
-// ---------- Premium success modal ----------
+// ---------- Premium success modal (gold) ----------
 
 type DareSuccessModalProps = {
   open: boolean;
@@ -473,13 +468,13 @@ function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProps) {
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="relative w-full max-w-sm rounded-3xl border border-pink-500/40 bg-gradient-to-b from-neutral-950 via-neutral-950 to-black shadow-[0_0_80px_rgba(236,72,153,0.45)] px-5 py-6"
+            className="relative w-full max-w-sm rounded-3xl border border-[rgba(212,175,55,0.45)] bg-gradient-to-b from-black via-[#050505] to-black shadow-[0_0_80px_rgba(0,0,0,0.9)] px-5 py-6"
             initial={{ scale: 0.85, opacity: 0, y: 16 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 10 }}
@@ -487,30 +482,30 @@ function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProps) {
           >
             <button
               onClick={onClose}
-              className="absolute right-3 top-3 rounded-full bg-black/60 p-1 text-gray-400 hover:text-white"
+              className="absolute right-3 top-3 rounded-full bg-black/70 p-1 text-white/60 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-pink-500/15 relative">
-              <div className="absolute inset-0 rounded-full bg-pink-500/40 blur-xl opacity-60" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)] relative">
+              <div className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.5)] blur-xl opacity-60" />
               <motion.div
                 className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.05 }}
               >
-                <CheckCircle2 className="h-7 w-7 text-pink-400" />
+                <CheckCircle2 className="h-7 w-7 text-[#f5d566]" />
               </motion.div>
             </div>
 
             <div className="text-center space-y-2">
-              <p className="text-xs uppercase tracking-[0.2em] text-pink-400 flex items-center justify-center gap-1">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#f5d566] flex items-center justify-center gap-1">
                 <Zap className="h-3 w-3" />
                 Dare created
               </p>
               <h2 className="text-xl font-semibold text-white">You’re officially live</h2>
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-white/70">
                 Your dare is on‑chain on Base Sepolia. Share it or wait for someone to
                 match your stake.
               </p>
@@ -521,7 +516,7 @@ function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProps) {
                 href={`https://sepolia.basescan.org/tx/${txHash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 block rounded-xl border border-neutral-800 bg-neutral-900/80 px-3 py-2 text-xs text-gray-400 hover:border-pink-500/60 hover:text-pink-100 transition-colors"
+                className="mt-4 block rounded-xl border border-white/10 bg-black/80 px-3 py-2 text-xs text-white/65 hover:border-[rgba(245,213,102,0.7)] hover:text-[#fefce8] transition-colors"
               >
                 View transaction on BaseScan
               </a>
@@ -529,14 +524,19 @@ function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProps) {
 
             <div className="mt-5 flex items-center gap-2">
               <Button
-                className="flex-1 h-10 bg-pink-500 text-white hover:bg-pink-500/90 text-sm"
+                className="flex-1 h-10 text-sm font-semibold"
+                style={{
+                  background: "linear-gradient(135deg,#d4af37,#e6c547)",
+                  color: "#000",
+                  boxShadow: "0 14px 30px rgba(212,175,55,0.45)",
+                }}
                 onClick={onClose}
               >
                 Back to feed
               </Button>
               <Button
                 variant="outline"
-                className="h-10 border-neutral-700 bg-neutral-950 text-xs text-gray-200 hover:border-pink-500/60"
+                className="h-10 border-white/15 bg-black/80 text-xs text-white/70 hover:border-[rgba(245,213,102,0.7)]"
                 onClick={onClose}
               >
                 Stay here
@@ -552,7 +552,8 @@ function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProps) {
 // ---------- CreateDareForm ----------
 
 export function CreateDareForm() {
-  const { isConnected, address, writeContract, approveToken, getAllowance, connect } = useWeb3();
+  const { isConnected, address, writeContract, approveToken, getAllowance, connect } =
+    useWeb3();
   const router = useRouter();
 
   const [description, setDescription] = useState("");
@@ -570,7 +571,6 @@ export function CreateDareForm() {
     durationType === "hours" ? durationValue * 3600 : durationValue * 86400;
   const isETH = token === ZERO_ADDRESS;
 
-  // remove TOKEN2 / TOKEN3 from list
   const filteredTokens = ALLOWED_TOKENS.filter(
     (t) => !["TKN2", "TOKEN2", "TKN3", "TOKEN3"].includes(t.symbol)
   );
@@ -585,7 +585,7 @@ export function CreateDareForm() {
   }
 
   function symbolToIcon(symbol: string) {
-    const display = symbolToDisplayName(symbol).toLowerCase(); // eth, usdc, jesse, aero, zora
+    const display = symbolToDisplayName(symbol).toLowerCase();
     return `/images/${display}.png`;
   }
 
@@ -595,7 +595,10 @@ export function CreateDareForm() {
     return symbolToDisplayName(t.symbol);
   }
 
-  const handleApplyFlashTemplate = (template: FlashTaskTemplate, category: FlashTaskCategory) => {
+  const handleApplyFlashTemplate = (
+    template: FlashTaskTemplate,
+    category: FlashTaskCategory
+  ) => {
     const dur = secondsToDuration(template.deadline);
     setDescription(
       `${template.title}\n\n${template.description}\n\nProof: ${template.proofType}`
@@ -648,7 +651,6 @@ export function CreateDareForm() {
       setSuccessTxHash(typeof txHash === "string" ? txHash : undefined);
       setShowSuccess(true);
 
-      // optional: reset form
       setDescription("");
       setStake("");
       setDurationType("days");
@@ -671,9 +673,8 @@ export function CreateDareForm() {
     <>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-7 bg-neutral-950 rounded-xl border border-neutral-800 p-6 md:p-8"
+        className="flex flex-col gap-7 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-6 md:p-8 shadow-[0_18px_60px_rgba(0,0,0,0.9)]"
       >
-        {/* Flash Task inline tab section (top, no page shift) */}
         <FlashTaskBar onApplyTemplate={handleApplyFlashTemplate} />
 
         {/* Description */}
@@ -685,36 +686,39 @@ export function CreateDareForm() {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Describe your dare clearly and make it memorable..."
-            className="min-h-[120px] w-full rounded-lg border border-neutral-800 bg-neutral-900 px-4 py-3 text-base text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary resize-none transition-colors"
+            placeholder="Describe your dare clearly about task and their duration in details and make it memorable..."
+            className="min-h-[120px] w-full rounded-lg border border-white/10 bg-black/80 px-4 py-3 text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[rgba(245,213,102,0.6)] focus:border-[rgba(245,213,102,0.9)] resize-none transition-colors"
             maxLength={500}
           />
-          <span className="text-xs text-gray-400 text-right">{description.length}/500</span>
+          <span className="text-xs text-white/45 text-right">
+            {description.length}/500
+          </span>
         </div>
 
-        {/* Duration */}
+                {/* Duration */}
         <div className="flex flex-col gap-4">
           <Label className="text-sm font-medium text-white">
             Duration:{" "}
-            <span className="text-primary font-semibold">
+            <span className="text-[#f5d566] font-semibold">
               {durationValue} {durationType === "hours" ? "hour" : "day"}
               {durationValue !== 1 ? "s" : ""}
             </span>
           </Label>
 
           {/* Duration Type Toggle */}
-          <div className="flex gap-2 bg-neutral-900 rounded-lg p-1 border border-neutral-800">
+          <div className="flex gap-2 bg-black/70 rounded-lg p-1 border border-white/10">
             <button
               type="button"
               onClick={() => {
                 setDurationType("hours");
                 setDurationValue(1);
               }}
-              className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              className={cn(
+                "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
                 durationType === "hours"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-gray-400 hover:text-white"
-              }`}
+                  ? "bg-[rgba(212,175,55,0.95)] text-black"
+                  : "text-white/60 hover:text-white"
+              )}
             >
               Hours
             </button>
@@ -724,26 +728,53 @@ export function CreateDareForm() {
                 setDurationType("days");
                 setDurationValue(1);
               }}
-              className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              className={cn(
+                "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
                 durationType === "days"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-gray-400 hover:text-white"
-              }`}
+                  ? "bg-[rgba(212,175,55,0.95)] text-black"
+                  : "text-white/60 hover:text-white"
+              )}
             >
               Days
             </button>
           </div>
 
-          {/* Duration Slider */}
-          <Slider
-            value={[durationValue]}
-            onValueChange={(v) => setDurationValue(v[0])}
-            min={durationType === "hours" ? 1 : 1}
-            max={durationType === "hours" ? 168 : 7}
-            step={1}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs text-gray-400">
+          {/* Custom gold slider */}
+          <div className="w-full">
+            <div
+              className="relative h-2 w-full rounded-full bg-white/10 cursor-pointer"
+              onClick={(e) => {
+                const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                const ratio = (e.clientX - rect.left) / rect.width;
+                const max = durationType === "hours" ? 168 : 7;
+                const min = 1;
+                const raw = min + ratio * (max - min);
+                const next = Math.min(max, Math.max(min, Math.round(raw)));
+                setDurationValue(next);
+              }}
+            >
+              {/* filled range */}
+              <div
+                className="h-2 rounded-full bg-[#f5d566]"
+                style={{
+                  width: `${((durationValue - 1) /
+                    ((durationType === "hours" ? 168 : 7) - 1 || 1)) *
+                    100}%`,
+                }}
+              />
+              {/* thumb */}
+              <div
+                className="absolute -top-[6px] h-4 w-4 rounded-full border-2 border-black bg-[#f5d566] shadow-[0_0_8px_rgba(245,213,102,0.8)]"
+                style={{
+                  left: `calc(${((durationValue - 1) /
+                    ((durationType === "hours" ? 168 : 7) - 1 || 1)) *
+                    100}% - 8px)`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-between text-xs text-white/50">
             <span>{durationType === "hours" ? "1 hour" : "1 day"}</span>
             <span>{durationType === "hours" ? "168 hours (7 days)" : "7 days"}</span>
           </div>
@@ -758,15 +789,16 @@ export function CreateDareForm() {
               setToken(val);
             }}
           >
-            <SelectTrigger className="w-full bg-neutral-900 border-neutral-800 text-white rounded-lg h-11 focus:ring-primary/60">
+            <SelectTrigger className="w-full bg-black/80 border-white/10 text-white rounded-lg h-11 focus:ring-[rgba(245,213,102,0.6)]">
               <SelectValue>
                 {(() => {
                   const t =
-                    filteredTokens.find((tok) => tok.address === token) ?? filteredTokens[0];
+                    filteredTokens.find((tok) => tok.address === token) ??
+                    filteredTokens[0];
                   const display = symbolToDisplayName(t.symbol);
                   return (
                     <span className="flex items-center gap-2">
-                      <div className="h-5 w-5 rounded-full overflow-hidden bg-neutral-900 flex-shrink-0">
+                      <div className="h-5 w-5 rounded-full overflow-hidden bg-black flex-shrink-0">
                         <Image
                           src={symbolToIcon(t.symbol)}
                           alt={display}
@@ -781,13 +813,17 @@ export function CreateDareForm() {
                 })()}
               </SelectValue>
             </SelectTrigger>
-            <SelectContent className="bg-neutral-950 border-neutral-800 rounded-lg">
+            <SelectContent className="bg-black border-white/10 rounded-lg">
               {filteredTokens.map((t) => {
                 const display = symbolToDisplayName(t.symbol);
                 return (
-                  <SelectItem key={t.address} value={t.address} className="text-white">
+                  <SelectItem
+                    key={t.address}
+                    value={t.address}
+                    className="text-white focus:bg-white/10"
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="h-5 w-5 rounded-full overflow-hidden bg-neutral-900 flex-shrink-0">
+                      <div className="h-5 w-5 rounded-full overflow-hidden bg-black flex-shrink-0">
                         <Image
                           src={symbolToIcon(t.symbol)}
                           alt={display}
@@ -811,7 +847,7 @@ export function CreateDareForm() {
             Stake Amount
           </Label>
           <div className="relative">
-            <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+            <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-white/45" />
             <Input
               id="stake"
               type="number"
@@ -820,38 +856,39 @@ export function CreateDareForm() {
               value={stake}
               onChange={(e) => setStake(e.target.value)}
               placeholder="Enter amount"
-              className="pl-11 bg-neutral-900 border-neutral-800 text-white text-base rounded-lg h-11 focus:ring-primary/60 transition-colors"
+              className="pl-11 bg-black/80 border-white/10 text-white text-base rounded-lg h-11 focus:ring-[rgba(245,213,102,0.6)] transition-colors"
             />
           </div>
-          <p className="text-xs text-gray-400">
-            Minimum: 0.0001 {getTokenLabel()} — Your opponent matches your stake, total pot = 2x
+          <p className="text-xs text-white/55">
+            Minimum: 0.0001 {getTokenLabel()} — Your opponent matches your stake, total pot =
+            2x
           </p>
         </div>
 
         {/* Fee info */}
         {stake && parseFloat(stake) > 0 && (
-          <div className="rounded-lg bg-gradient-to-r from-primary/15 to-sky-500/10 border border-primary/30 p-4 text-sm">
+          <div className="rounded-lg bg-gradient-to-r from-[rgba(212,175,55,0.14)] to-[rgba(10,10,10,0.9)] border border-[rgba(212,175,55,0.4)] p-4 text-sm">
             <div className="space-y-2.5">
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Your stake</span>
+                <span className="text-white/70">Your stake</span>
                 <span className="text-white font-semibold font-mono">
                   {stake} {getTokenLabel()}
                 </span>
               </div>
-              <div className="h-px bg-neutral-800" />
+              <div className="h-px bg-white/10" />
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">Total pot (with opponent)</span>
+                <span className="text-white/70">Total pot (with opponent)</span>
                 <span className="text-white font-semibold font-mono">
                   {(parseFloat(stake) * 2).toFixed(6)} {getTokenLabel()}
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs text-gray-400">
+              <div className="flex justify-between items-center text-xs text-white/60">
                 <span>Platform fee (3%)</span>
                 <span className="font-mono">
                   {(parseFloat(stake) * 2 * 0.03).toFixed(6)} {getTokenLabel()}
                 </span>
               </div>
-              <div className="h-px bg-neutral-800" />
+              <div className="h-px bg-white/10" />
               <div className="flex justify-between items-center">
                 <span className="text-emerald-400 font-medium">Winner receives</span>
                 <span className="text-emerald-400 font-semibold font-mono">
@@ -863,7 +900,7 @@ export function CreateDareForm() {
         )}
 
         {error && (
-          <div className="flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/40 p-3 text-sm text-red-400">
+          <div className="flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/40 p-3 text-sm text-red-300">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
@@ -872,7 +909,16 @@ export function CreateDareForm() {
         <Button
           type="submit"
           disabled={isSubmitting || !isConnected}
-          className="w-full h-12 md:h-13 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 text-base md:text-lg font-semibold rounded-lg transition-all shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full h-12 md:h-13 text-base md:text-lg font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            background: isConnected
+              ? "linear-gradient(135deg,#d4af37,#e6c547)"
+              : "linear-gradient(135deg,#4b5563,#6b7280)",
+            color: "#000",
+            boxShadow: isConnected
+              ? "0 18px 40px rgba(212,175,55,0.45)"
+              : "0 12px 28px rgba(0,0,0,0.8)",
+          }}
         >
           {isSubmitting ? (
             <>
