@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useWeb3 } from "@/lib/web3-provider";
 import { ALLOWED_TOKENS, ZERO_ADDRESS } from "@/lib/contract";
 import { Button } from "@/components/ui/button";
@@ -142,8 +142,35 @@ export function CreateDareForm() {
   const isETH = token === ZERO_ADDRESS;
 
   const filteredTokens = ALLOWED_TOKENS.filter(
-    (t) => !["TKN2", "TOKEN2", "TKN3", "TOKEN3"].includes(t.symbol)
+    (t) => !["TKN2", "TOKEN2", "TKN3", "TOKEN3"].includes(t.symbol),
   );
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const title = searchParams.get("flashTitle");
+    const desc = searchParams.get("flashDesc");
+    const proof = searchParams.get("flashProof");
+    const deadlineStr = searchParams.get("flashDeadline");
+    if (!title || !desc || !proof || !deadlineStr) return;
+
+    const deadline = Number(deadlineStr);
+    if (!deadline || Number.isNaN(deadline)) return;
+
+    // seconds → duration
+    let type: "hours" | "days" = "hours";
+    let value = Math.round(deadline / 3600);
+    if (deadline % 86400 === 0) {
+      type = "days";
+      value = Math.max(1, deadline / 86400);
+    } else {
+      value = Math.max(1, Math.round(deadline / 3600));
+    }
+
+    setDescription(`${title}\n\n${desc}\n\nProof: ${proof}`);
+    setDurationType(type);
+    setDurationValue(value);
+  }, [searchParams]);
 
   function symbolToDisplayName(symbol: string) {
     if (symbol === "USDC9CIRCLE0" || symbol === "USDC_CIRCLE") return "USDC";
@@ -203,7 +230,7 @@ export function CreateDareForm() {
       const txHash = await writeContract(
         "createDare",
         [description, BigInt(durationSeconds), token, stakeWei],
-        isETH ? stakeWei : undefined
+        isETH ? stakeWei : undefined,
       );
 
       setSuccessTxHash(typeof txHash === "string" ? txHash : undefined);
@@ -273,7 +300,7 @@ export function CreateDareForm() {
                 "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
                 durationType === "hours"
                   ? "bg-[rgba(212,175,55,0.95)] text-black"
-                  : "text-white/60 hover:text-white"
+                  : "text-white/60 hover:text-white",
               )}
             >
               Hours
@@ -288,7 +315,7 @@ export function CreateDareForm() {
                 "flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors",
                 durationType === "days"
                   ? "bg-[rgba(212,175,55,0.95)] text-black"
-                  : "text-white/60 hover:text-white"
+                  : "text-white/60 hover:text-white",
               )}
             >
               Days

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useWeb3 } from "@/lib/web3-provider";
 import { shortenAddress } from "@/lib/helpers";
 import { Button } from "@/components/ui/button";
@@ -21,10 +21,18 @@ import {
   BookOpenText,
   Network,
   Link2,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  FLASH_TASK_CATEGORIES,
+  secondsToDuration,
+  type FlashTaskTemplate,
+  type FlashTaskCategory,
+} from "@/lib/flash-templates";
+import { useFlashTemplateStore } from "@/lib/flash-template-store";
 
 const BASE_SEPOLIA_PARAMS = {
   chainIdHex: "0x14a34", // 84532
@@ -48,6 +56,22 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [flashOpen, setFlashOpen] = useState(false);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+  const setFlashTemplate = useFlashTemplateStore((s) => s.setPending);
+
+  const handleFlashPick = (template: FlashTaskTemplate, category: FlashTaskCategory) => {
+  const params = new URLSearchParams({
+    flashTitle: template.title,
+    flashDesc: template.description,
+    flashProof: template.proofType,
+    flashDeadline: String(template.deadline),
+  });
+  setFlashOpen(false);
+  router.push(`/create?${params.toString()}`);
+};
 
   const getChainId = () => {
     if (!chain?.id) return null;
@@ -206,7 +230,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/">Browse</Link>
@@ -220,7 +244,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/create")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/create">Create</Link>
@@ -235,7 +259,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/profile")
                     ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
                 )}
               >
                 <Link href={`/profile/${address}`}>
@@ -253,7 +277,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/leaderboard")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/leaderboard">
@@ -270,7 +294,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/how-it-works")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/how-it-works">How It Works</Link>
@@ -284,7 +308,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/faq")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/faq">FAQ</Link>
@@ -298,7 +322,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/legal")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/legal">Legal</Link>
@@ -313,7 +337,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/debug")
                     ? "text-black bg-[#f97373] bg-red-500/20 shadow-[0_0_18px_rgba(249,115,115,0.7)]"
-                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10"
+                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10",
                 )}
               >
                 <Link href="/debug">Debug</Link>
@@ -328,7 +352,7 @@ export function Header() {
               <span
                 className={cn(
                   "inline-flex h-1.5 w-1.5 rounded-full mr-1.5",
-                  isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400"
+                  isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
                 )}
               />
               {currentChainLabel}
@@ -382,7 +406,7 @@ export function Header() {
                   <span
                     className={cn(
                       "inline-flex h-1.5 w-1.5 rounded-full mr-1",
-                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400"
+                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
                     )}
                   />
                   {isBaseSepolia
@@ -507,7 +531,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/how-it-works")
                     ? "text-[#f5d566] bg-white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link href="/how-it-works" onClick={() => setMobileMenuOpen(false)}>
@@ -523,7 +547,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/faq")
                     ? "text-[#f5d566] bg-white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link href="/faq" onClick={() => setMobileMenuOpen(false)}>
@@ -539,7 +563,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/legal")
                     ? "text-[#f5d566] bg-white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link href="/legal" onClick={() => setMobileMenuOpen(false)}>
@@ -556,7 +580,7 @@ export function Header() {
                     "w-full justify-start text-sm h-9",
                     isActive("/debug")
                       ? "text-[#f97373] bg-red-500/10"
-                      : "text-white/60 hover:text-[#f97373]"
+                      : "text-white/60 hover:text-[#f97373]",
                   )}
                 >
                   <Link href="/debug" onClick={() => setMobileMenuOpen(false)}>
@@ -570,79 +594,234 @@ export function Header() {
         )}
       </header>
 
-      {/* Mobile bottom nav */}
+      {/* Mobile bottom nav + Flash sheet */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(212,175,55,0.25)] bg-black/95 backdrop-blur-xl lg:hidden">
         <div className="flex items-stretch justify-around h-14 px-2">
-          <Link
-            href="/"
+          {/* Home */}
+          <button
+            type="button"
+            onClick={() => router.push("/")}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5",
-              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]"
+              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <Home
               className={cn(
-                "h-5 w-5",
-                isActive("/") ? "text-[#f5d566]" : "text-white/60"
+                "h-5 w-5 transition-colors",
+                isActive("/") ? "text-[#f5d566]" : "text-white/60",
               )}
             />
             <span>Home</span>
-          </Link>
+          </button>
 
-          <Link
-            href="/create"
+          {/* Create */}
+          <button
+            type="button"
+            onClick={() => router.push("/create")}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5",
+              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
               isActive("/create")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
-            <span className={cn(
-              "h-5 w-5 rounded-full border border-[#f5d566] flex items-center justify-center text-lg leading-none",
-              isActive("/create") ? "text-[#f5d566]" : "text-white/60"
-            )}>
+            <span
+              className={cn(
+                "h-5 w-5 rounded-full border border-[#f5d566] flex items-center justify-center text-lg leading-none transition-all",
+                isActive("/create")
+                  ? "text-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
+                  : "text-white/60",
+              )}
+            >
               +
             </span>
             <span>Create</span>
-          </Link>
+          </button>
 
-          <Link
-            href={isConnected && address ? `/profile/${address}` : "/"}
+          {/* Flash */}
+          <button
+            type="button"
+            onClick={() => setFlashOpen(true)}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5",
+              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              flashOpen ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]",
+            )}
+          >
+            <Zap
+              className={cn(
+                "h-5 w-5 transition-all",
+                flashOpen ? "text-[#f5d566]" : "text-white/60",
+              )}
+            />
+            <span>Flash</span>
+          </button>
+
+          {/* Profile */}
+          <button
+            type="button"
+            onClick={() =>
+              router.push(isConnected && address ? `/profile/${address}` : "/")
+            }
+            className={cn(
+              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
               isActive("/profile")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <User
               className={cn(
-                "h-5 w-5",
-                isActive("/profile") ? "text-[#f5d566]" : "text-white/60"
+                "h-5 w-5 transition-colors",
+                isActive("/profile") ? "text-[#f5d566]" : "text-white/60",
               )}
             />
             <span>Profile</span>
-          </Link>
+          </button>
 
-          <Link
-            href="/leaderboard"
+          {/* Leaders */}
+          <button
+            type="button"
+            onClick={() => router.push("/leaderboard")}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5",
+              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
               isActive("/leaderboard")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <Trophy
               className={cn(
-                "h-5 w-5",
-                isActive("/leaderboard") ? "text-[#f5d566]" : "text-white/60"
+                "h-5 w-5 transition-colors",
+                isActive("/leaderboard") ? "text-[#f5d566]" : "text-white/60",
               )}
             />
             <span>Leaders</span>
-          </Link>
+          </button>
         </div>
+
+        {/* Flash bottom sheet – category wise */}
+        {flashOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* backdrop */}
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => {
+                setFlashOpen(false);
+                setExpandedCategoryId(null);
+              }}
+            />
+
+            {/* sheet */}
+            <div className="absolute inset-x-0 bottom-0 max-h-[80vh] rounded-t-3xl border border-[rgba(212,175,55,0.45)] bg-[rgba(5,5,5,0.98)] shadow-[0_-18px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+              {/* drag handle */}
+              <div className="flex justify-center pt-2">
+                <div className="h-1 w-10 rounded-full bg-white/15" />
+              </div>
+
+              <div className="flex items-center justify-between px-4 pt-2 pb-2 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)]">
+                    <span className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.45)] blur-md opacity-50" />
+                    <Zap className="relative h-4 w-4 text-[#f5d566]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[#f5d566]">
+                      Flash Tasks
+                    </span>
+                    <span className="text-[11px] text-white/60">
+                      Tap category, then template to prefill Create
+                    </span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFlashOpen(false);
+                    setExpandedCategoryId(null);
+                  }}
+                  className="rounded-full bg-black/70 p-1.5 text-white/60 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="px-3 pb-4 pt-2 space-y-2 max-h-[calc(80vh-64px)] overflow-y-auto">
+                {FLASH_TASK_CATEGORIES.map((cat) => {
+                  const isOpen = expandedCategoryId === cat.id;
+                  return (
+                    <div
+                      key={cat.id}
+                      className="rounded-xl border border-white/10 bg-black/90 p-3 space-y-2"
+                    >
+                      {/* Category header (tap to toggle) */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedCategoryId(isOpen ? null : cat.id)
+                        }
+                        className="flex w-full items-center justify-between"
+                      >
+                        <div className="flex items-center gap-2 text-left">
+                          <span className="text-lg">{cat.emoji}</span>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-white">
+                              {cat.name}
+                            </span>
+                            <span className="text-[11px] text-white/55">
+                              {cat.description}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-[#fbbf24]">
+                          {"🔥".repeat(cat.failureRating)}
+                        </span>
+                      </button>
+
+                      {/* Templates list – only when open */}
+                      {isOpen && (
+                        <div className="mt-2 space-y-1">
+                          {cat.templates.map((t) => {
+                            const dur = secondsToDuration(t.deadline);
+                            return (
+                              <button
+                                key={t.id}
+                                type="button"
+                                onClick={() => handleFlashPick(t, cat)}
+                                className="group relative w-full text-left rounded-lg border border-white/10 bg-black/80 px-3 py-2 hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-all"
+                              >
+                                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[rgba(245,213,102,0.12)] via-transparent to-[rgba(212,175,55,0.12)] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity" />
+                                <p className="relative text-xs font-semibold text-white line-clamp-1">
+                                  {t.title}
+                                </p>
+                                <p className="relative text-[11px] text-white/65 line-clamp-2">
+                                  {t.description}
+                                </p>
+                                <div className="relative mt-1 flex items-center justify-between text-[10px] text-white/60">
+                                  <span>
+                                    ⏱ {dur.value}{" "}
+                                    {dur.type === "hours" ? "hr" : "day"}
+                                    {dur.value !== 1 ? "s" : ""}
+                                  </span>
+                                  <span className="text-[10px] text-[#fbbf24]">
+                                    {t.failureRate}
+                                  </span>
+                                  <span className="ml-auto text-[10px] text-[#f5d566]">
+                                    Tap to paste
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
     </>
   );
