@@ -7,7 +7,7 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as cons
 
 export const TOKEN_MAP: Record<string, { name: string; symbol: string; decimals: number }> = {
   [ZERO_ADDRESS]: { name: "Ethereum", symbol: "ETH", decimals: 18 },
-  "0x833589fCD6eDb6E08f4c7C32D4f71b1566dA1c78": { name: "USD Coin", symbol: "USDC", decimals: 6 },
+  "0x5dEaC602762362FE5f135FA5904351916053cF70": { name: "USD Coin", symbol: "USDC", decimals: 6 },
   "0x50F88fe97f72CD3E75b9Eb4f747F59BcEBA80d59": { name: "Token 1", symbol: "TKN1", decimals: 18 },
   "0x44ff8620b8cA30902395A7bD3F2407e1A091BF73": { name: "Token 2", symbol: "TKN2", decimals: 18 },
   "0x58D97B57BB95320F9a05dC918Aef65434969c2B2": { name: "Token 3", symbol: "TKN3", decimals: 18 },
@@ -17,7 +17,7 @@ export const TOKEN_MAP: Record<string, { name: string; symbol: string; decimals:
 
 export const ALLOWED_TOKENS = [
   { address: ZERO_ADDRESS, name: "ETH", symbol: "ETH" },
-  { address: "0x833589fCD6eDb6E08f4c7C32D4f71b1566dA1c78", name: "USDC (Circle)", symbol: "USDC" },
+  { address: "0x5dEaC602762362FE5f135FA5904351916053cF70", name: "USDC (Circle)", symbol: "USDC" },
   { address: "0x50F88fe97f72CD3E75b9Eb4f747F59BcEBA80d59", name: "Token 1", symbol: "TKN1" },
   { address: "0x44ff8620b8cA30902395A7bD3F2407e1A091BF73", name: "Token 2", symbol: "TKN2" },
   { address: "0x58D97B57BB95320F9a05dC918Aef65434969c2B2", name: "Token 3", symbol: "TKN3" },

@@ -49,14 +49,26 @@ export function Header() {
   const { toast } = useToast();
   const pathname = usePathname();
 
-  const isBaseSepolia = chain?.id === BASE_SEPOLIA_PARAMS.chainIdDec;
+  const getChainId = () => {
+    if (!chain?.id) return null;
+    if (typeof chain.id === "number") return chain.id;
+    if (typeof chain.id === "string") {
+      return parseInt(chain.id, 16); // "0x14a34" -> 84532
+    }
+    return null;
+  };
+
+  const chainId = getChainId();
+  const isBaseSepolia = chainId === BASE_SEPOLIA_PARAMS.chainIdDec;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
 
-  const currentChainLabel = chain?.name
+  const currentChainLabel = isBaseSepolia
+    ? "Base Sepolia"
+    : chain?.name
     ? chain.name
     : "No network";
 
@@ -211,10 +223,7 @@ export function Header() {
                   : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
-              <Link href="/create">
-                <Plus className="mr-1 h-4 w-4" />
-                Create
-              </Link>
+              <Link href="/create">Create</Link>
             </Button>
 
             {isConnected && address && (
@@ -252,6 +261,64 @@ export function Header() {
                 Leaderboard
               </Link>
             </Button>
+
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm rounded-full",
+                isActive("/how-it-works")
+                  ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+              )}
+            >
+              <Link href="/how-it-works">How It Works</Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm rounded-full",
+                isActive("/faq")
+                  ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+              )}
+            >
+              <Link href="/faq">FAQ</Link>
+            </Button>
+
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm rounded-full",
+                isActive("/legal")
+                  ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+              )}
+            >
+              <Link href="/legal">Legal</Link>
+            </Button>
+
+            {isConnected && address && (
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "h-9 px-3 text-xs md:text-sm rounded-full",
+                  isActive("/debug")
+                    ? "text-black bg-[#f97373] bg-red-500/20 shadow-[0_0_18px_rgba(249,115,115,0.7)]"
+                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10"
+                )}
+              >
+                <Link href="/debug">Debug</Link>
+              </Button>
+            )}
           </nav>
 
           {/* Right side */}
@@ -318,7 +385,11 @@ export function Header() {
                       isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400"
                     )}
                   />
-                  {chain?.name ? chain.name.replace("Base ", "") : "Net"}
+                  {isBaseSepolia
+                    ? "Base Sepolia"
+                    : chain?.name
+                    ? chain.name.replace("Base ", "")
+                    : "Net"}
                 </div>
                 <Button
                   asChild
@@ -527,12 +598,12 @@ export function Header() {
                 : "text-white/60 hover:text-[#f5d566]"
             )}
           >
-            <Plus
-              className={cn(
-                "h-5 w-5",
-                isActive("/create") ? "text-[#f5d566]" : "text-white/60"
-              )}
-            />
+            <span className={cn(
+              "h-5 w-5 rounded-full border border-[#f5d566] flex items-center justify-center text-lg leading-none",
+              isActive("/create") ? "text-[#f5d566]" : "text-white/60"
+            )}>
+              +
+            </span>
             <span>Create</span>
           </Link>
 

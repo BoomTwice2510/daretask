@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "@/lib/web3-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { MotionLayout } from "@/components/motion-layout";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,7 +41,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-black text-white antialiased">
         <Web3Provider>
-          {children}
+          <MotionLayout>{children}</MotionLayout>
           <Toaster />
         </Web3Provider>
       </body>

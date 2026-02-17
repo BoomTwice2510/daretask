@@ -74,7 +74,8 @@ export function DareFeed() {
       const results = await Promise.all(promises);
       setDares(results);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch dares";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to fetch dares";
       console.error("[v0] Failed to fetch dares:", err);
       setError(errorMessage);
       setDares([]);
@@ -105,27 +106,34 @@ export function DareFeed() {
     <div className="flex flex-col gap-6 text-white">
       {/* Filter + Refresh */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-        <div className="w-full md:w-auto flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-          {filterOptions.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value)}
-              className={`shrink-0 rounded-full px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200 border ${
-                filter === opt.value
-                  ? "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_22px_rgba(245,213,102,0.7)] scale-[1.02]"
-                  : "bg-[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
-              }`}
-            >
-              <span className="block">{opt.label}</span>
-              {filter !== opt.value && (
-                <span className="text-[11px] text-white/45">
-                  {opt.value === "all"
-                    ? dares.length
-                    : dares.filter((d) => d.status === parseInt(opt.value)).length}
-                </span>
-              )}
-            </button>
-          ))}
+        <div className="w-full md:w-auto flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+          {filterOptions.map((opt) => {
+            const countForFilter =
+              opt.value === "all"
+                ? dares.length
+                : dares.filter((d) => d.status === parseInt(opt.value)).length;
+
+            const isActive = filter === opt.value;
+
+            return (
+              <button
+                key={opt.value}
+                onClick={() => setFilter(opt.value)}
+                className={`shrink-0 rounded-full px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200 border ${
+                  isActive
+                    ? "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_22px_rgba(245,213,102,0.7)] scale-[1.03]"
+                    : "bg-[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
+                }`}
+              >
+                <span className="block">{opt.label}</span>
+                {!isActive && (
+                  <span className="text-[11px] text-white/45">
+                    {countForFilter}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
         <Button
           variant="ghost"
@@ -134,7 +142,11 @@ export function DareFeed() {
           disabled={loading}
           className="h-10 w-10 shrink-0 text-white/60 hover:text-white hover:bg-black border border-white/10 rounded-full"
         >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin text-[#f5d566]" : ""}`} />
+          <RefreshCw
+            className={`h-4 w-4 ${
+              loading ? "animate-spin text-[#f5d566]" : ""
+            }`}
+          />
         </Button>
       </div>
 
@@ -175,7 +187,9 @@ export function DareFeed() {
           <Filter className="h-12 w-12 text-white/40 mb-3" />
           <p className="text-white font-medium">No dares found</p>
           <p className="text-sm text-white/60 mt-1">
-            {filter !== "all" ? "Try a different filter" : "Be the first to create a dare"}
+            {filter !== "all"
+              ? "Try a different filter"
+              : "Be the first to create a dare"}
           </p>
         </div>
       )}

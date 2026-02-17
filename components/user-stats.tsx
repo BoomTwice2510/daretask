@@ -4,7 +4,15 @@ import type { UserStats } from "@/lib/types";
 import { formatStake } from "@/lib/helpers";
 import { BadgeDisplay } from "@/components/badge-display";
 import { BADGE_XP_THRESHOLDS, BADGE_LABELS } from "@/lib/contract";
-import { Trophy, Target, Flame, Coins, Shield, Swords, TrendingUp } from "lucide-react";
+import {
+  Trophy,
+  Target,
+  Flame,
+  Coins,
+  Shield,
+  Swords,
+  TrendingUp,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface UserStatsCardProps {
@@ -30,7 +38,10 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
       const nextMin = nextThresholds.min;
       const range = nextMin - currentMin;
       if (range > 0) {
-        progressPercent = Math.min(100, Math.max(0, ((xp - currentMin) / range) * 100));
+        progressPercent = Math.min(
+          100,
+          Math.max(0, ((xp - currentMin) / range) * 100)
+        );
       }
     }
   } else {
@@ -85,10 +96,12 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Badge + XP Progress */}
-      <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.8)]">
+      <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]">
         <div className="flex items-center justify-between mb-3">
           <BadgeDisplay badge={badge} size="lg" />
-          <span className="font-mono text-lg font-bold text-[#f5d566]">{xp} XP</span>
+          <span className="font-mono text-lg font-bold text-[#f5d566]">
+            {xp} XP
+          </span>
         </div>
         {badge < 7 && nextBadge && (
           <div className="flex flex-col gap-1.5">
@@ -114,13 +127,15 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
         {statItems.map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-white/10 bg-[rgba(10,10,10,0.95)] p-3 flex flex-col gap-1.5"
+            className="rounded-xl border border-white/10 bg-[rgba(10,10,10,0.95)] p-3 flex flex-col gap-1.5 transition-all duration-200 hover:-translate-y-[1px] hover:border-[rgba(245,213,102,0.7)] hover:shadow-[0_0_26px_rgba(245,213,102,0.25)]"
           >
             <div className={`flex items-center gap-1.5 ${item.color}`}>
               {item.icon}
               <span className="text-xs text-white/60">{item.label}</span>
             </div>
-            <span className="font-mono text-lg font-bold text-white">{item.value}</span>
+            <span className="font-mono text-lg font-bold text-white">
+              {item.value}
+            </span>
           </div>
         ))}
       </div>

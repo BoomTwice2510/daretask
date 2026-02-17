@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Header } from "@/components/header";
 import { DareFeed } from "@/components/dare-feed";
 import { Button } from "@/components/ui/button";
-import { Plus, Zap, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -64,8 +64,7 @@ export default function HomePage() {
               <Button
                 className="h-11 px-7 md:h-12 md:px-10 text-base md:text-lg font-semibold shadow-lg transition-transform active:scale-95"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #d4af37, #e6c547)",
+                  background: "linear-gradient(135deg, #d4af37, #e6c547)",
                   color: "#000",
                   boxShadow: "0 18px 40px rgba(212,175,55,0.45)",
                 }}
@@ -81,42 +80,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Stats bar */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 py-4 mb-8 px-3 md:px-4 rounded-2xl border border-[rgba(212,175,55,0.24)] bg-[rgba(10,10,10,0.9)] backdrop-blur-md">
-          <div className="flex items-center gap-1.5 text-xs md:text-sm text-white/70">
-            <Zap className="h-4 w-4 text-[#f5d566] flex-shrink-0 animate-pulse" />
-            <span>Network</span>
-            <span className="font-semibold text-[#e6c547]">Base Sepolia</span>
-          </div>
-          <div className="h-3 w-px bg-white/10 hidden md:block" />
-          <span className="text-xs md:text-sm text-white/60 text-center flex items-center gap-1">
-            <span className="font-mono text-[11px] md:text-xs text-[#f5f5f5]">
-              0xee48...8586
-            </span>
-            <span className="hidden sm:inline text-[11px] text-white/40">
-              • Dare Protocol contract
-            </span>
-          </span>
-        </div>
-
         {/* Feed */}
         <DareFeed />
       </main>
-
-      {/* Mobile FAB */}
-      <Link
-        href="/create"
-        className="fixed bottom-6 right-6 z-50 md:hidden flex h-14 w-14 items-center justify-center rounded-full shadow-lg active:scale-95 transition-transform"
-        style={{
-          background:
-            "linear-gradient(135deg, #d4af37, #e6c547)",
-          color: "#000",
-          boxShadow: "0 18px 40px rgba(212,175,55,0.45)",
-        }}
-        aria-label="Create Dare"
-      >
-        <Plus className="h-6 w-6" />
-      </Link>
     </div>
   );
 }

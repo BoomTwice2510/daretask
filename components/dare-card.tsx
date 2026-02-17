@@ -66,7 +66,10 @@ export function DareCard({ dare }: DareCardProps) {
   function handleShare(network: "x" | "whatsapp" | "farcaster") {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/dare/${dare.id}`;
-    const text = `On-chain dare on Dare Protocol: "${dare.description.slice(0, 140)}"`;
+    const text = `On-chain dare on Dare Protocol: "${dare.description.slice(
+      0,
+      140
+    )}"`;
 
     let shareUrl = "";
     if (network === "x") {
@@ -87,9 +90,9 @@ export function DareCard({ dare }: DareCardProps) {
 
   return (
     <div
-      className="rounded-2xl border border-[rgba(212,175,55,0.36)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_40px_rgba(0,0,0,0.85)] transition-all duration-300 space-y-3 hover:-translate-y-[1px]"
+      className="group rounded-2xl border border-[rgba(212,175,55,0.36)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_40px_rgba(0,0,0,0.85)] transition-all duration-300 space-y-3 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]"
     >
-      <Link href={`/dare/${dare.id}`} className="block group space-y-3">
+      <Link href={`/dare/${dare.id}`} className="block space-y-3">
         {/* Status + Time row */}
         <div className="flex items-center justify-between">
           <span
@@ -102,7 +105,9 @@ export function DareCard({ dare }: DareCardProps) {
           </span>
           <span className="flex items-center gap-1 text-xs text-white/70">
             <Clock className="h-3 w-3 text-[#f5d566]" />
-            {isOpen || isRunning ? timeRemaining(dare.deadline) : timeAgo(dare.createdAt)}
+            {isOpen || isRunning
+              ? timeRemaining(dare.deadline)
+              : timeAgo(dare.createdAt)}
           </span>
         </div>
 
@@ -113,13 +118,14 @@ export function DareCard({ dare }: DareCardProps) {
 
         {/* Stake */}
         <div className="flex items-center gap-2 mb-1 rounded-xl px-3 py-2 bg-[rgba(10,10,10,0.9)] border border-white/10">
-          <div className="h-6 w-6 rounded-full overflow-hidden bg-black flex-shrink-0">
+          <div className="relative h-6 w-6 rounded-full overflow-hidden bg-black flex-shrink-0">
+            <span className="absolute inset-0 rounded-full bg-[rgba(245,213,102,0.18)] blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
             <Image
               src={tokenMeta.icon}
               alt={tokenMeta.symbol}
               width={24}
               height={24}
-              className="h-full w-full object-contain"
+              className="relative h-full w-full object-contain"
             />
           </div>
           <span className="font-mono text-sm font-semibold text-[#f5f5f5]">
@@ -144,7 +150,8 @@ export function DareCard({ dare }: DareCardProps) {
             </span>
           </div>
           {dare.accepter !== ZERO_ADDRESS &&
-            dare.accepter !== "0x0000000000000000000000000000000000000000" && (
+            dare.accepter !==
+              "0x0000000000000000000000000000000000000000" && (
               <div className="flex items-center gap-1.5">
                 <span className="text-white/50">vs</span>
                 <span className="font-mono text-[11px]">

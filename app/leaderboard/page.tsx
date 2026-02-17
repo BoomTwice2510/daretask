@@ -77,7 +77,15 @@ export default function LeaderboardPage() {
               readContract("getUserStats", [addr]),
               readContract("getUserBadge", [addr]),
             ]);
-            const s = statsResult as [bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+            const s = statsResult as [
+              bigint,
+              bigint,
+              bigint,
+              bigint,
+              bigint,
+              bigint,
+              bigint
+            ];
             leaderEntries.push({
               address: addr,
               wins: s[3],
@@ -112,8 +120,16 @@ export default function LeaderboardPage() {
 
   const sortTabs = [
     { key: "xp" as const, label: "XP", icon: <Flame className="h-3.5 w-3.5" /> },
-    { key: "wins" as const, label: "Wins", icon: <Trophy className="h-3.5 w-3.5" /> },
-    { key: "volume" as const, label: "Volume", icon: <Coins className="h-3.5 w-3.5" /> },
+    {
+      key: "wins" as const,
+      label: "Wins",
+      icon: <Trophy className="h-3.5 w-3.5" />,
+    },
+    {
+      key: "volume" as const,
+      label: "Volume",
+      icon: <Coins className="h-3.5 w-3.5" />,
+    },
   ];
 
   return (
@@ -125,13 +141,16 @@ export default function LeaderboardPage() {
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
+            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to feed
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            <span className="relative">
+              Back to feed
+              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
+            </span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.25)]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
@@ -143,14 +162,16 @@ export default function LeaderboardPage() {
         {/* Hero */}
         <section className="mb-6 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.15)] border border-[rgba(212,175,55,0.45)] shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
-              <Crown className="h-6 w-6 text-[#f5d566] animate-bounce" />
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.15)] border border-[rgba(212,175,55,0.45)] shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
+              <span className="absolute inset-0 rounded-2xl bg-[rgba(245,213,102,0.25)] blur-md opacity-0 md:opacity-100" />
+              <Crown className="relative h-6 w-6 text-[#f5d566] animate-bounce" />
             </div>
             <div>
               <h1
                 className="text-2xl md:text-3xl font-bold tracking-tight"
                 style={{
-                  background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                  background:
+                    "linear-gradient(to right,#f5d566,#e6c547,#d4af37,#f97316)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -181,7 +202,7 @@ export default function LeaderboardPage() {
             <button
               key={tab.key}
               onClick={() => setSortBy(tab.key)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                 sortBy === tab.key
                   ? "bg-[#f5d566] text-black shadow-[0_0_25px_rgba(245,213,102,0.6)]"
                   : "bg-[rgba(15,15,15,0.95)] text-white/60 hover:text-white hover:bg-black border border-white/10"
@@ -195,8 +216,11 @@ export default function LeaderboardPage() {
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
+            <p className="text-xs text-white/60">
+              Fetching on‑chain leaderboard…
+            </p>
           </div>
         )}
 
@@ -214,7 +238,7 @@ export default function LeaderboardPage() {
               <Link
                 key={entry.address}
                 href={`/profile/${entry.address}`}
-                className="flex items-center gap-3 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-3 hover:border-[rgba(245,213,102,0.8)] hover:bg-black transition-colors"
+                className="group flex items-center gap-3 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-3 transition-all duration-200 hover:border-[rgba(245,213,102,0.9)] hover:bg-black hover:shadow-[0_18px_60px_rgba(0,0,0,0.9)] hover:-translate-y-0.5"
               >
                 {/* Rank */}
                 <div
@@ -239,18 +263,23 @@ export default function LeaderboardPage() {
                   <span className="font-mono text-xs text-white truncate">
                     {shortenAddress(entry.address)}
                   </span>
-                  <BadgeDisplay badge={entry.badge} size="sm" />
+                  <div className="flex items-center gap-1">
+                    <BadgeDisplay badge={entry.badge} size="sm" />
+                  </div>
                 </div>
 
                 {/* Stat value */}
                 <div className="text-right shrink-0">
                   <div className="font-mono text-sm font-bold text-white">
                     {sortBy === "xp" && `${Number(entry.xp)} XP`}
-                    {sortBy === "wins" && `${Number(entry.wins)}W / ${Number(entry.losses)}L`}
-                    {sortBy === "volume" && `${formatStake(entry.volume)} ETH`}
+                    {sortBy === "wins" &&
+                      `${Number(entry.wins)}W / ${Number(entry.losses)}L`}
+                    {sortBy === "volume" &&
+                      `${formatStake(entry.volume)} ETH`}
                   </div>
                   <div className="text-[11px] text-white/55">
-                    Wins: {Number(entry.wins)} • Vol: {formatStake(entry.volume)} ETH
+                    Wins: {Number(entry.wins)} • Vol:{" "}
+                    {formatStake(entry.volume)} ETH
                   </div>
                 </div>
               </Link>

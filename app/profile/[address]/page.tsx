@@ -19,7 +19,11 @@ import {
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function ProfilePage({ params }: { params: Promise<{ address: string }> }) {
+export default function ProfilePage({
+  params,
+}: {
+  params: Promise<{ address: string }>;
+}) {
   const { address: paramAddress } = use(params);
   const { readContract, address: connectedAddress } = useWeb3();
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -29,7 +33,8 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
   const [copied, setCopied] = useState(false);
 
   const profileAddress = paramAddress;
-  const isOwnProfile = connectedAddress?.toLowerCase() === profileAddress.toLowerCase();
+  const isOwnProfile =
+    connectedAddress?.toLowerCase() === profileAddress.toLowerCase();
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);
@@ -41,7 +46,15 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
         readContract("dareCount"),
       ]);
 
-      const s = statsResult as [bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+      const s = statsResult as [
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint,
+        bigint
+      ];
       setStats({
         activeCountCreator: s[0],
         activeCountAccepter: s[1],
@@ -130,13 +143,16 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
+            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to feed
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            <span className="relative">
+              Back to feed
+              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
+            </span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.25)]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
@@ -151,13 +167,18 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
             <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.18)] text-[#f5d566] text-lg font-bold">
               {profileAddress.slice(2, 4).toUpperCase()}
               <span className="absolute inset-0 rounded-2xl border border-[rgba(212,175,55,0.6)] blur-[1px]" />
+              <span className="pointer-events-none absolute -inset-1 rounded-3xl bg-[radial-gradient(circle_at_top,_rgba(245,213,102,0.22),_transparent)] opacity-60" />
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-medium text-white truncate">
                   {shortenAddress(profileAddress)}
                 </span>
-                <button onClick={handleCopy} className="shrink-0" aria-label="Copy address">
+                <button
+                  onClick={handleCopy}
+                  className="shrink-0 rounded-full border border-white/10 bg-black/40 p-1 hover:bg-black/80 transition-colors"
+                  aria-label="Copy address"
+                >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-400" />
                   ) : (
@@ -168,14 +189,16 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
                   href={`https://basescan.org/address/${profileAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="shrink-0"
+                  className="shrink-0 rounded-full border border-white/10 bg-black/40 p-1 hover:bg-black/80 transition-colors"
                   aria-label="View on BaseScan"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-white/50 hover:text-white" />
                 </a>
               </div>
               <span className="text-xs text-white/55">
-                {isOwnProfile ? "Your on‑chain dare history" : "Public dare profile"}
+                {isOwnProfile
+                  ? "Your on‑chain dare history"
+                  : "Public dare profile"}
               </span>
             </div>
           </div>
@@ -198,27 +221,32 @@ export default function ProfilePage({ params }: { params: Promise<{ address: str
 
         {/* Loading */}
         {loading && (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
+            <p className="text-xs text-white/60">Fetching profile data…</p>
           </div>
         )}
 
         {/* Content */}
         {!loading && stats && (
           <>
-            <UserStatsCard stats={stats} badge={badge} address={profileAddress} />
+            <UserStatsCard
+              stats={stats}
+              badge={badge}
+              address={profileAddress}
+            />
 
             <Tabs defaultValue="active" className="mt-8">
               <TabsList className="grid w-full grid-cols-2 bg-[rgba(10,10,10,0.95)] rounded-full p-1 border border-white/10">
                 <TabsTrigger
                   value="active"
-                  className="text-white/70 data-[state=active]:bg-[#f5d566] data-[state=active]:text-black rounded-full text-sm"
+                  className="text-white/70 data-[state=active]:bg-[#f5d566] data-[state=active]:text-black rounded-full text-sm transition-all data-[state=active]:shadow-[0_0_20px_rgba(245,213,102,0.6)]"
                 >
                   Active ({activeDares.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
-                  className="text-white/70 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/15 rounded-full text-sm"
+                  className="text-white/70 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/15 rounded-full text-sm transition-all"
                 >
                   History ({pastDares.length})
                 </TabsTrigger>

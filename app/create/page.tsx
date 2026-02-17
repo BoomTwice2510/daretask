@@ -2,7 +2,7 @@
 
 import { Header } from "@/components/header";
 import { CreateDareForm } from "@/components/create-dare-form";
-import { ArrowLeft, Zap, Coins, Gauge } from "lucide-react";
+import { ArrowLeft, Zap, Coins, Gauge, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function CreateDarePage() {
@@ -15,13 +15,16 @@ export default function CreateDarePage() {
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-white/60 hover:text-[#f5d566] transition-colors"
+            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to feed
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            <span className="relative">
+              Back to feed
+              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
+            </span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.35)]">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-70" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
@@ -32,34 +35,43 @@ export default function CreateDarePage() {
 
         {/* Hero */}
         <section className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1 rounded-full border border-yellow-500/20 bg-yellow-500/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
+              <Sparkles className="h-3 w-3 text-yellow-300" />
+              <span>New dare</span>
+            </div>
+
             <h1
-              className="text-3xl md:text-4xl font-bold"
+              className="text-3xl md:text-4xl font-bold tracking-tight"
               style={{
-                background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                background:
+                  "linear-gradient(to right,#f5d566,#e6c547,#d4af37,#f97316)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
             >
               Create a Dare
             </h1>
-            <p className="text-sm md:text-base text-white/70 mt-2 max-w-xl">
-              Put real stakes behind real commitments. Define your challenge and let the contract
-              handle timing, proof windows, and payouts automatically.
+
+            <p className="text-sm md:text-base text-white/70 max-w-xl">
+              Put real stakes behind real commitments. Define your challenge and
+              let the contract handle timing, proof windows, and payouts
+              automatically.
             </p>
           </div>
 
           <div className="mt-3 md:mt-0 flex flex-col gap-2 text-xs text-white/70">
-            <div className="inline-flex items-center gap-2 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(10,10,10,0.9)] px-3 py-2 backdrop-blur-md">
-              <Zap className="h-4 w-4 text-[#f5d566] animate-pulse" />
+            <div className="group inline-flex items-center gap-2 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(10,10,10,0.9)] px-3 py-2 backdrop-blur-md transition-all duration-200 hover:border-[#f5d566] hover:shadow-[0_0_30px_rgba(245,213,102,0.28)]">
+              <Zap className="h-4 w-4 text-[#f5d566] transition-transform duration-200 group-hover:rotate-6" />
               <span>Network: Base Sepolia (testnet)</span>
             </div>
-            <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[rgba(15,15,15,0.9)] px-3 py-2 backdrop-blur-md">
-              <Gauge className="h-4 w-4 text-emerald-400" />
+            <div className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[rgba(15,15,15,0.9)] px-3 py-2 backdrop-blur-md transition-all duration-200 hover:border-emerald-400/60 hover:shadow-[0_0_28px_rgba(16,185,129,0.25)]">
+              <Gauge className="h-4 w-4 text-emerald-400 transition-transform duration-200 group-hover:scale-110" />
               <span>
                 Mainnet reference: simple Base tx ≈{" "}
-                <span className="font-mono">0.001–0.005 USD</span> gas; dare create + accept
-                typically stays under a few cents in normal conditions.
+                <span className="font-mono">0.001–0.005 USD</span> gas; dare
+                create + accept typically stays under a few cents in normal
+                conditions.
               </span>
             </div>
           </div>
@@ -67,7 +79,7 @@ export default function CreateDarePage() {
 
         {/* Form card */}
         <div
-          className="rounded-2xl p-5 md:p-6 shadow-[0_18px_60px_rgba(0,0,0,0.85)] transition-all duration-300"
+          className="group rounded-2xl p-5 md:p-6 shadow-[0_18px_60px_rgba(0,0,0,0.85)] transition-all duration-300 hover:shadow-[0_24px_80px_rgba(0,0,0,0.95)] hover:-translate-y-0.5"
           style={{
             backdropFilter: "blur(14px)",
             background:
@@ -75,50 +87,65 @@ export default function CreateDarePage() {
             border: "1px solid rgba(212,175,55,0.35)",
           }}
         >
+          <div className="mb-3 flex items-center justify-between text-[11px] text-white/50">
+            <span>Step 1 · Configure dare</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Live on Base
+            </span>
+          </div>
           <CreateDareForm />
         </div>
 
         {/* Info card */}
         <div
-          className="mt-6 rounded-2xl p-4 md:p-5 text-xs flex flex-col gap-3"
+          className="mt-6 rounded-2xl p-4 md:p-5 text-xs flex flex-col gap-3 transition-all duration-300 hover:border-white/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]"
           style={{
             backdropFilter: "blur(10px)",
             backgroundColor: "rgba(10,10,10,0.9)",
             border: "1px solid rgba(255,255,255,0.08)",
           }}
         >
-          <div className="flex items-center gap-2">
-            <Coins className="h-4 w-4 text-[#f5d566]" />
-            <p className="font-medium text-white text-sm">
-              How it works (stakes + fees)
-            </p>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Coins className="h-4 w-4 text-[#f5d566]" />
+              <p className="font-medium text-white text-sm">
+                How it works (stakes + fees)
+              </p>
+            </div>
+            <span className="rounded-full bg-white/5 px-2 py-1 text-[10px] text-white/60">
+              Fully on‑chain · Non‑custodial
+            </span>
           </div>
           <ul className="flex flex-col gap-1.5 list-disc pl-4 text-white/70">
             <li>
-              You choose description, duration (1–7 days), token, and stake amount (min 0.0001).
+              You choose description, duration (1–7 days), token, and stake
+              amount (min 0.0001).
             </li>
             <li>
               Someone accepts and matches your stake — the dare becomes{" "}
-              <span className="text-emerald-400 font-medium">Running</span>.
+                <span className="text-emerald-400 font-medium">Running</span>.
             </li>
             <li>
-              After the deadline, the accepter has a limited proof window to submit a URI
-              (image, video, IPFS, etc.).
+              After the deadline, the accepter has a limited proof window to
+              submit a URI (image, video, IPFS, etc.).
             </li>
             <li>
-              You can confirm or dispute the proof. If you stay inactive, the accepter can win
-              by timeout.
+              You can confirm or dispute the proof. If you stay inactive, the
+              accepter can win by timeout.
             </li>
             <li>
-              Winner receives the full pot minus a 3% protocol fee (further reduced for higher
-              badge tiers).
+              Winner receives the full pot minus a 3% protocol fee (further
+              reduced for higher badge tiers).
             </li>
             <li>
-              XP: win = +100 XP, loss = −20 XP — used for badges and leaderboard rank.
+              XP: win = +100 XP, loss = −20 XP — used for badges and leaderboard
+              rank.
             </li>
             <li className="text-[11px] text-white/40 mt-1">
-              Gas note: actual gas cost depends on Base network usage and your wallet settings.
-              Values above are rough mainnet references, not a guarantee.
+              Gas note: actual gas cost depends on Base network usage and your
+              wallet settings. Values above are rough mainnet references, not a
+              guarantee.
             </li>
           </ul>
         </div>

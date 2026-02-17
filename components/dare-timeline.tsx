@@ -47,9 +47,9 @@ export function DareTimeline({ status }: DareTimelineProps) {
                     "bg-emerald-500 text-black border-emerald-400 shadow-[0_0_14px_rgba(16,185,129,0.7)]",
                   isActive &&
                     !isDisputed &&
-                    "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_14px_rgba(245,213,102,0.7)]",
+                    "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_14px_rgba(245,213,102,0.7)] animate-glow",
                   isDisputed &&
-                    "bg-red-500 text-black border-red-400 shadow-[0_0_14px_rgba(248,113,113,0.7)]",
+                    "bg-red-500 text-black border-red-400 shadow-[0_0_14px_rgba(248,113,113,0.7)] animate-glow",
                   !isComplete &&
                     !isActive &&
                     !isDisputed &&
