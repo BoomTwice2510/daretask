@@ -117,9 +117,11 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     try {
       await action();
       setSuccess(`${label} successful! Refreshing...`);
-      setTimeout(onRefresh, 3000);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message.slice(0, 200) : "Transaction failed");
+      onRefresh();
+    } catch (err: any) {
+      const message = err?.message ?? "Transaction failed";
+      setError(message);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
