@@ -11,7 +11,6 @@ import {
   LogOut,
   User,
   Trophy,
-  Plus,
   Menu,
   X,
   AlertCircle,
@@ -50,8 +49,7 @@ export function Header() {
     isConnecting,
     connect,
     disconnect,
-    chain,
-    switchChain,
+    chainId,
   } = useWeb3();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { toast } = useToast();
@@ -63,38 +61,29 @@ export function Header() {
   const setFlashTemplate = useFlashTemplateStore((s) => s.setPending);
 
   const handleFlashPick = (template: FlashTaskTemplate, category: FlashTaskCategory) => {
-  const params = new URLSearchParams({
-    flashTitle: template.title,
-    flashDesc: template.description,
-    flashProof: template.proofType,
-    flashDeadline: String(template.deadline),
-  });
-  setFlashOpen(false);
-  router.push(`/create?${params.toString()}`);
-};
-
-  const getChainId = () => {
-    if (!chain?.id) return null;
-    if (typeof chain.id === "number") return chain.id;
-    if (typeof chain.id === "string") {
-      return parseInt(chain.id, 16); // "0x14a34" -> 84532
-    }
-    return null;
+    const params = new URLSearchParams({
+      flashTitle: template.title,
+      flashDesc: template.description,
+      flashProof: template.proofType,
+      flashDeadline: String(template.deadline),
+    });
+    setFlashOpen(false);
+    router.push(`/create?${params.toString()}`);
   };
 
-  const chainId = getChainId();
   const isBaseSepolia = chainId === BASE_SEPOLIA_PARAMS.chainIdDec;
+  const showWrongNetwork = isConnected && !isBaseSepolia;
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
 
-  const currentChainLabel = isBaseSepolia
+  const currentChainLabel = !isConnected
+    ? "Not connected"
+    : isBaseSepolia
     ? "Base Sepolia"
-    : chain?.name
-    ? chain.name
-    : "No network";
+    : "Wrong network";
 
   async function handleConnect() {
     try {
@@ -128,23 +117,21 @@ export function Header() {
     }
   }
 
-  // Try switch to Base Sepolia using wallet API (via web3-provider’s switchChain or raw window.ethereum)
+  // Switch to Base Sepolia via window.ethereum
   async function handleSwitchToBaseSepolia() {
     try {
-      if (switchChain) {
-        await switchChain(BASE_SEPOLIA_PARAMS.chainIdDec);
-      } else if (typeof window !== "undefined" && (window as any).ethereum) {
-        await (window as any).ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: BASE_SEPOLIA_PARAMS.chainIdHex }],
-        });
+      if (typeof window === "undefined" || !(window as any).ethereum) {
+        throw new Error("No wallet found");
       }
+      await (window as any).ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: BASE_SEPOLIA_PARAMS.chainIdHex }],
+      });
       toast({
         title: "Network switched",
         description: "Switched to Base Sepolia.",
       });
     } catch (err: any) {
-      // 4902 = chain not added
       if (err?.code === 4902 || err?.message?.includes("not added")) {
         await handleAddBaseSepolia();
       } else {
@@ -352,7 +339,7 @@ export function Header() {
               <span
                 className={cn(
                   "inline-flex h-1.5 w-1.5 rounded-full mr-1.5",
-                  isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
+                  !isConnected ? "bg-gray-500" : isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
                 )}
               />
               {currentChainLabel}
@@ -393,9 +380,7 @@ export function Header() {
                 <span className="hidden sm:inline">
                   {isConnecting ? "Connecting..." : "Connect Wallet"}
                 </span>
-                <span className="sm:hidden">
-                  {isConnecting ? "..." : "Connect"}
-                </span>
+                <span className="sm:hidden">{isConnecting ? "..." : "Connect"}</span>
               </Button>
             )}
 
@@ -409,11 +394,7 @@ export function Header() {
                       isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
                     )}
                   />
-                  {isBaseSepolia
-                    ? "Base Sepolia"
-                    : chain?.name
-                    ? chain.name.replace("Base ", "")
-                    : "Net"}
+                  {isBaseSepolia ? "Base Sepolia" : "Wrong net"}
                 </div>
                 <Button
                   asChild
@@ -440,7 +421,7 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile hamburger sheet: How/FAQ/Legal/Debug + wallet/network controls */}
+        {/* Mobile hamburger sheet */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-[rgba(212,175,55,0.25)] bg-black/95 px-4 py-3 backdrop-blur-xl space-y-3">
             {/* Wallet / network controls */}
@@ -450,7 +431,12 @@ export function Header() {
                   <Network className="h-4 w-4 text-[#f5d566]" />
                   <span>{currentChainLabel}</span>
                 </div>
-                {isBaseSepolia ? (
+                {!isConnected ? (
+                  <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                    <span className="inline-flex h-1.5 w-1.5 rounded-full bg-gray-500" />
+                    Not connected
+                  </span>
+                ) : isBaseSepolia ? (
                   <span className="text-[10px] text-emerald-400 flex items-center gap-1">
                     <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
                     On Base Sepolia
@@ -464,27 +450,29 @@ export function Header() {
               </div>
 
               <div className="flex flex-col gap-1.5 mt-1">
-                {!isBaseSepolia && (
-                  <Button
-                    size="sm"
-                    className="w-full h-8 text-xs bg-[#f5d566] text-black hover:bg-[#e6c547]"
-                    onClick={handleSwitchToBaseSepolia}
-                  >
-                    Switch to Base Sepolia
-                  </Button>
-                )}
-                {!isBaseSepolia && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full h-8 text-xs border-white/15 text-white/80 hover:border-[rgba(245,213,102,0.7)]"
-                    onClick={handleAddBaseSepolia}
-                  >
-                    <Link2 className="h-3.5 w-3.5 mr-1" />
-                    Add Base Sepolia to Wallet
-                  </Button>
+                {/* Network actions only when connected & wrong net */}
+                {showWrongNetwork && (
+                  <>
+                    <Button
+                      size="sm"
+                      className="w-full h-8 text-xs bg-[#f5d566] text-black hover:bg-[#e6c547]"
+                      onClick={handleSwitchToBaseSepolia}
+                    >
+                      Switch to Base Sepolia
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full h-8 text-xs border-white/15 text-white/80 hover:border-[rgba(245,213,102,0.7)]"
+                      onClick={handleAddBaseSepolia}
+                    >
+                      <Link2 className="h-3.5 w-3.5 mr-1" />
+                      Add Base Sepolia to Wallet
+                    </Button>
+                  </>
                 )}
 
+                {/* Wallet actions */}
                 {!isConnected ? (
                   <Button
                     size="sm"
@@ -530,7 +518,7 @@ export function Header() {
                 className={cn(
                   "w-full justify-start text-sm h-9",
                   isActive("/how-it-works")
-                    ? "text-[#f5d566] bg-white/5"
+                    ? "text-[#f5d566] bg:white/5"
                     : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
@@ -546,7 +534,7 @@ export function Header() {
                 className={cn(
                   "w-full justify-start text-sm h-9",
                   isActive("/faq")
-                    ? "text-[#f5d566] bg-white/5"
+                    ? "text-[#f5d566] bg:white/5"
                     : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
@@ -562,7 +550,7 @@ export function Header() {
                 className={cn(
                   "w-full justify-start text-sm h-9",
                   isActive("/legal")
-                    ? "text-[#f5d566] bg-white/5"
+                    ? "text-[#f5d566] bg:white/5"
                     : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
@@ -594,7 +582,7 @@ export function Header() {
         )}
       </header>
 
-      {/* Mobile bottom nav + Flash sheet */}
+      {/* Mobile bottom nav + Flash sheet (unchanged from your original) */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(212,175,55,0.25)] bg-black/95 backdrop-blur-xl lg:hidden">
         <div className="flex items-stretch justify-around h-14 px-2">
           {/* Home */}
@@ -700,7 +688,7 @@ export function Header() {
           </button>
         </div>
 
-        {/* Flash bottom sheet – category wise */}
+        {/* Flash bottom sheet – category wise (same as your original) */}
         {flashOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             {/* backdrop */}
@@ -754,7 +742,7 @@ export function Header() {
                       key={cat.id}
                       className="rounded-xl border border-white/10 bg-black/90 p-3 space-y-2"
                     >
-                      {/* Category header (tap to toggle) */}
+                      {/* Category header */}
                       <button
                         type="button"
                         onClick={() =>
@@ -778,7 +766,7 @@ export function Header() {
                         </span>
                       </button>
 
-                      {/* Templates list – only when open */}
+                      {/* Templates list */}
                       {isOpen && (
                         <div className="mt-2 space-y-1">
                           {cat.templates.map((t) => {

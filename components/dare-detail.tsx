@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useWeb3 } from "@/lib/web3-provider";
 import { ALLOWED_TOKENS, ZERO_ADDRESS } from "@/lib/contract";
@@ -35,7 +35,7 @@ import {
   Ban,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { type Address } from "viem";
+import { type Address, type Hash } from "viem";
 import Link from "next/link";
 
 interface DareDetailProps {
@@ -83,6 +83,10 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
   const [proofURI, setProofURI] = useState("");
   const [copied, setCopied] = useState(false);
   const [judgeAddress, setJudgeAddress] = useState<string>("");
+  const [txHash, setTxHash] = useState<Hash | null>(null);
+  const [txStage, setTxStage] = useState<"idle" | "sign" | "pending" | "success" | "error">(
+    "idle"
+  );
 
   const stakeFormatted = formatStake(dare.stake);
   const tokenMeta = tokenMetaFromAddress(dare.token);
@@ -110,17 +114,22 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const executeAction = async (action: () => Promise<unknown>, label: string) => {
+  const executeAction = async (action: () => Promise<Hash>, label: string) => {
     setError("");
     setSuccess("");
     setIsLoading(true);
+    setTxHash(null);
+    setTxStage("sign");
     try {
-      await action();
-      setSuccess(`${label} successful! Refreshing...`);
+      const hash = await action(); // writeContract / approveToken se hash aayega
+      setTxHash(hash);
+      setTxStage("pending");
+      setSuccess(`${label} submitted. Waiting for confirmation...`);
       onRefresh();
     } catch (err: any) {
       const message = err?.message ?? "Transaction failed";
       setError(message);
+      setTxStage("error");
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -133,15 +142,18 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       if (!isETH) {
         const allowance = await getAllowance(dare.token as Address, address!);
         if (allowance < dare.stake) {
-          await approveToken(dare.token as Address, dare.stake);
+          const approveHash = await approveToken(dare.token as Address, dare.stake);
+          setTxHash(approveHash);
+          setTxStage("pending");
           await new Promise((r) => setTimeout(r, 3000));
         }
       }
-      await writeContract(
+      const hash = await writeContract(
         "acceptDare",
         [BigInt(dare.id)],
         isETH ? dare.stake : undefined
       );
+      return hash;
     }, "Dare accepted");
 
   // Cancel Dare (creator only, open)
@@ -319,6 +331,37 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               : dare.proofURI}
             <ExternalLink className="h-3 w-3 shrink-0" />
           </a>
+        </div>
+      )}
+
+      {/* Transaction status banner */}
+      {txStage !== "idle" && (
+        <div className="flex items-start gap-2 rounded-lg bg-black/80 border border-white/15 p-3 text-xs text-white/80">
+          <Loader2
+            className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
+              txStage === "sign" || txStage === "pending" ? "animate-spin" : ""
+            }`}
+          />
+          <div className="flex flex-col gap-0.5">
+            {txStage === "sign" && <span>Check your wallet and sign the transaction.</span>}
+            {txStage === "pending" && (
+              <span>Transaction sent. Waiting for blockchain confirmation…</span>
+            )}
+            {txStage === "success" && <span>Transaction confirmed on-chain.</span>}
+            {txStage === "error" && (
+              <span>Transaction failed. Please check the error message below.</span>
+            )}
+            {txHash && (
+              <a
+                href={`https://sepolia.basescan.org/tx/${txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] text-sky-400 hover:underline break-all"
+              >
+                View on BaseScan: {txHash}
+              </a>
+            )}
+          </div>
         </div>
       )}
 
