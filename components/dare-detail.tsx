@@ -75,18 +75,43 @@ function tokenMetaFromAddress(tokenAddress: string) {
 }
 
 export function DareDetail({ dare, onRefresh }: DareDetailProps) {
-  const { address, isConnected, writeContract, approveToken, getAllowance, readContract, connect } =
-    useWeb3();
+  const {
+    address,
+    isConnected,
+    writeContract,
+    approveToken,
+    getAllowance,
+    readContract,
+    connect,
+  } = useWeb3();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [proofURI, setProofURI] = useState("");
+  const [proofError, setProofError] = useState("");
   const [copied, setCopied] = useState(false);
   const [judgeAddress, setJudgeAddress] = useState<string>("");
   const [txHash, setTxHash] = useState<Hash | null>(null);
-  const [txStage, setTxStage] = useState<"idle" | "sign" | "pending" | "success" | "error">(
-    "idle"
-  );
+  const [txStage, setTxStage] = useState<
+    "idle" | "sign" | "pending" | "success" | "error"
+  >("idle");
+  const [acceptStep, setAcceptStep] = useState<0 | 1 | 2>(0);
+
+  // confirm modal
+  const [confirmAction, setConfirmAction] = useState<
+    | null
+    | {
+        type:
+          | "cancel"
+          | "expire"
+          | "dispute"
+          | "resolveConfirmTimeout"
+          | "resolveProofTimeout"
+          | "judgeCreator"
+          | "judgeAccepter";
+        label: string;
+      }
+  >(null);
 
   const stakeFormatted = formatStake(dare.stake);
   const tokenMeta = tokenMetaFromAddress(dare.token);
@@ -120,8 +145,9 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     setIsLoading(true);
     setTxHash(null);
     setTxStage("sign");
+    setAcceptStep(0);
     try {
-      const hash = await action(); // writeContract / approveToken se hash aayega
+      const hash = await action();
       setTxHash(hash);
       setTxStage("pending");
       setSuccess(`${label} submitted. Waiting for confirmation...`);
@@ -133,28 +159,42 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       console.error(err);
     } finally {
       setIsLoading(false);
+      setConfirmAction(null);
     }
   };
 
-  // Accept Dare
+  // Accept Dare with 2-step progress (approve -> accept)
   const handleAcceptDare = () =>
-    executeAction(async () => {
-      if (!isETH) {
-        const allowance = await getAllowance(dare.token as Address, address!);
-        if (allowance < dare.stake) {
-          const approveHash = await approveToken(dare.token as Address, dare.stake);
-          setTxHash(approveHash);
-          setTxStage("pending");
-          await new Promise((r) => setTimeout(r, 3000));
+    executeAction(
+      async () => {
+        // Step 1: Approve if ERC20 allowance insufficient
+        if (!isETH) {
+          const allowance = await getAllowance(dare.token as Address, address!);
+          if (allowance < dare.stake) {
+            setAcceptStep(1); // 1/2 Approving
+            setTxStage("sign");
+            const approveHash = await approveToken(
+              dare.token as Address,
+              dare.stake
+            );
+            setTxHash(approveHash);
+            setTxStage("pending");
+            await new Promise((r) => setTimeout(r, 3000));
+          }
         }
-      }
-      const hash = await writeContract(
-        "acceptDare",
-        [BigInt(dare.id)],
-        isETH ? dare.stake : undefined
-      );
-      return hash;
-    }, "Dare accepted");
+
+        // Step 2: Accept dare
+        setAcceptStep(2); // 2/2 Accepting
+        setTxStage("sign");
+        const hash = await writeContract(
+          "acceptDare",
+          [BigInt(dare.id)],
+          isETH ? dare.stake : undefined
+        );
+        return hash;
+      },
+      "Dare accepted"
+    );
 
   // Cancel Dare (creator only, open)
   const handleCancel = () =>
@@ -211,6 +251,78 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       () => writeContract("judgeResolve", [BigInt(dare.id), creatorWins]),
       "Judge resolved"
     );
+
+  // Proof URL validation
+  const validateProof = (value: string) => {
+    const v = value.trim();
+    if (!v) {
+      setProofError("");
+      return;
+    }
+    if (v.length < 8) {
+      setProofError("Proof link looks too short.");
+      return;
+    }
+    if (!v.startsWith("http://") && !v.startsWith("https://")) {
+      setProofError("Proof URL must start with http:// or https://");
+      return;
+    }
+    setProofError("");
+  };
+
+  const primaryAcceptLabel = `Accept Dare (${stakeFormatted} ${tokenMeta.symbol})`;
+
+  // choose primary CTA for mobile bar
+  let mobilePrimaryCTA:
+    | null
+    | {
+        label: string;
+        onClick: () => void;
+        disabled?: boolean;
+        tone?: "primary" | "danger" | "neutral";
+      } = null;
+
+  if (dare.status === DareStatus.Open) {
+    if (isConnected && !isCreator) {
+      mobilePrimaryCTA = {
+        label: primaryAcceptLabel,
+        onClick: handleAcceptDare,
+        disabled: isLoading,
+        tone: "primary",
+      };
+    } else if (!isConnected) {
+      mobilePrimaryCTA = {
+        label: "Connect Wallet to Accept",
+        onClick: connect,
+        tone: "primary",
+      };
+    }
+  } else if (
+    dare.status === DareStatus.Running &&
+    isConnected &&
+    isAccepter &&
+    isDeadlinePassed(dare.deadline) &&
+    isInProofWindow(dare.deadline)
+  ) {
+    mobilePrimaryCTA = {
+      label: "Submit Proof",
+      onClick: handleSubmitProof,
+      disabled: isLoading || !proofURI.trim() || !!proofError,
+      tone: "primary",
+    };
+  } else if (
+    dare.status === DareStatus.ProofSubmitted &&
+    isConnected &&
+    isCreator &&
+    isInConfirmWindow(dare.proofTime)
+  ) {
+    mobilePrimaryCTA = {
+      label: "Confirm Success",
+      onClick: handleConfirmSuccess,
+      disabled: isLoading,
+      tone: "primary",
+    };
+  }
 
   return (
     <div className="flex flex-col gap-6 text-white">
@@ -300,11 +412,13 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         <div className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
           <span>
-            Deadline: {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
+            Deadline:{" "}
+            {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
             {new Date(Number(dare.deadline) * 1000).toLocaleTimeString()}
           </span>
         </div>
-        {(dare.status === DareStatus.Open || dare.status === DareStatus.Running) && (
+        {(dare.status === DareStatus.Open ||
+          dare.status === DareStatus.Running) && (
           <div className="flex items-center gap-1">
             <span className="text-[#f5d566] font-medium">
               {timeRemaining(dare.deadline)} remaining
@@ -318,7 +432,9 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         <div className="rounded-lg border border-white/10 bg-[rgba(10,10,10,0.95)] p-3">
           <div className="flex items-center gap-2 mb-2">
             <FileCheck className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm font-medium text-white">Proof Submitted</span>
+            <span className="text-sm font-medium text-white">
+              Proof Submitted
+            </span>
           </div>
           <a
             href={dare.proofURI}
@@ -343,13 +459,31 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             }`}
           />
           <div className="flex flex-col gap-0.5">
-            {txStage === "sign" && <span>Check your wallet and sign the transaction.</span>}
-            {txStage === "pending" && (
-              <span>Transaction sent. Waiting for blockchain confirmation…</span>
+            {txStage === "sign" && (
+              <span>
+                {acceptStep === 1
+                  ? "Step 1/2: Approving token spend. Check your wallet and sign."
+                  : acceptStep === 2
+                  ? "Step 2/2: Accepting dare. Check your wallet and sign."
+                  : "Check your wallet and sign the transaction."}
+              </span>
             )}
-            {txStage === "success" && <span>Transaction confirmed on-chain.</span>}
+            {txStage === "pending" && (
+              <span>
+                {acceptStep === 1
+                  ? "Step 1/2: Approval sent. Waiting for confirmation…"
+                  : acceptStep === 2
+                  ? "Step 2/2: Accept sent. Waiting for confirmation…"
+                  : "Transaction sent. Waiting for blockchain confirmation…"}
+              </span>
+            )}
+            {txStage === "success" && (
+              <span>Transaction confirmed on-chain.</span>
+            )}
             {txStage === "error" && (
-              <span>Transaction failed. Please check the error message below.</span>
+              <span>
+                Transaction failed. Please check the error message below.
+              </span>
             )}
             {txHash && (
               <a
@@ -382,14 +516,19 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 ) : (
                   <Swords className="mr-2 h-4 w-4" />
                 )}
-                Accept Dare ({stakeFormatted} {tokenMeta.symbol})
+                {primaryAcceptLabel}
               </Button>
             )}
 
             {/* Cancel (creator only, before deadline) */}
             {isConnected && isCreator && !isDeadlinePassed(dare.deadline) && (
               <Button
-                onClick={handleCancel}
+                onClick={() =>
+                  setConfirmAction({
+                    type: "cancel",
+                    label: "Cancel Dare",
+                  })
+                }
                 disabled={isLoading}
                 variant="outline"
                 className="w-full h-12 border-red-500 text-red-400 hover:bg-red-500/10"
@@ -406,7 +545,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {/* Expire (anyone, after deadline) */}
             {isDeadlinePassed(dare.deadline) && (
               <Button
-                onClick={handleExpire}
+                onClick={() =>
+                  setConfirmAction({
+                    type: "expire",
+                    label: "Expire & Refund Creator",
+                  })
+                }
                 disabled={isLoading}
                 variant="outline"
                 className="w-full h-12 border-white/15 text-white/80 hover:bg-black"
@@ -442,17 +586,27 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 <div className="flex flex-col gap-3 rounded-lg border border-[rgba(212,175,55,0.45)] bg-[rgba(5,5,5,0.96)] p-4">
                   <div className="flex items-center gap-2">
                     <FileCheck className="h-4 w-4 text-[#f5d566]" />
-                    <span className="text-sm font-medium text-white">Submit Your Proof</span>
+                    <span className="text-sm font-medium text-white">
+                      Submit Your Proof
+                    </span>
                   </div>
                   <Input
                     value={proofURI}
-                    onChange={(e) => setProofURI(e.target.value)}
-                    placeholder="Proof URL (e.g. screenshot, video link)"
+                    onChange={(e) => {
+                      setProofURI(e.target.value);
+                      validateProof(e.target.value);
+                    }}
+                    placeholder="Proof URL (e.g. tweet link, image URL, IPFS, Google Drive)"
                     className="bg-black/80 border-white/10 text-white text-base"
                   />
+                  {proofError && (
+                    <p className="text-[11px] text-red-400">{proofError}</p>
+                  )}
                   <Button
                     onClick={handleSubmitProof}
-                    disabled={isLoading || !proofURI.trim()}
+                    disabled={
+                      isLoading || !proofURI.trim() || proofError.length > 0
+                    }
                     className="w-full h-12 bg-[#f5d566] text-black hover:bg-[#e6c547]"
                   >
                     {isLoading ? (
@@ -479,7 +633,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               !isInProofWindow(dare.deadline) &&
               !dare.proofSubmitted && (
                 <Button
-                  onClick={handleResolveProofTimeout}
+                  onClick={() =>
+                    setConfirmAction({
+                      type: "resolveProofTimeout",
+                      label: "Resolve (No Proof - Creator Wins)",
+                    })
+                  }
                   disabled={isLoading}
                   className="w-full h-12 bg-amber-500 text-black hover:bg-amber-400"
                 >
@@ -517,7 +676,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     Confirm
                   </Button>
                   <Button
-                    onClick={handleDispute}
+                    onClick={() =>
+                      setConfirmAction({
+                        type: "dispute",
+                        label: "Open Dispute",
+                      })
+                    }
                     disabled={isLoading}
                     variant="outline"
                     className="flex-1 h-12 border-red-500 text-red-400 hover:bg-red-500/10"
@@ -536,7 +700,13 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {/* Resolve after confirm timeout (anyone) */}
             {!isInConfirmWindow(dare.proofTime) && (
               <Button
-                onClick={handleResolveConfirmTimeout}
+                onClick={() =>
+                  setConfirmAction({
+                    type: "resolveConfirmTimeout",
+                    label:
+                      "Resolve (Creator Inactive - Accepter Wins)",
+                  })
+                }
                 disabled={isLoading}
                 className="w-full h-12 bg-sky-500 text-black hover:bg-sky-400"
               >
@@ -558,14 +728,21 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               <div className="flex flex-col gap-3 rounded-lg border border-[rgba(212,175,55,0.45)] bg-[rgba(5,5,5,0.96)] p-4">
                 <div className="flex items-center gap-2">
                   <Gavel className="h-4 w-4 text-[#f5d566]" />
-                  <span className="text-sm font-medium text-white">Judge Resolution</span>
+                  <span className="text-sm font-medium text-white">
+                    Judge Resolution
+                  </span>
                 </div>
                 <p className="text-xs text-white/70">
                   As the judge, decide who wins this disputed dare.
                 </p>
                 <div className="flex gap-3">
                   <Button
-                    onClick={() => handleJudgeResolve(true)}
+                    onClick={() =>
+                      setConfirmAction({
+                        type: "judgeCreator",
+                        label: "Creator Wins",
+                      })
+                    }
                     disabled={isLoading}
                     variant="outline"
                     className="flex-1 h-12 border-[rgba(212,175,55,0.7)] text-[#f5d566] hover:bg-[rgba(245,213,102,0.1)]"
@@ -573,7 +750,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     Creator Wins
                   </Button>
                   <Button
-                    onClick={() => handleJudgeResolve(false)}
+                    onClick={() =>
+                      setConfirmAction({
+                        type: "judgeAccepter",
+                        label: "Accepter Wins",
+                      })
+                    }
                     disabled={isLoading}
                     variant="outline"
                     className="flex-1 h-12 border-sky-500 text-sky-400 hover:bg-sky-500/10"
@@ -587,7 +769,10 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {!isJudge && (
               <div className="rounded-lg bg-red-500/10 border border-red-500/40 p-4 text-sm text-red-400 flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4" />
-                <span>This dare is under dispute. A judge will resolve it within 72 hours.</span>
+                <span>
+                  This dare is under dispute. A judge will resolve it within 72
+                  hours.
+                </span>
               </div>
             )}
           </>
@@ -597,7 +782,9 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {dare.status === DareStatus.Resolved && (
           <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-4 text-center">
             <Check className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-emerald-400">Dare Resolved</p>
+            <p className="text-sm font-medium text-emerald-400">
+              Dare Resolved
+            </p>
           </div>
         )}
 
@@ -605,7 +792,9 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {dare.status === DareStatus.Cancelled && (
           <div className="rounded-lg bg-black/80 border border-white/10 p-4 text-center">
             <Ban className="h-6 w-6 text-white/60 mx-auto mb-2" />
-            <p className="text-sm font-medium text-white/80">Dare Cancelled</p>
+            <p className="text-sm font-medium text-white/80">
+              Dare Cancelled
+            </p>
           </div>
         )}
       </div>
@@ -621,6 +810,93 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         <div className="flex items-start gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-3 text-sm text-emerald-400">
           <Check className="h-4 w-4 mt-0.5 shrink-0" />
           <span>{success}</span>
+        </div>
+      )}
+
+      {/* Confirm modal */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl bg-[rgba(5,5,5,0.98)] border border-white/10 p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4 text-[#f5d566]" />
+              <span className="text-sm font-semibold text-white">
+                Confirm action
+              </span>
+            </div>
+            <p className="text-xs text-white/70">
+              {confirmAction.type === "cancel" &&
+                "Are you sure you want to cancel this open dare? Funds will be refunded to the creator."}
+              {confirmAction.type === "expire" &&
+                "Expire this dare and refund the creator? Anyone can trigger this after the deadline."}
+              {confirmAction.type === "dispute" &&
+                "Open a dispute on this dare? The judge will review the proof and decide a winner."}
+              {confirmAction.type === "resolveConfirmTimeout" &&
+                "Resolve in favor of the accepter because the creator did not respond in time?"}
+              {confirmAction.type === "resolveProofTimeout" &&
+                "Resolve in favor of the creator because no proof was submitted in time?"}
+              {confirmAction.type === "judgeCreator" &&
+                "Confirm that the creator wins this disputed dare?"}
+              {confirmAction.type === "judgeAccepter" &&
+                "Confirm that the accepter wins this disputed dare?"}
+            </p>
+            <div className="flex gap-2 mt-1">
+              <Button
+                variant="outline"
+                className="flex-1 h-9 border-white/20 text-white/80 hover:bg-black/60"
+                onClick={() => setConfirmAction(null)}
+                disabled={isLoading}
+              >
+                Go back
+              </Button>
+              <Button
+                className="flex-1 h-9 bg-red-500 text-black hover:bg-red-400 text-sm font-semibold"
+                disabled={isLoading}
+                onClick={() => {
+                  if (confirmAction.type === "cancel") return handleCancel();
+                  if (confirmAction.type === "expire") return handleExpire();
+                  if (confirmAction.type === "dispute") return handleDispute();
+                  if (confirmAction.type === "resolveConfirmTimeout")
+                    return handleResolveConfirmTimeout();
+                  if (confirmAction.type === "resolveProofTimeout")
+                    return handleResolveProofTimeout();
+                  if (confirmAction.type === "judgeCreator")
+                    return handleJudgeResolve(true);
+                  if (confirmAction.type === "judgeAccepter")
+                    return handleJudgeResolve(false);
+                }}
+              >
+                {isLoading ? (
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                ) : null}
+                Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile sticky CTA */}
+      {mobilePrimaryCTA && (
+        <div className="fixed inset-x-0 bottom-0 z-30 md:hidden border-t border-white/10 bg-[rgba(5,5,5,0.98)] px-3 py-2 flex items-center justify-between gap-2">
+          <span className="text-[11px] text-white/60">
+            Primary action for this dare.
+          </span>
+          <Button
+            size="sm"
+            disabled={mobilePrimaryCTA.disabled}
+            onClick={mobilePrimaryCTA.onClick}
+            className={cn(
+              "h-9 px-3 text-[11px] font-semibold",
+              mobilePrimaryCTA.tone === "primary" &&
+                "bg-[#f5d566] text-black hover:bg-[#e6c547]",
+              mobilePrimaryCTA.tone === "danger" &&
+                "bg-red-500 text-black hover:bg-red-400",
+              (!mobilePrimaryCTA.tone || mobilePrimaryCTA.tone === "neutral") &&
+                "bg-white/10 text-white hover:bg-white/15"
+            )}
+          >
+            {mobilePrimaryCTA.label}
+          </Button>
         </div>
       )}
     </div>
