@@ -63,6 +63,18 @@ export function DareCard({ dare }: DareCardProps) {
   const stakeFormatted = formatStake(dare.stake);
   const tokenMeta = tokenMetaFromAddress(dare.token);
 
+  // card border / hover by status
+  const statusFrameClasses = cn(
+    "group rounded-2xl p-5 md:p-6 space-y-3",
+    "border-[1.5px] bg-[rgba(5,5,5,0.96)] shadow-[0_18px_40px_rgba(0,0,0,0.85)]",
+    "transition-all duration-300 hover:-translate-y-[3px] hover:border-[2px] hover:shadow-[0_26px_80px_rgba(0,0,0,0.98)]",
+    dare.status === 0 && "border-[rgba(245,213,102,0.55)] hover:border-[rgba(245,213,102,0.95)]",
+    dare.status === 1 && "border-[rgba(251,191,36,0.55)] hover:border-[rgba(251,191,36,0.95)]",
+    dare.status === 2 && "border-[rgba(168,85,247,0.55)] hover:border-[rgba(192,132,252,0.95)]",
+    dare.status === 3 && "border-[rgba(248,113,113,0.55)] hover:border-[rgba(248,113,113,0.95)]",
+    dare.status === 4 && "border-[rgba(52,211,153,0.55)] hover:border-[rgba(52,211,153,0.95)]"
+  );
+
   function handleShare(network: "x" | "whatsapp" | "farcaster") {
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/dare/${dare.id}`;
@@ -89,9 +101,7 @@ export function DareCard({ dare }: DareCardProps) {
   }
 
   return (
-    <div
-      className="group rounded-2xl border border-[rgba(212,175,55,0.36)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_40px_rgba(0,0,0,0.85)] transition-all duration-300 space-y-3 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]"
-    >
+    <div className={statusFrameClasses}>
       <Link href={`/dare/${dare.id}`} className="block space-y-3">
         {/* Status + Time row */}
         <div className="flex items-center justify-between">
@@ -117,28 +127,33 @@ export function DareCard({ dare }: DareCardProps) {
         </p>
 
         {/* Stake */}
-        <div className="flex items-center gap-2 mb-1 rounded-xl px-3 py-2 bg-[rgba(10,10,10,0.9)] border border-white/10">
-          <div className="relative h-6 w-6 rounded-full overflow-hidden bg-black flex-shrink-0">
-            <span className="absolute inset-0 rounded-full bg-[rgba(245,213,102,0.18)] blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
-            <Image
-              src={tokenMeta.icon}
-              alt={tokenMeta.symbol}
-              width={24}
-              height={24}
-              className="relative h-full w-full object-contain"
-            />
-          </div>
-          <span className="font-mono text-sm font-semibold text-[#f5f5f5]">
-            {stakeFormatted} {tokenMeta.symbol}
-          </span>
-          {isOpen && (
-            <span className="ml-auto text-[11px] text-white/60">
-              Pool:{" "}
-              <span className="font-mono text-[#f5d566]">
-                {formatStake(dare.stake * 2n)} {tokenMeta.symbol}
-              </span>
+        <div className="flex flex-col gap-1 mb-1 rounded-xl px-3 py-2 bg-[rgba(10,10,10,0.9)] border border-white/10">
+          <div className="flex items-center gap-2">
+            <div className="relative h-6 w-6 rounded-full overflow-hidden bg-black flex-shrink-0">
+              <span className="absolute inset-0 rounded-full bg-[rgba(245,213,102,0.18)] blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Image
+                src={tokenMeta.icon}
+                alt={tokenMeta.symbol}
+                width={24}
+                height={24}
+                className="relative h-full w-full object-contain"
+              />
+            </div>
+            <span className="font-mono text-sm font-semibold text-[#f5f5f5]">
+              {stakeFormatted} {tokenMeta.symbol}
             </span>
-          )}
+            {isOpen && (
+              <span className="ml-auto text-[11px] text-white/60">
+                Pool:{" "}
+                <span className="font-mono text-[#f5d566]">
+                  {formatStake(dare.stake * 2n)} {tokenMeta.symbol}
+                </span>
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-white/55">
+            Winner takes both stakes minus protocol fee.
+          </span>
         </div>
 
         {/* Creator / Accepter */}

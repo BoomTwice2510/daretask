@@ -93,13 +93,13 @@ export function DareFeed() {
       ? dares
       : dares.filter((d) => d.status === parseInt(filter));
 
-  const filterOptions: { value: FilterStatus; label: string }[] = [
+  const filterOptions: { value: FilterStatus; label: string; accent?: string }[] = [
     { value: "all", label: "All" },
-    { value: "0", label: "Open" },
-    { value: "1", label: "Running" },
-    { value: "2", label: "Proof" },
-    { value: "3", label: "Disputed" },
-    { value: "4", label: "Resolved" },
+    { value: "0", label: "Open", accent: "bg-[#f5d566]" },
+    { value: "1", label: "Running", accent: "bg-amber-400" },
+    { value: "2", label: "Proof", accent: "bg-violet-400" },
+    { value: "3", label: "Disputed", accent: "bg-red-400" },
+    { value: "4", label: "Resolved", accent: "bg-emerald-400" },
   ];
 
   return (
@@ -125,7 +125,16 @@ export function DareFeed() {
                     : "bg-[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
                 }`}
               >
-                <span className="block">{opt.label}</span>
+                <span className="flex items-center gap-1">
+                  {opt.accent && (
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        isActive ? "bg-black/70" : opt.accent
+                      }`}
+                    />
+                  )}
+                  <span>{opt.label}</span>
+                </span>
                 {!isActive && (
                   <span className="text-[11px] text-white/45">
                     {countForFilter}

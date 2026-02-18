@@ -96,28 +96,50 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
   return (
     <div className="flex flex-col gap-5">
       {/* Badge + XP Progress */}
-      <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]">
+      <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[radial-gradient(circle_at_top,_rgba(245,213,102,0.16),_rgba(5,5,5,0.98))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]">
         <div className="flex items-center justify-between mb-3">
-          <BadgeDisplay badge={badge} size="lg" />
-          <span className="font-mono text-lg font-bold text-[#f5d566]">
-            {xp} XP
-          </span>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="absolute -inset-2 rounded-2xl bg-[conic-gradient(from_0deg,_rgba(245,213,102,0.25),_transparent_40%,_rgba(56,189,248,0.25),_transparent_80%)] opacity-60 blur-md" />
+              <div className="relative rounded-2xl bg-black/60 p-1.5 border border-[rgba(212,175,55,0.6)]">
+                <BadgeDisplay badge={badge} size="lg" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs uppercase tracking-[0.16em] text-white/55">
+                Badge
+              </span>
+              <span className="text-sm font-semibold text-[#f5d566]">
+                {badgeLabel}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end">
+            <span className="text-xs text-white/55">Total XP</span>
+            <span className="font-mono text-lg font-bold text-[#f5d566]">
+              {xp}
+            </span>
+          </div>
         </div>
+
         {badge < 7 && nextBadge && (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between text-xs text-white/60">
+          <div className="flex flex-col gap-1.5 mt-2">
+            <div className="flex justify-between text-[11px] text-white/60">
               <span>{badgeLabel}</span>
-              <span>{nextBadge}</span>
+              <span>Next: {nextBadge}</span>
             </div>
             <Progress
               value={progressPercent}
-              className="h-2 bg-black/70 [&>div]:bg-[#f5d566]"
+              className="h-2 bg-black/70 [&>div]:bg-gradient-to-r [&>div]:from-[#f5d566] [&>div]:via-amber-400 [&>div]:to-emerald-400"
             />
+            <span className="text-[11px] text-white/45">
+              {progressPercent.toFixed(0)}% of the way to {nextBadge}.
+            </span>
           </div>
         )}
         {badge === 7 && (
           <p className="text-xs text-sky-400 text-center font-medium mt-1">
-            Maximum rank achieved
+            Max rank achieved. You’re at the top of the ladder.
           </p>
         )}
       </div>

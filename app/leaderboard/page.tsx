@@ -252,10 +252,10 @@ export default function LeaderboardPage() {
                       : "bg-black text-white/60"
                   }`}
                 >
-                  {index + 1}
                   {index === 0 && (
                     <span className="absolute inset-0 rounded-full border border-[#f5d566] animate-pulse" />
                   )}
+                  {index + 1}
                 </div>
 
                 {/* Address + Badge */}
