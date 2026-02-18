@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useWeb3 } from "@/lib/web3-provider";
 import { ALLOWED_TOKENS, ZERO_ADDRESS } from "@/lib/contract";
@@ -39,7 +39,7 @@ import { type Address, type Hash } from "viem";
 import Link from "next/link";
 
 interface DareDetailProps {
-  dare: DareData;
+  dare: DareData | null; // allow null for skeleton state
   onRefresh: () => void;
 }
 
@@ -72,6 +72,28 @@ function tokenMetaFromAddress(tokenAddress: string) {
     symbol: display,
     icon: `/images/${display.toLowerCase()}.png`,
   };
+}
+
+// compact duration text: 2d 5h, 3h 12m, 45m
+function formatDurationShort(totalSeconds: number) {
+  if (totalSeconds <= 0) return "0m";
+  const d = Math.floor(totalSeconds / 86400);
+  const h = Math.floor((totalSeconds % 86400) / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function SkeletonBlock({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "animate-pulse rounded-md bg-white/5",
+        className
+      )}
+    />
+  );
 }
 
 export function DareDetail({ dare, onRefresh }: DareDetailProps) {
@@ -113,16 +135,17 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       }
   >(null);
 
-  const stakeFormatted = formatStake(dare.stake);
-  const tokenMeta = tokenMetaFromAddress(dare.token);
-  const isETH =
-    dare.token === ZERO_ADDRESS ||
-    dare.token === "0x0000000000000000000000000000000000000000";
-  const isCreator = address?.toLowerCase() === dare.creator.toLowerCase();
-  const isAccepter = address?.toLowerCase() === dare.accepter.toLowerCase();
-  const noAccepter =
-    dare.accepter === ZERO_ADDRESS ||
-    dare.accepter === "0x0000000000000000000000000000000000000000";
+  // close dialog via Esc
+  useEffect(() => {
+    if (!confirmAction) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setConfirmAction(null);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [confirmAction]);
 
   // Fetch judge address
   useEffect(() => {
@@ -163,13 +186,72 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     }
   };
 
+  // skeleton state
+  if (!dare) {
+    return (
+      <div className="flex flex-col gap-6 text-white">
+        <SkeletonBlock className="h-6 w-40" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+          <SkeletonBlock className="h-9 w-48 rounded-full" />
+        </div>
+        <SkeletonBlock className="h-24 w-full rounded-xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <SkeletonBlock className="h-14 w-full rounded-xl" />
+          <SkeletonBlock className="h-14 w-full rounded-xl" />
+        </div>
+        <SkeletonBlock className="h-5 w-64" />
+      </div>
+    );
+  }
+
+  const stakeFormatted = formatStake(dare.stake);
+  const tokenMeta = tokenMetaFromAddress(dare.token);
+  const isETH =
+    dare.token === ZERO_ADDRESS ||
+    dare.token === "0x0000000000000000000000000000000000000000";
+  const isCreator = address?.toLowerCase() === dare.creator.toLowerCase();
+  const isAccepter = address?.toLowerCase() === dare.accepter.toLowerCase();
+  const noAccepter =
+    dare.accepter === ZERO_ADDRESS ||
+    dare.accepter === "0x0000000000000000000000000000000000000000";
+
+  // time windows (seconds)
+  const now = useMemo(() => Math.floor(Date.now() / 1000), []);
+  const proofWindowText = useMemo(() => {
+    if (!isDeadlinePassed(dare.deadline) || !isInProofWindow(dare.deadline)) {
+      return null;
+    }
+    const proofEnd = Number(dare.deadline) + 24 * 60 * 60; // 24h after deadline
+    const remaining = proofEnd - now;
+    return `Proof window ends in ${formatDurationShort(remaining)}`;
+  }, [dare.deadline, now]);
+
+  const confirmWindowText = useMemo(() => {
+    if (!dare.proofTime || !isInConfirmWindow(dare.proofTime)) return null;
+    const confirmEnd = Number(dare.proofTime) + 24 * 60 * 60;
+    const remaining = confirmEnd - now;
+    return `Creator has ${formatDurationShort(
+      remaining
+    )} to confirm or dispute`;
+  }, [dare.proofTime, now]);
+
+  const judgeWindowText = useMemo(() => {
+    if (!dare.disputeTime || !isInJudgeWindow(dare.disputeTime)) return null;
+    const judgeEnd = Number(dare.disputeTime) + 72 * 60 * 60;
+    const remaining = judgeEnd - now;
+    return `Judge has ${formatDurationShort(remaining)} left to decide`;
+  }, [dare.disputeTime, now]);
+
   // Accept Dare with 2-step progress (approve -> accept)
   const handleAcceptDare = () =>
     executeAction(
       async () => {
+        if (!address) throw new Error("Wallet not connected");
+
         // Step 1: Approve if ERC20 allowance insufficient
         if (!isETH) {
-          const allowance = await getAllowance(dare.token as Address, address!);
+          const allowance = await getAllowance(dare.token as Address, address);
           if (allowance < dare.stake) {
             setAcceptStep(1); // 1/2 Approving
             setTxStage("sign");
@@ -270,6 +352,17 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     setProofError("");
   };
 
+  const handleProofKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!isLoading && proofURI.trim() && !proofError) {
+        handleSubmitProof();
+      }
+    }
+  };
+
   const primaryAcceptLabel = `Accept Dare (${stakeFormatted} ${tokenMeta.symbol})`;
 
   // choose primary CTA for mobile bar
@@ -332,8 +425,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       {/* Status badge + stake */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span
+          key={dare.status}
           className={cn(
             "inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border border-white/10 bg-black/70",
+            "transition-all duration-300 ease-out",
+            dare.status === DareStatus.Resolved &&
+              "shadow-[0_0_25px_rgba(16,185,129,0.65)] scale-[1.03]",
             getStatusColor(dare.status)
           )}
         >
@@ -364,8 +461,8 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       {/* Participants */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="flex items-center gap-3 rounded-lg border border-[rgba(212,175,55,0.35)] p-3 bg-[rgba(5,5,5,0.96)]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(245,213,102,0.18)]">
-            <User className="h-4 w-4 text-[#f5d566]" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(245,213,102,0.18)]">
+            <User className="h-5 w-5 text-[#f5d566]" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="text-xs text-white/55">Creator</span>
@@ -378,21 +475,21 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
           </div>
           <button
             onClick={() => copyAddress(dare.creator)}
-            className="ml-auto shrink-0 p-1"
+            className="ml-auto shrink-0 h-11 w-11 flex items-center justify-center rounded-full hover:bg-white/5"
             aria-label="Copy address"
           >
             {copied ? (
-              <Check className="h-3.5 w-3.5 text-emerald-400" />
+              <Check className="h-4 w-4 text-emerald-400" />
             ) : (
-              <Copy className="h-3.5 w-3.5 text-white/50" />
+              <Copy className="h-4 w-4 text-white/50" />
             )}
           </button>
         </div>
 
         {!noAccepter && (
           <div className="flex items-center gap-3 rounded-lg border border-white/10 p-3 bg-[rgba(10,10,10,0.95)]">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20">
-              <Swords className="h-4 w-4 text-sky-400" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500/20">
+              <Swords className="h-5 w-5 text-sky-400" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-xs text-white/55">Accepter</span>
@@ -408,21 +505,44 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       </div>
 
       {/* Time info */}
-      <div className="flex flex-wrap gap-3 text-xs text-white/60">
-        <div className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          <span>
-            Deadline:{" "}
-            {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
-            {new Date(Number(dare.deadline) * 1000).toLocaleTimeString()}
-          </span>
-        </div>
-        {(dare.status === DareStatus.Open ||
-          dare.status === DareStatus.Running) && (
+      <div className="flex flex-col gap-2 text-xs text-white/60">
+        <div className="flex flex-wrap gap-3 items-center">
           <div className="flex items-center gap-1">
-            <span className="text-[#f5d566] font-medium">
-              {timeRemaining(dare.deadline)} remaining
+            <Clock className="h-3 w-3" />
+            <span>
+              Deadline:{" "}
+              {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
+              {new Date(Number(dare.deadline) * 1000).toLocaleTimeString()}
             </span>
+          </div>
+          {(dare.status === DareStatus.Open ||
+            dare.status === DareStatus.Running) && (
+            <div className="flex items-center gap-1">
+              <span className="text-[#f5d566] font-medium">
+                {timeRemaining(dare.deadline)} remaining
+              </span>
+            </div>
+          )}
+        </div>
+
+        {proofWindowText && (
+          <div className="flex items-center gap-1 text-[11px] text-white/70">
+            <Clock className="h-3 w-3 text-[#f5d566]" />
+            <span>{proofWindowText}</span>
+          </div>
+        )}
+
+        {confirmWindowText && (
+          <div className="flex items-center gap-1 text-[11px] text-white/70">
+            <Clock className="h-3 w-3 text-emerald-400" />
+            <span>{confirmWindowText}</span>
+          </div>
+        )}
+
+        {judgeWindowText && (
+          <div className="flex items-center gap-1 text-[11px] text-white/70">
+            <Gavel className="h-3 w-3 text-sky-400" />
+            <span>{judgeWindowText}</span>
           </div>
         )}
       </div>
@@ -509,7 +629,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               <Button
                 onClick={handleAcceptDare}
                 disabled={isLoading}
-                className="w-full h-12 bg-[#f5d566] text-black hover:bg-[#e6c547] text-base font-semibold shadow-[0_0_25px_rgba(245,213,102,0.6)]"
+                className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547] text-base font-semibold shadow-[0_0_25px_rgba(245,213,102,0.6)]"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -531,7 +651,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 }
                 disabled={isLoading}
                 variant="outline"
-                className="w-full h-12 border-red-500 text-red-400 hover:bg-red-500/10"
+                className="w-full h-12 min-h-[48px] border-red-500 text-red-400 hover:bg-red-500/10"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -553,7 +673,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 }
                 disabled={isLoading}
                 variant="outline"
-                className="w-full h-12 border-white/15 text-white/80 hover:bg-black"
+                className="w-full h-12 min-h-[48px] border-white/15 text-white/80 hover:bg-black"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -567,7 +687,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {!isConnected && (
               <Button
                 onClick={connect}
-                className="w-full h-12 bg-[#f5d566] text-black hover:bg-[#e6c547]"
+                className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547]"
               >
                 Connect Wallet to Accept
               </Button>
@@ -596,6 +716,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                       setProofURI(e.target.value);
                       validateProof(e.target.value);
                     }}
+                    onKeyDown={handleProofKeyDown}
                     placeholder="Proof URL (e.g. tweet link, image URL, IPFS, Google Drive)"
                     className="bg-black/80 border-white/10 text-white text-base"
                   />
@@ -607,7 +728,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     disabled={
                       isLoading || !proofURI.trim() || proofError.length > 0
                     }
-                    className="w-full h-12 bg-[#f5d566] text-black hover:bg-[#e6c547]"
+                    className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547]"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -640,7 +761,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     })
                   }
                   disabled={isLoading}
-                  className="w-full h-12 bg-amber-500 text-black hover:bg-amber-400"
+                  className="w-full h-12 min-h-[48px] bg-amber-500 text-black hover:bg-amber-400"
                 >
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -666,7 +787,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                   <Button
                     onClick={handleConfirmSuccess}
                     disabled={isLoading}
-                    className="flex-1 h-12 bg-emerald-500 text-black hover:bg-emerald-400"
+                    className="flex-1 h-12 min-h-[48px] bg-emerald-500 text-black hover:bg-emerald-400"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -684,7 +805,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     }
                     disabled={isLoading}
                     variant="outline"
-                    className="flex-1 h-12 border-red-500 text-red-400 hover:bg-red-500/10"
+                    className="flex-1 h-12 min-h-[48px] border-red-500 text-red-400 hover:bg-red-500/10"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -708,7 +829,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                   })
                 }
                 disabled={isLoading}
-                className="w-full h-12 bg-sky-500 text-black hover:bg-sky-400"
+                className="w-full h-12 min-h-[48px] bg-sky-500 text-black hover:bg-sky-400"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -745,7 +866,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     }
                     disabled={isLoading}
                     variant="outline"
-                    className="flex-1 h-12 border-[rgba(212,175,55,0.7)] text-[#f5d566] hover:bg-[rgba(245,213,102,0.1)]"
+                    className="flex-1 h-12 min-h-[48px] border-[rgba(212,175,55,0.7)] text-[#f5d566] hover:bg-[rgba(245,213,102,0.1)]"
                   >
                     Creator Wins
                   </Button>
@@ -758,7 +879,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     }
                     disabled={isLoading}
                     variant="outline"
-                    className="flex-1 h-12 border-sky-500 text-sky-400 hover:bg-sky-500/10"
+                    className="flex-1 h-12 min-h-[48px] border-sky-500 text-sky-400 hover:bg-sky-500/10"
                   >
                     Accepter Wins
                   </Button>
@@ -780,7 +901,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
 
         {/* --- RESOLVED --- */}
         {dare.status === DareStatus.Resolved && (
-          <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-4 text-center">
+          <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-4 text-center animate-[flash-green_0.6s_ease-out]">
             <Check className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
             <p className="text-sm font-medium text-emerald-400">
               Dare Resolved
@@ -842,14 +963,14 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             <div className="flex gap-2 mt-1">
               <Button
                 variant="outline"
-                className="flex-1 h-9 border-white/20 text-white/80 hover:bg-black/60"
+                className="flex-1 h-9 min-h-[44px] border-white/20 text-white/80 hover:bg-black/60"
                 onClick={() => setConfirmAction(null)}
                 disabled={isLoading}
               >
                 Go back
               </Button>
               <Button
-                className="flex-1 h-9 bg-red-500 text-black hover:bg-red-400 text-sm font-semibold"
+                className="flex-1 h-9 min-h-[44px] bg-red-500 text-black hover:bg-red-400 text-sm font-semibold"
                 disabled={isLoading}
                 onClick={() => {
                   if (confirmAction.type === "cancel") return handleCancel();
@@ -886,7 +1007,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             disabled={mobilePrimaryCTA.disabled}
             onClick={mobilePrimaryCTA.onClick}
             className={cn(
-              "h-9 px-3 text-[11px] font-semibold",
+              "h-11 min-h-[44px] px-4 text-[11px] font-semibold",
               mobilePrimaryCTA.tone === "primary" &&
                 "bg-[#f5d566] text-black hover:bg-[#e6c547]",
               mobilePrimaryCTA.tone === "danger" &&

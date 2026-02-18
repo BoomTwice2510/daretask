@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 /* ----- v0 color system ----- */
 
 @layer base {
@@ -90,6 +91,7 @@
   }
 }
 
+
 /* Utilities */
 
 @layer utilities {
@@ -106,10 +108,12 @@
   }
 }
 
+
 /* shadcn/sonner toaster – bottom-right */
 [data-sonner-toaster] {
   inset: auto 1rem 1rem auto;
 }
+
 
 /* Animations */
 
@@ -133,6 +137,19 @@
   }
 }
 
+/* resolved card flash */
+@keyframes flash-green {
+  0% {
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+  }
+  30% {
+    box-shadow: 0 0 35px rgba(16, 185, 129, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -140,6 +157,7 @@
 .animate-glow {
   animation: glow 3s ease-in-out infinite;
 }
+
 
 /* Scrollbar Styling */
 
@@ -160,3 +178,4 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #e6c547, #f5d566);
 }
+npm run dev
