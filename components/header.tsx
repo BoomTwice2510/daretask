@@ -57,10 +57,15 @@ export function Header() {
   const router = useRouter();
 
   const [flashOpen, setFlashOpen] = useState(false);
-  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);
+  const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
+    null
+  );
   const setFlashTemplate = useFlashTemplateStore((s) => s.setPending);
 
-  const handleFlashPick = (template: FlashTaskTemplate, category: FlashTaskCategory) => {
+  const handleFlashPick = (
+    template: FlashTaskTemplate,
+    category: FlashTaskCategory
+  ) => {
     const params = new URLSearchParams({
       flashTitle: template.title,
       flashDesc: template.description,
@@ -168,7 +173,8 @@ export function Header() {
       });
       toast({
         title: "Base Sepolia added",
-        description: "Network added to your wallet. You can now switch to it.",
+        description:
+          "Network added to your wallet. You can now switch to it.",
       });
     } catch {
       toast({
@@ -184,7 +190,7 @@ export function Header() {
       {/* Top header */}
       <header className="sticky top-0 z-50 border-b border-[rgba(212,175,55,0.25)] bg-black/85 backdrop-blur-2xl">
         <div className="h-16 md:h-14 flex items-center justify-between px-4 md:px-6">
-          {/* Logo */}
+          {/* Logo + title */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
             <div className="rounded-full overflow-hidden w-9 h-9 md:w-9 md:h-9 flex-shrink-0 bg-black border border-[rgba(212,175,55,0.6)] shadow-[0_0_20px_rgba(212,175,55,0.45)]">
               <Image
@@ -192,19 +198,30 @@ export function Header() {
                 alt="Dare Protocol"
                 width={36}
                 height={36}
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                }}
               />
             </div>
-            <span
-              className="text-xs md:text-sm font-semibold hidden md:inline whitespace-nowrap"
-              style={{
-                background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              Dare Protocol
-            </span>
+
+            <div className="flex flex-col leading-tight">
+              <span
+                className="text-xs md:text-sm font-semibold whitespace-nowrap"
+                style={{
+                  background:
+                    "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Dare Protocol
+              </span>
+              <span className="hidden sm:block text-[10px] text-white/50 uppercase tracking-[0.16em]">
+                On-chain dares
+              </span>
+            </div>
           </Link>
 
           {/* Desktop center nav */}
@@ -217,7 +234,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/">Browse</Link>
@@ -231,7 +248,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/create")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/create">Create</Link>
@@ -246,7 +263,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/profile")
                     ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
                 )}
               >
                 <Link href={`/profile/${address}`}>
@@ -264,7 +281,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/leaderboard")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/leaderboard">
@@ -281,7 +298,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/how-it-works")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/how-it-works">How It Works</Link>
@@ -295,7 +312,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/faq")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/faq">FAQ</Link>
@@ -309,7 +326,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/legal")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
               )}
             >
               <Link href="/legal">Legal</Link>
@@ -324,7 +341,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/debug")
                     ? "text-black bg-[#f97373] bg-red-500/20 shadow-[0_0_18px_rgba(249,115,115,0.7)]"
-                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10",
+                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10"
                 )}
               >
                 <Link href="/debug">Debug</Link>
@@ -334,12 +351,16 @@ export function Header() {
 
           {/* Right side */}
           <div className="flex items-center gap-2 ml-auto">
-            {/* Chain pill (desktop & md+) */}
+            {/* Chain pill */}
             <div className="hidden sm:flex items-center rounded-full border border-white/10 bg-black/70 px-2.5 py-1 text-[11px] text-white/65">
               <span
                 className={cn(
                   "inline-flex h-1.5 w-1.5 rounded-full mr-1.5",
-                  !isConnected ? "bg-gray-500" : isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
+                  !isConnected
+                    ? "bg-gray-500"
+                    : isBaseSepolia
+                    ? "bg-emerald-400"
+                    : "bg-yellow-400"
                 )}
               />
               {currentChainLabel}
@@ -380,7 +401,9 @@ export function Header() {
                 <span className="hidden sm:inline">
                   {isConnecting ? "Connecting..." : "Connect Wallet"}
                 </span>
-                <span className="sm:hidden">{isConnecting ? "..." : "Connect"}</span>
+                <span className="sm:hidden">
+                  {isConnecting ? "..." : "Connect"}
+                </span>
               </Button>
             )}
 
@@ -391,7 +414,7 @@ export function Header() {
                   <span
                     className={cn(
                       "inline-flex h-1.5 w-1.5 rounded-full mr-1",
-                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
+                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400"
                     )}
                   />
                   {isBaseSepolia ? "Base Sepolia" : "Wrong net"}
@@ -416,7 +439,11 @@ export function Header() {
               className="lg:hidden h-9 w-9 text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
@@ -519,10 +546,13 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/how-it-works")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]",
+                    : "text-white/80 hover:text-[#f5d566]"
                 )}
               >
-                <Link href="/how-it-works" onClick={() => setMobileMenuOpen(false)}>
+                <Link
+                  href="/how-it-works"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
                   <HelpCircle className="mr-2 h-4 w-4" />
                   How It Works
                 </Link>
@@ -535,7 +565,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/faq")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]",
+                    : "text-white/80 hover:text-[#f5d566]"
                 )}
               >
                 <Link href="/faq" onClick={() => setMobileMenuOpen(false)}>
@@ -551,7 +581,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/legal")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]",
+                    : "text-white/80 hover:text-[#f5d566]"
                 )}
               >
                 <Link href="/legal" onClick={() => setMobileMenuOpen(false)}>
@@ -568,10 +598,13 @@ export function Header() {
                     "w-full justify-start text-sm h-9",
                     isActive("/debug")
                       ? "text-[#f97373] bg-red-500/10"
-                      : "text-white/60 hover:text-[#f97373]",
+                      : "text-white/60 hover:text-[#f97373]"
                   )}
                 >
-                  <Link href="/debug" onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    href="/debug"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
                     <AlertCircle className="mr-2 h-4 w-4" />
                     Debug
                   </Link>
@@ -582,48 +615,36 @@ export function Header() {
         )}
       </header>
 
-      {/* Mobile bottom nav + Flash sheet (unchanged from your original) */}
+      {/* Mobile bottom nav + Flash sheet */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(212,175,55,0.25)] bg-black/95 backdrop-blur-xl lg:hidden">
-        <div className="flex items-stretch justify-around h-14 px-2">
-          {/* Home */}
-          <button
-            type="button"
-            onClick={() => router.push("/")}
-            className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]",
-            )}
-          >
-            <Home
-              className={cn(
-                "h-5 w-5 transition-colors",
-                isActive("/") ? "text-[#f5d566]" : "text-white/60",
-              )}
-            />
-            <span>Home</span>
-          </button>
-
+        <div className="flex items-center justify-between h-16 px-4">
           {/* Create */}
           <button
             type="button"
             onClick={() => router.push("/create")}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              "flex flex-col items-center justify-center text-[9px] gap-0.5 transition-colors",
               isActive("/create")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]",
+                : "text-white/60 hover:text-[#f5d566]"
             )}
           >
-            <span
+            <div
               className={cn(
-                "h-5 w-5 rounded-full border border-[#f5d566] flex items-center justify-center text-lg leading-none transition-all",
-                isActive("/create")
-                  ? "text-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/60",
+                "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
+                isActive("/create") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
               )}
             >
-              +
-            </span>
+              <span
+                className={cn(
+                  "text-lg leading-none",
+                  isActive("/create") ? "text-black" : "text-white/70"
+                )}
+              >
+                +
+              </span>
+            </div>
             <span>Create</span>
           </button>
 
@@ -632,38 +653,82 @@ export function Header() {
             type="button"
             onClick={() => setFlashOpen(true)}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              flashOpen ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]",
+              "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              flashOpen ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]"
             )}
           >
-            <Zap
+            <div
               className={cn(
-                "h-5 w-5 transition-all",
-                flashOpen ? "text-[#f5d566]" : "text-white/60",
+                "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
+                flashOpen &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
               )}
-            />
+            >
+              <Zap
+                className={cn(
+                  "h-6 w-6",
+                  flashOpen ? "text-black" : "text-white/70"
+                )}
+              />
+            </div>
             <span>Flash</span>
+          </button>
+
+          {/* Home */}
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className={cn(
+              "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]"
+            )}
+          >
+            <div
+              className={cn(
+                "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
+                isActive("/") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_24px_rgba(245,213,102,1)]"
+              )}
+            >
+              <Home
+                className={cn(
+                  "h-6 w-6",
+                  isActive("/") ? "text-black" : "text-white/70"
+                )}
+              />
+            </div>
+            <span>Home</span>
           </button>
 
           {/* Profile */}
           <button
             type="button"
             onClick={() =>
-              router.push(isConnected && address ? `/profile/${address}` : "/")
+              router.push(
+                isConnected && address ? `/profile/${address}` : "/"
+              )
             }
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
               isActive("/profile")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]",
+                : "text-white/60 hover:text-[#f5d566]"
             )}
           >
-            <User
+            <div
               className={cn(
-                "h-5 w-5 transition-colors",
-                isActive("/profile") ? "text-[#f5d566]" : "text-white/60",
+                "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
+                isActive("/profile") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
               )}
-            />
+            >
+              <User
+                className={cn(
+                  "h-6 w-6",
+                  isActive("/profile") ? "text-black" : "text-white/70"
+                )}
+              />
+            </div>
             <span>Profile</span>
           </button>
 
@@ -672,23 +737,31 @@ export function Header() {
             type="button"
             onClick={() => router.push("/leaderboard")}
             className={cn(
-              "flex flex-1 flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
+              "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
               isActive("/leaderboard")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]",
+                : "text-white/60 hover:text-[#f5d566]"
             )}
           >
-            <Trophy
+            <div
               className={cn(
-                "h-5 w-5 transition-colors",
-                isActive("/leaderboard") ? "text-[#f5d566]" : "text-white/60",
+                "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
+                isActive("/leaderboard") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
               )}
-            />
+            >
+              <Trophy
+                className={cn(
+                  "h-6 w-6",
+                  isActive("/leaderboard") ? "text-black" : "text-white/70"
+                )}
+              />
+            </div>
             <span>Leaders</span>
           </button>
         </div>
 
-        {/* Flash bottom sheet – category wise (same as your original) */}
+        {/* Flash bottom sheet – category wise */}
         {flashOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             {/* backdrop */}

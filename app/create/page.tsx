@@ -2,13 +2,26 @@
 
 import { Header } from "@/components/header";
 import { CreateDareForm } from "@/components/create-dare-form";
-import { ArrowLeft, Zap, Coins, Gauge, Sparkles } from "lucide-react";
+import { ArrowLeft, Zap, Gauge, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 export default function CreateDarePage() {
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // yeh handler CreateDareForm ko pass karega
+  const handleDareCreated = () => {
+    setShowSuccess(true);
+  };
+
+  const handleSuccessClose = () => setShowSuccess(false);
+
+  const handleBackToFeed = () => {
+    window.location.href = "/"; // ya router.push("/")
+  };
+
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="relative min-h-screen bg-black text-foreground">
       <Header />
 
       <main className="mx-auto max-w-3xl px-4 py-10 pb-24">
@@ -97,11 +110,12 @@ export default function CreateDarePage() {
           </div>
 
           <Suspense fallback={null}>
-            <CreateDareForm />
+            {/* yaha CreateDareForm ko callback pass karo */}
+            <CreateDareForm onDareCreated={handleDareCreated} />
           </Suspense>
         </div>
 
-        {/* Info card */}
+        {/* Info card (unchanged placeholder) */}
         <div
           className="mt-6 rounded-2xl p-4 md:p-5 text-xs flex flex-col gap-3 transition-all duration-300 hover:border-white/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.9)]"
           style={{
@@ -113,6 +127,66 @@ export default function CreateDarePage() {
           {/* ...rest of your info card unchanged ... */}
         </div>
       </main>
+
+      {/* Mobile/desktop success overlay – slider se independent */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-[45] flex items-end lg:items-center justify-center p-5 pointer-events-none">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"
+            onClick={handleSuccessClose}
+          />
+
+          {/* Card */}
+          <div
+            className="relative w-full max-w-md rounded-3xl border border-[rgba(212,175,55,0.5)] bg-[rgba(5,5,5,0.97)] shadow-[0_24px_80px_rgba(0,0,0,0.95)] pointer-events-auto overflow-hidden"
+            style={{
+              marginBottom: "env(safe-area-inset-bottom, 20px)",
+            }}
+          >
+            <div className="px-6 pt-5 pb-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)]">
+                  <span className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.55)] blur-md opacity-60" />
+                  <Zap className="relative h-5 w-5 text-[#f5d566]" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#f5d566]">
+                    Dare Created
+                  </span>
+                  <span className="text-sm text-white/80">
+                    You’re officially live on Base Sepolia.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 text-sm text-white/75">
+              <p>
+                Your dare is on‑chain. Share it or wait for someone to match
+                your stake.
+              </p>
+            </div>
+
+            <div className="px-6 pb-5 pt-1 flex flex-col gap-2">
+              <button
+                type="button"
+                className="h-11 w-full rounded-full bg-gradient-to-r from-[#f5d566] to-[#d4af37] text-black text-sm font-semibold shadow-[0_0_28px_rgba(245,213,102,0.8)] active:scale-[0.98] transition"
+                onClick={handleBackToFeed}
+              >
+                Back to feed
+              </button>
+              <button
+                type="button"
+                className="h-10 w-full rounded-full border border-white/15 bg-black/70 text-xs text-white/70 hover:bg-black/80 transition"
+                onClick={handleSuccessClose}
+              >
+                Stay here
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
