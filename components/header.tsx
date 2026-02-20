@@ -520,7 +520,7 @@ export function Header() {
                     >
                       <Link href={`/profile/${address}`}>
                         <User className="h-3.5 w-3.5 mr-1" />
-                        {shortenAddress(address)}
+                        {address && shortenAddress(address)}
                       </Link>
                     </Button>
                     <Button
@@ -638,7 +638,7 @@ export function Header() {
             >
               <span
                 className={cn(
-                  "text-lg leading-none",
+                  "text-4xl leading-none",
                   isActive("/create") ? "text-black" : "text-white/70"
                 )}
               >

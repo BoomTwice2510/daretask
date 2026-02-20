@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import type { DareData } from "@/lib/types";
 import { Loader2, RefreshCw, Filter, AlertCircle } from "lucide-react";
 
-type FilterStatus = "all" | "0" | "1" | "2" | "3" | "4" | "5";
+type FilterStatus = "0" | "1" | "2" | "3" | "4" | "5";
 
 export function DareFeed() {
   const { readContract } = useWeb3();
   const [dares, setDares] = useState<DareData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterStatus>("all");
+  const [filter, setFilter] = useState<FilterStatus>("0"); // default Open
   const [error, setError] = useState<string | null>(null);
 
   const fetchDares = useCallback(async () => {
@@ -88,19 +88,19 @@ export function DareFeed() {
     fetchDares();
   }, [fetchDares]);
 
-  const filteredDares =
-    filter === "all"
-      ? dares
-      : dares.filter((d) => d.status === parseInt(filter));
+  const filteredDares = dares.filter(
+    (d) => d.status === parseInt(filter)
+  );
 
-  const filterOptions: { value: FilterStatus; label: string; accent?: string }[] = [
-    { value: "all", label: "All" },
-    { value: "0", label: "Open", accent: "bg-[#f5d566]" },
-    { value: "1", label: "Running", accent: "bg-amber-400" },
-    { value: "2", label: "Proof", accent: "bg-violet-400" },
-    { value: "3", label: "Disputed", accent: "bg-red-400" },
-    { value: "4", label: "Resolved", accent: "bg-emerald-400" },
-  ];
+  const filterOptions: { value: FilterStatus; label: string; accent?: string }[] =
+    [
+      { value: "0", label: "Open", accent: "bg-[#f5d566]" },
+      { value: "1", label: "Running", accent: "bg-amber-400" },
+      { value: "2", label: "Proof", accent: "bg-violet-400" },
+      { value: "3", label: "Disputed", accent: "bg-red-400" },
+      { value: "4", label: "Resolved", accent: "bg-emerald-400" },
+      { value: "5", label: "Cancelled", accent: "bg-slate-400" },
+    ];
 
   return (
     <div className="flex flex-col gap-6 text-white">
@@ -108,10 +108,9 @@ export function DareFeed() {
       <div className="flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="w-full md:w-auto flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
           {filterOptions.map((opt) => {
-            const countForFilter =
-              opt.value === "all"
-                ? dares.length
-                : dares.filter((d) => d.status === parseInt(opt.value)).length;
+            const countForFilter = dares.filter(
+              (d) => d.status === parseInt(opt.value)
+            ).length;
 
             const isActive = filter === opt.value;
 
@@ -122,7 +121,7 @@ export function DareFeed() {
                 className={`shrink-0 rounded-full px-3 md:px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200 border ${
                   isActive
                     ? "bg-[#f5d566] text-black border-[rgba(212,175,55,0.9)] shadow-[0_0_22px_rgba(245,213,102,0.7)] scale-[1.03]"
-                    : "bg-[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
+                    : "bg[rgba(10,10,10,0.95)] text-white/70 border-white/10 hover:text-white hover:bg-black"
                 }`}
               >
                 <span className="flex items-center gap-1">
@@ -196,9 +195,7 @@ export function DareFeed() {
           <Filter className="h-12 w-12 text-white/40 mb-3" />
           <p className="text-white font-medium">No dares found</p>
           <p className="text-sm text-white/60 mt-1">
-            {filter !== "all"
-              ? "Try a different filter"
-              : "Be the first to create a dare"}
+            {"Try a different filter"}
           </p>
         </div>
       )}
