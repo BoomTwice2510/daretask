@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar } from "@coinbase/onchainkit/identity";
+import { base } from "viem/chains";
 
 export default function ProfilePage({
   params,
@@ -164,11 +166,12 @@ export default function ProfilePage({
         {/* Profile Header */}
         <div className="mb-6 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] px-4 py-4 flex items-center justify-between gap-4 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
           <div className="flex items-center gap-3">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.18)] text-[#f5d566] text-lg font-bold">
-              {profileAddress.slice(2, 4).toUpperCase()}
-              <span className="absolute inset-0 rounded-2xl border border-[rgba(212,175,55,0.6)] blur-[1px]" />
-              <span className="pointer-events-none absolute -inset-1 rounded-3xl bg-[radial-gradient(circle_at_top,_rgba(245,213,102,0.22),_transparent)] opacity-60" />
-            </div>
+            {/* Avatar from Base / ENS / mini app */}
+            <Avatar
+              address={profileAddress as `0x${string}`}
+              chain={base}
+              className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)]"
+            />
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-medium text-white truncate">

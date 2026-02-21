@@ -1,9 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { Web3Provider } from "@/lib/web3-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { MotionLayout } from "@/components/motion-layout";
+import { Providers } from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,14 +24,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#000000", // pure black
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
@@ -41,10 +37,7 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen bg-black text-white antialiased">
-        <Web3Provider>
-          <MotionLayout>{children}</MotionLayout>
-          <Toaster />
-        </Web3Provider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

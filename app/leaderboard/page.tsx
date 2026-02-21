@@ -15,6 +15,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { Avatar } from "@coinbase/onchainkit/identity";
+import { base } from "viem/chains";
 
 interface LeaderEntry {
   address: string;
@@ -257,6 +259,13 @@ export default function LeaderboardPage() {
                   )}
                   {index + 1}
                 </div>
+
+                {/* Avatar */}
+                <Avatar
+                  address={entry.address as `0x${string}`}
+                  chain={base}
+                  className="h-8 w-8 rounded-full shrink-0"
+                />
 
                 {/* Address + Badge */}
                 <div className="flex flex-col gap-0.5 min-w-0 flex-1">
