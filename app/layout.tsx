@@ -13,13 +13,40 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
+const siteUrl = "https://daretask.vercel.app";
+const ogImage = `${siteUrl}/images/hero.png`;
+
 export const metadata: Metadata = {
   title: "Dare Protocol - Stake. Dare. Win.",
   description:
     "Dare platform on Base. Stake. Dare. Win. Create and accept dares, stake crypto, and earn XP badges.",
   manifest: "/manifest.json",
+  metadataBase: new URL(siteUrl),
+  openGraph: {
+    title: "Dare Protocol",
+    description:
+      "Create high-stakes dares with friends, stake on outcomes, and win on Base.",
+    url: siteUrl,
+    siteName: "Dare Protocol",
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: "Dare Protocol preview",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dare Protocol",
+    description:
+      "Create high-stakes dares with friends, stake on outcomes, and win on Base.",
+    images: [ogImage],
+  },
   other: {
-    "base:app_id": "697782ba88e3bac59cf3d9c8"
+    "base:app_id": "697782ba88e3bac59cf3d9c8",
   },
 };
 
