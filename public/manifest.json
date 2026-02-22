@@ -1,7 +1,7 @@
 {
   "name": "Dare Protocol",
-  "short_name": "DareProtocol",
-  "description": "Polymarket-style dare platform on Base. Stake. Dare. Win.",
+  "short_name": "Dare",
+  "description": "Dare platform on Base. Stake. Dare. Win.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d1117",

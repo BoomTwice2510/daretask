@@ -1,0 +1,25 @@
+{
+  "miniapp": {
+    "id": "dare-protocol",
+    "name": "Dare Protocol",
+    "shortName": "Dare",
+    "description": "Dare platform on Base. Stake. Dare. Win.",
+    "homeUrl": "https://daretask.vercel.app/",
+    "iconUrl": "https://daretask.vercel.app/images/logo-gold.png",
+    "heroImageUrl": "https://daretask.vercel.app/images/hero.png",
+    "splashImageUrl": "https://daretask.vercel.app/images/splash.png",
+    "splashBackgroundColor": "#000000",
+    "primaryCategory": "gaming",
+    "tags": ["prediction", "social", "xp", "dare"],
+    "chains": ["base-mainnet", "base-sepolia"],
+    "developer": {
+      "name": "Dare Protocol",
+      "url": "https://x.com/sharepluse"
+    },
+    "accountAssociation": {
+      "header": "",
+      "payload": "",
+      "signature": ""
+    }
+  }
+}

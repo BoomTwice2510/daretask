@@ -10,11 +10,11 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Web3Provider>
-        <MotionLayout>{children}</MotionLayout>
-        <Toaster />
-      </Web3Provider>
-    </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        <Web3Provider>
+          <MotionLayout>{children}</MotionLayout>
+          <Toaster />
+        </Web3Provider>
+      </QueryClientProvider>
   );
 }
