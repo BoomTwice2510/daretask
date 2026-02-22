@@ -6,10 +6,39 @@ import { Header } from "@/components/header";
 import { DareFeed } from "@/components/dare-feed";
 import { Button } from "@/components/ui/button";
 import { Plus, Sparkles } from "lucide-react";
+import Head from "next/head";
+
+const appUrl = "https://daretask.vercel.app";
+
+const dareMiniAppEmbed = {
+  version: "next",
+  imageUrl: `${appUrl}/images/hero.png`,
+  button: {
+    title: "Open Dare Protocol",
+    action: {
+      type: "launch_miniapp",
+      name: "Dare Protocol",
+      url: appUrl,
+      splashImageUrl: `${appUrl}/images/splash.png`,
+      splashBackgroundColor: "#0d1117",
+    },
+  },
+};
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-black text-foreground">
+      <Head>
+        <meta
+          name="fc:miniapp"
+          content={JSON.stringify(dareMiniAppEmbed)}
+        />
+        <meta
+          name="fc:frame"
+          content={JSON.stringify(dareMiniAppEmbed)}
+        />
+      </Head>
+
       <Header />
 
       <main className="mx-auto max-w-4xl px-4 pb-24">
@@ -46,7 +75,8 @@ export default function HomePage() {
             <h1
               className="text-3xl md:text-5xl font-bold text-balance leading-tight"
               style={{
-                background: "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
+                background:
+                  "linear-gradient(to right,#f5d566,#e6c547,#d4af37)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -55,7 +85,8 @@ export default function HomePage() {
             </h1>
 
             <p className="text-sm md:text-base text-white/70 mt-4 text-pretty">
-              Put real stakes behind real commitments. No screenshots. No promises. No excuses.
+              Put real stakes behind real commitments. No screenshots. No
+              promises. No excuses.
             </p>
           </div>
 
@@ -64,7 +95,8 @@ export default function HomePage() {
               <Button
                 className="h-11 px-7 md:h-12 md:px-10 text-base md:text-lg font-semibold shadow-lg transition-transform active:scale-95"
                 style={{
-                  background: "linear-gradient(135deg, #d4af37, #e6c547)",
+                  background:
+                    "linear-gradient(135deg, #d4af37, #e6c547)",
                   color: "#000",
                   boxShadow: "0 18px 40px rgba(212,175,55,0.45)",
                 }}
@@ -75,7 +107,9 @@ export default function HomePage() {
             </Link>
             <div className="flex items-center gap-2 text-xs text-white/60">
               <Sparkles className="h-4 w-4 text-[#f5d566]" />
-              <span>Win dares to earn XP and unlock your on‑chain reputation.</span>
+              <span>
+                Win dares to earn XP and unlock your on‑chain reputation.
+              </span>
             </div>
           </div>
         </section>
