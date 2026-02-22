@@ -18,8 +18,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar } from "@coinbase/onchainkit/identity";
-import { base } from "viem/chains";
+
+type FarcasterUser = {
+  fid: number;
+  username: string;
+  display_name?: string;
+  pfp_url?: string;
+};
 
 export default function ProfilePage({
   params,
@@ -33,6 +38,7 @@ export default function ProfilePage({
   const [userDares, setUserDares] = useState<DareData[]>([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [fcUser, setFcUser] = useState<FarcasterUser | null>(null);
 
   const profileAddress = paramAddress;
   const isOwnProfile =
@@ -127,6 +133,45 @@ export default function ProfilePage({
     fetchProfile();
   }, [fetchProfile]);
 
+  // TODO: yahan apna real FID set karo (testing ke liye hard-coded)
+  const fid = 0; // e.g. 1234
+
+  useEffect(() => {
+    async function fetchFarcasterProfile() {
+      try {
+        if (!fid) return;
+
+        const res = await fetch(
+          `https://api.neynar.com/v2/farcaster/user/by_id?fid=${fid}`,
+          {
+            headers: {
+              "x-api-key": process.env.NEXT_PUBLIC_NEYNAR_API_KEY as string,
+            },
+          }
+        );
+
+        if (!res.ok) {
+          console.error("Failed to fetch Farcaster user", await res.text());
+          return;
+        }
+
+        const data = await res.json();
+        const user = data.user;
+
+        setFcUser({
+          fid: user.fid,
+          username: user.username,
+          display_name: user.display_name,
+          pfp_url: user.pfp_url || user.profile?.pfp_url,
+        });
+      } catch (err) {
+        console.error("Error fetching Farcaster user", err);
+      }
+    }
+
+    fetchFarcasterProfile();
+  }, [fid]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(profileAddress);
     setCopied(true);
@@ -166,13 +211,30 @@ export default function ProfilePage({
         {/* Profile Header */}
         <div className="mb-6 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] px-4 py-4 flex items-center justify-between gap-4 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
           <div className="flex items-center gap-3">
-            {/* Avatar from Base / ENS / mini app */}
-            <Avatar
-              address={profileAddress as `0x${string}`}
-              chain={base}
-              className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)]"
-            />
+            {/* Farcaster avatar (fallback to blocky if missing) */}
+            <div className="relative h-12 w-12">
+              {fcUser?.pfp_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={fcUser.pfp_url}
+                  alt={
+                    fcUser.display_name ||
+                    fcUser.username ||
+                    "Farcaster profile"
+                  }
+                  className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)] object-cover"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)] bg-gradient-to-br from-slate-800 to-slate-900" />
+              )}
+            </div>
+
             <div className="flex flex-col min-w-0">
+              {fcUser && (
+                <span className="text-xs text-white/70">
+                  @{fcUser.username}
+                </span>
+              )}
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm font-medium text-white truncate">
                   {shortenAddress(profileAddress)}

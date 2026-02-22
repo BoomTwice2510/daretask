@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     images: [ogImage],
   },
   other: {
-    "base:app_id": "697782ba88e3bac59cf3d9c8",
+    "base:app_id": "699b5910eb8da8c3b3d7b15c",
   },
 };
 
