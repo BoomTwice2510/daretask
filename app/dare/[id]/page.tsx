@@ -94,7 +94,8 @@ export default function DareDetailPage({
     <div className="min-h-screen bg-black text-white">
       <Header />
 
-      <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
+      {/* yahan core fix: pb-32 md:pb-24 */}
+      <main className="mx-auto max-w-3xl px-4 py-8 pb-32 md:pb-24">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -174,7 +175,9 @@ export default function DareDetailPage({
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
-            <p className="text-xs text-white/60">Fetching on‑chain dare data…</p>
+            <p className="text-xs text-white/60">
+              Fetching on‑chain dare data…
+            </p>
           </div>
         )}
 

@@ -5,16 +5,29 @@
     "signature": "AAAAAAAAAAAAAAAAyhG94Fl3s2MRZwKIYr4qFzl2yhEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeSCrVbLAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAC6XtDGqoxJA4-Bnlh-JjPEqfQooAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOQ_-6NvAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQMOcw1-74pmKTFNwHiIC6W-UzQCTor448mlEi923JrrhYiQeXzqEMwiDbIxthrrDDWrxeRM7pfkyaWDRW8ld10AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcy6RS6iMczfVLrIJ0Xwhqb3F3Gb7QF4YZcKfG_Jz1_0_JquEK5yLTudrXPJXb9vm-1UldFNIrUoTBo6Hld885AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAl8ZgIay2xclZzG8RWZzuWvO8j9R0fus3XxDee9lRlVy8dAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACKeyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiYlZNazZ5aHhXRmhLV2JZaDk5aUZaWm05OHIxVTJ0Y1lFZ0NZZjlIaFdERSIsIm9yaWdpbiI6Imh0dHBzOi8va2V5cy5jb2luYmFzZS5jb20iLCJjcm9zc09yaWdpbiI6ZmFsc2V9AAAAAAAAAAAAAAAAAAAAAAAAAAAAAGSSZJJkkmSSZJJkkmSSZJJkkmSSZJJkkmSSZJJkkmSS"
   },
   "miniapp": {
-    "version": "1",
-    "name": "Dare Protocol",
-    "description": "Dare platform on Base. Stake. Dare. Win.",
-    "iconUrl": "https://daretask.vercel.app/images/logo-gold.png",
-    "homeUrl": "https://daretask.vercel.app/",
-    "splashImageUrl": "https://daretask.vercel.app/images/splash.png",
-    "splashBackgroundColor": "#0d1117",
-    "primaryCategory": "games",
-    "requiredChains": ["eip155:84532"],
-    "tags": ["dare", "tasks", "base"],
-    "canonicalDomain": "daretask.vercel.app"
-  }
+  "version": "1",
+  "name": "Dare Protocol",
+  "description": "Dare platform on Base. Stake. Dare. Win.",
+  "subtitle": "High-stakes social dares",
+  "iconUrl": "https://daretask.vercel.app/images/logo-gold.png",
+  "homeUrl": "https://daretask.vercel.app/",
+  "splashImageUrl": "https://daretask.vercel.app/images/splash.png",
+  "splashBackgroundColor": "#0d1117",
+  "primaryCategory": "games",
+  "requiredChains": ["eip155:84532"],
+  "tags": ["dare", "tasks", "base"],
+  "canonicalDomain": "daretask.vercel.app",
+  "webhookUrl": "https://daretask.vercel.app/api/webhook",
+  "screenshotUrls": [
+    "https://daretask.vercel.app/images/screen1.png",
+    "https://daretask.vercel.app/images/screen2.png",
+    "https://daretask.vercel.app/images/screen3.png"
+  ],
+  "heroImageUrl": "https://daretask.vercel.app/images/hero.png",
+  "tagline": "Stake, dare friends, and win",
+  "ogTitle": "Dare Protocol",
+  "ogDescription": "Create high-stakes dares with friends, stake on outcomes, and win on Base.",
+  "ogImageUrl": "https://daretask.vercel.app/images/hero.png",
+  "noindex": false
+}
 }

@@ -16,8 +16,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Dare Protocol - Stake. Dare. Win.",
   description:
-    "Polymarket-style prediction and dare platform on Base. Create and accept dares, stake crypto, and earn XP badges.",
+    "Dare platform on Base. Stake. Dare. Win. Create and accept dares, stake crypto, and earn XP badges.",
   manifest: "/manifest.json",
+  other: {
+    "base:app_id": "697782ba88e3bac59cf3d9c8"
+  },
 };
 
 export const viewport: Viewport = {
