@@ -1,0 +1,20 @@
+{
+  "accountAssociation": {
+    "header": "<generated-header>",
+    "payload": "<generated-payload>",
+    "signature": "<generated-signature>"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Dare Protocol",
+    "description": "Dare platform on Base. Stake. Dare. Win.",
+    "iconUrl": "https://daretask.vercel.app/images/logo-gold.png",
+    "homeUrl": "https://daretask.vercel.app/",
+    "splashImageUrl": "https://daretask.vercel.app/images/splash.png",
+    "splashBackgroundColor": "#0d1117",
+    "primaryCategory": "games",
+    "requiredChains": ["eip155:84532"],
+    "tags": ["dare", "tasks", "base"],
+    "canonicalDomain": "daretask.vercel.app"
+  }
+}
