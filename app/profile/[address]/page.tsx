@@ -26,6 +26,11 @@ type FarcasterUser = {
   pfp_url?: string;
 };
 
+const INITIAL_LIMIT = 20;
+const SECOND_LIMIT = 30;
+const MAX_LIMIT = 50;
+const SCAN_WINDOW = 200; // last N dares to scan for this user
+
 export default function ProfilePage({
   params,
 }: {
@@ -39,6 +44,8 @@ export default function ProfilePage({
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [fcUser, setFcUser] = useState<FarcasterUser | null>(null);
+  const [displayLimit, setDisplayLimit] = useState<number>(INITIAL_LIMIT);
+  const [totalFound, setTotalFound] = useState<number>(0);
 
   const profileAddress = paramAddress;
   const isOwnProfile =
@@ -74,12 +81,14 @@ export default function ProfilePage({
       });
       setBadge(badgeResult as number);
 
-      // Fetch user's dares (scan last 200)
+      // Scan last SCAN_WINDOW dares, but stop when we collected MAX_LIMIT for this user
       const total = Number(dareCount as bigint);
-      const userDaresList: DareData[] = [];
-      const start = Math.max(0, total - 200);
+      const start = Math.max(0, total - SCAN_WINDOW);
 
-      for (let i = total - 1; i >= start && userDaresList.length < 50; i--) {
+      const found: DareData[] = [];
+
+      for (let i = total - 1; i >= start; i--) {
+        if (found.length >= MAX_LIMIT) break;
         try {
           const result = (await readContract("getDare", [BigInt(i)])) as [
             string,
@@ -96,14 +105,17 @@ export default function ProfilePage({
             number
           ];
 
+          const creator = result[0];
+          const accepter = result[1];
+
           if (
-            result[0].toLowerCase() === profileAddress.toLowerCase() ||
-            result[1].toLowerCase() === profileAddress.toLowerCase()
+            creator.toLowerCase() === profileAddress.toLowerCase() ||
+            accepter.toLowerCase() === profileAddress.toLowerCase()
           ) {
-            userDaresList.push({
+            found.push({
               id: i,
-              creator: result[0],
-              accepter: result[1],
+              creator,
+              accepter,
               description: result[2],
               token: result[3],
               stake: result[4],
@@ -121,7 +133,9 @@ export default function ProfilePage({
         }
       }
 
-      setUserDares(userDaresList);
+      setUserDares(found);
+      setTotalFound(found.length);
+      setDisplayLimit(INITIAL_LIMIT);
     } catch (err) {
       console.error("Failed to fetch profile:", err);
     } finally {
@@ -145,9 +159,10 @@ export default function ProfilePage({
           `https://api.neynar.com/v2/farcaster/user/by_id?fid=${fid}`,
           {
             headers: {
-              "x-api-key": process.env.NEXT_PUBLIC_NEYNAR_API_KEY as string,
+              "x-api-key": process.env
+                .NEXT_PUBLIC_NEYNAR_API_KEY as string,
             },
-          }
+          },
         );
 
         if (!res.ok) {
@@ -178,8 +193,22 @@ export default function ProfilePage({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const activeDares = userDares.filter((d) => d.status <= 3);
-  const pastDares = userDares.filter((d) => d.status >= 4);
+  const activeDaresAll = userDares.filter((d) => d.status <= 3);
+  const pastDaresAll = userDares.filter((d) => d.status >= 4);
+
+  const activeDares = activeDaresAll.slice(0, displayLimit);
+  const pastDares = pastDaresAll.slice(0, displayLimit);
+
+  const canExpand =
+    !loading && totalFound > displayLimit && displayLimit < MAX_LIMIT;
+
+  const handleExpand = () => {
+    setDisplayLimit((prev) => {
+      if (prev < SECOND_LIMIT) return SECOND_LIMIT;
+      if (prev < MAX_LIMIT) return MAX_LIMIT;
+      return prev;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -307,13 +336,13 @@ export default function ProfilePage({
                   value="active"
                   className="text-white/70 data-[state=active]:bg-[#f5d566] data-[state=active]:text-black rounded-full text-sm transition-all data-[state=active]:shadow-[0_0_20px_rgba(245,213,102,0.6)]"
                 >
-                  Active ({activeDares.length})
+                  Active ({activeDaresAll.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
                   className="text-white/70 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/15 rounded-full text-sm transition-all"
                 >
-                  History ({pastDares.length})
+                  History ({pastDaresAll.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -345,6 +374,21 @@ export default function ProfilePage({
                 )}
               </TabsContent>
             </Tabs>
+
+            {canExpand && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={handleExpand}
+                  className="text-xs px-4 py-1.5 rounded-full border border-[rgba(212,175,55,0.5)] text-[#f5d566] hover:bg-black/60 transition-colors"
+                >
+                  Show more dares ({displayLimit} →{" "}
+                  {displayLimit < SECOND_LIMIT
+                    ? SECOND_LIMIT
+                    : MAX_LIMIT}
+                  )
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>

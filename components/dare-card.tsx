@@ -23,8 +23,7 @@ interface DareCardProps {
 function symbolToDisplayName(symbol: string) {
   if (symbol === "USDC9CIRCLE0" || symbol === "USDC_CIRCLE") return "USDC";
   if (symbol === "TKN1" || symbol === "TOKEN1") return "JESSE";
-  if (symbol === "TKN4" || symbol === "TOKEN4") return "AERO";
-  if (symbol === "TKN5" || symbol === "TOKEN5") return "ZORA";
+  if (symbol === "TKN2" || symbol === "TOKEN5") return "ZORA";
   if (symbol === "ETH") return "ETH";
   return symbol;
 }

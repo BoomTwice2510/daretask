@@ -1,3 +1,4 @@
+// components/header.tsx
 "use client";
 
 import Image from "next/image";
@@ -21,6 +22,7 @@ import {
   Network,
   Link2,
   Zap,
+  Compass,
 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -58,26 +60,13 @@ export function Header() {
 
   const [flashOpen, setFlashOpen] = useState(false);
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
-    null
+    null,
   );
   const setFlashTemplate = useFlashTemplateStore((s) => s.setPending);
 
-  const handleFlashPick = (
-    template: FlashTaskTemplate,
-    category: FlashTaskCategory
-  ) => {
-    const params = new URLSearchParams({
-      flashTitle: template.title,
-      flashDesc: template.description,
-      flashProof: template.proofType,
-      flashDeadline: String(template.deadline),
-    });
-    setFlashOpen(false);
-    router.push(`/create?${params.toString()}`);
-  };
-
   const isBaseSepolia = chainId === BASE_SEPOLIA_PARAMS.chainIdDec;
   const showWrongNetwork = isConnected && !isBaseSepolia;
+  const disabledNav = !isConnected; // footer gating
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -90,12 +79,26 @@ export function Header() {
     ? "Base Sepolia"
     : "Wrong network";
 
+  const handleFlashPick = (
+    template: FlashTaskTemplate,
+    category: FlashTaskCategory,
+  ) => {
+    const params = new URLSearchParams({
+      flashTitle: template.title,
+      flashDesc: template.description,
+      flashProof: template.proofType,
+      flashDeadline: String(template.deadline),
+    });
+    setFlashOpen(false);
+    router.push(`/create?${params.toString()}`);
+  };
+
   async function handleConnect() {
     try {
       await connect();
       toast({
         title: "Wallet connected",
-        description: "You’re ready to create and accept dares.",
+        description: "You’re ready to explore and accept dares.",
       });
     } catch {
       toast({
@@ -226,6 +229,7 @@ export function Header() {
 
           {/* Desktop center nav */}
           <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+            {/* Home = landing */}
             <Button
               asChild
               variant="ghost"
@@ -234,12 +238,28 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
-              <Link href="/">Browse</Link>
+              <Link href="/">Home</Link>
             </Button>
 
+            {/* Explore = feed */}
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-9 px-3 text-xs md:text-sm rounded-full",
+                isActive("/explore")
+                  ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
+              )}
+            >
+              <Link href="/explore">Explore</Link>
+            </Button>
+
+            {/* Create */}
             <Button
               asChild
               variant="ghost"
@@ -248,7 +268,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/create")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/create">Create</Link>
@@ -263,7 +283,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/profile")
                     ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                    : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
                 )}
               >
                 <Link href={`/profile/${address}`}>
@@ -281,7 +301,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/leaderboard")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/leaderboard">
@@ -298,7 +318,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/how-it-works")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/how-it-works">How It Works</Link>
@@ -312,7 +332,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/faq")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/faq">FAQ</Link>
@@ -326,7 +346,7 @@ export function Header() {
                 "h-9 px-3 text-xs md:text-sm rounded-full",
                 isActive("/legal")
                   ? "text-black bg-[#f5d566] shadow-[0_0_18px_rgba(245,213,102,0.7)]"
-                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5"
+                  : "text-white/65 hover:text-[#f5d566] hover:bg-white/5",
               )}
             >
               <Link href="/legal">Legal</Link>
@@ -341,7 +361,7 @@ export function Header() {
                   "h-9 px-3 text-xs md:text-sm rounded-full",
                   isActive("/debug")
                     ? "text-black bg-[#f97373] bg-red-500/20 shadow-[0_0_18px_rgba(249,115,115,0.7)]"
-                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10"
+                    : "text-white/65 hover:text-[#f97373] hover:bg-red-500/10",
                 )}
               >
                 <Link href="/debug">Debug</Link>
@@ -360,7 +380,7 @@ export function Header() {
                     ? "bg-gray-500"
                     : isBaseSepolia
                     ? "bg-emerald-400"
-                    : "bg-yellow-400"
+                    : "bg-yellow-400",
                 )}
               />
               {currentChainLabel}
@@ -414,7 +434,7 @@ export function Header() {
                   <span
                     className={cn(
                       "inline-flex h-1.5 w-1.5 rounded-full mr-1",
-                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400"
+                      isBaseSepolia ? "bg-emerald-400" : "bg-yellow-400",
                     )}
                   />
                   {isBaseSepolia ? "Base Sepolia" : "Wrong net"}
@@ -546,7 +566,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/how-it-works")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link
@@ -565,7 +585,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/faq")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link href="/faq" onClick={() => setMobileMenuOpen(false)}>
@@ -581,7 +601,7 @@ export function Header() {
                   "w-full justify-start text-sm h-9",
                   isActive("/legal")
                     ? "text-[#f5d566] bg:white/5"
-                    : "text-white/80 hover:text-[#f5d566]"
+                    : "text-white/80 hover:text-[#f5d566]",
                 )}
               >
                 <Link href="/legal" onClick={() => setMobileMenuOpen(false)}>
@@ -598,7 +618,7 @@ export function Header() {
                     "w-full justify-start text-sm h-9",
                     isActive("/debug")
                       ? "text-[#f97373] bg-red-500/10"
-                      : "text-white/60 hover:text-[#f97373]"
+                      : "text-white/60 hover:text-[#f97373]",
                   )}
                 >
                   <Link
@@ -618,142 +638,175 @@ export function Header() {
       {/* Mobile bottom nav + Flash sheet */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(212,175,55,0.25)] bg-black/95 backdrop-blur-xl lg:hidden">
         <div className="flex items-center justify-between h-16 px-4">
-          {/* Create */}
+          {/* Explore (center, gated) */}
           <button
             type="button"
-            onClick={() => router.push("/create")}
+            onClick={() => !disabledNav && router.push("/explore")}
+            disabled={disabledNav}
             className={cn(
               "flex flex-col items-center justify-center text-[9px] gap-0.5 transition-colors",
-              isActive("/create")
+              disabledNav
+                ? "opacity-40 pointer-events-none text-white/30"
+                : isActive("/explore")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <div
               className={cn(
                 "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
-                isActive("/create") &&
-                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
+                !disabledNav &&
+                  isActive("/explore") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]",
               )}
             >
-              <span
+              <Compass
                 className={cn(
-                  "text-4xl leading-none",
-                  isActive("/create") ? "text-black" : "text-white/70"
+                  "h-6 w-6",
+                  disabledNav
+                    ? "text-white/40"
+                    : isActive("/explore")
+                    ? "text-black"
+                    : "text-white/70",
                 )}
-              >
-                +
-              </span>
+              />
             </div>
-            <span>Create</span>
+            <span>Explore</span>
           </button>
 
-          {/* Flash */}
+          {/* Flash (gated) */}
           <button
             type="button"
-            onClick={() => setFlashOpen(true)}
+            onClick={() => !disabledNav && setFlashOpen(true)}
+            disabled={disabledNav}
             className={cn(
               "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              flashOpen ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]"
+              disabledNav
+                ? "opacity-40 pointer-events-none text-white/30"
+                : flashOpen
+                ? "text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <div
               className={cn(
                 "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
-                flashOpen &&
-                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
+                !disabledNav &&
+                  flashOpen &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]",
               )}
             >
               <Zap
                 className={cn(
                   "h-6 w-6",
-                  flashOpen ? "text-black" : "text-white/70"
+                  disabledNav
+                    ? "text-white/40"
+                    : flashOpen
+                    ? "text-black"
+                    : "text-white/70",
                 )}
               />
             </div>
             <span>Flash</span>
           </button>
 
-          {/* Home */}
+          {/* Home (landing, always active) */}
           <button
             type="button"
             onClick={() => router.push("/")}
             className={cn(
               "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]"
+              isActive("/") ? "text-[#f5d566]" : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <div
               className={cn(
                 "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
                 isActive("/") &&
-                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_24px_rgba(245,213,102,1)]"
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_24px_rgba(245,213,102,1)]",
               )}
             >
               <Home
                 className={cn(
                   "h-6 w-6",
-                  isActive("/") ? "text-black" : "text-white/70"
+                  isActive("/") ? "text-black" : "text-white/70",
                 )}
               />
             </div>
             <span>Home</span>
           </button>
 
-          {/* Profile */}
+          {/* Profile (gated) */}
           <button
             type="button"
             onClick={() =>
+              !disabledNav &&
               router.push(
-                isConnected && address ? `/profile/${address}` : "/"
+                isConnected && address ? `/profile/${address}` : "/",
               )
             }
+            disabled={disabledNav}
             className={cn(
               "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              isActive("/profile")
+              disabledNav
+                ? "opacity-40 pointer-events-none text-white/30"
+                : isActive("/profile")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <div
               className={cn(
                 "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
-                isActive("/profile") &&
-                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
+                !disabledNav &&
+                  isActive("/profile") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]",
               )}
             >
               <User
                 className={cn(
                   "h-6 w-6",
-                  isActive("/profile") ? "text-black" : "text-white/70"
+                  disabledNav
+                    ? "text-white/40"
+                    : isActive("/profile")
+                    ? "text-black"
+                    : "text-white/70",
                 )}
               />
             </div>
             <span>Profile</span>
           </button>
 
-          {/* Leaders */}
+          {/* Leaders (gated) */}
           <button
             type="button"
-            onClick={() => router.push("/leaderboard")}
+            onClick={() => !disabledNav && router.push("/leaderboard")}
+            disabled={disabledNav}
             className={cn(
               "flex flex-col items-center justify-center text-[10px] gap-0.5 transition-colors",
-              isActive("/leaderboard")
+              disabledNav
+                ? "opacity-40 pointer-events-none text-white/30"
+                : isActive("/leaderboard")
                 ? "text-[#f5d566]"
-                : "text-white/60 hover:text-[#f5d566]"
+                : "text-white/60 hover:text-[#f5d566]",
             )}
           >
             <div
               className={cn(
                 "h-11 w-11 rounded-full flex items-center justify-center border border-white/10 bg-black/60 shadow-[0_0_10px_rgba(0,0,0,0.6)] transition-all",
-                isActive("/leaderboard") &&
-                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]"
+                !disabledNav &&
+                  isActive("/leaderboard") &&
+                  "border-[#f5d566] bg-gradient-to-br from-[#f5d566] via-[#e6c547] to-[#d4af37] shadow-[0_0_20px_rgba(245,213,102,0.9)]",
               )}
             >
               <Trophy
                 className={cn(
                   "h-6 w-6",
-                  isActive("/leaderboard") ? "text-black" : "text-white/70"
+                  disabledNav
+                    ? "text-white/40"
+                    : isActive("/leaderboard")
+                    ? "text-black"
+                    : "text-white/70",
                 )}
               />
             </div>
@@ -761,10 +814,10 @@ export function Header() {
           </button>
         </div>
 
-        {/* Flash bottom sheet – category wise */}
+        {/* Flash bottom sheet – footer ke upar, footer visible rahe */}
         {flashOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-            {/* backdrop */}
+          <div className="fixed inset-x-0 bottom-16 z-50 lg:hidden">
+            {/* backdrop (sirf upar area) */}
             <div
               className="absolute inset-0 bg-black/70"
               onClick={() => {
@@ -774,7 +827,7 @@ export function Header() {
             />
 
             {/* sheet */}
-            <div className="absolute inset-x-0 bottom-0 max-h-[80vh] rounded-t-3xl border border-[rgba(212,175,55,0.45)] bg-[rgba(5,5,5,0.98)] shadow-[0_-18px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+            <div className="absolute inset-x-0 bottom-0 max-h-[70vh] rounded-t-3xl border border-[rgba(212,175,55,0.45)] bg-[rgba(5,5,5,0.98)] shadow-[0_-18px_60px_rgba(0,0,0,0.9)] backdrop-blur-xl">
               {/* drag handle */}
               <div className="flex justify-center pt-2">
                 <div className="h-1 w-10 rounded-full bg-white/15" />
@@ -807,7 +860,7 @@ export function Header() {
                 </button>
               </div>
 
-              <div className="px-3 pb-4 pt-2 space-y-2 max-h-[calc(80vh-64px)] overflow-y-auto">
+              <div className="px-3 pb-4 pt-2 space-y-2 max-h-[calc(70vh-64px)] overflow-y-auto">
                 {FLASH_TASK_CATEGORIES.map((cat) => {
                   const isOpen = expandedCategoryId === cat.id;
                   return (
