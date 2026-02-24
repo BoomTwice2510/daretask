@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { OnchainKitProvider } from "@coinbase/onchainkit";
+import { baseSepolia } from "viem/chains";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
-const siteUrl = "https://daretask.vercel.app";
+const siteUrl = "https://dareprotocol.com";
 const ogImage = `${siteUrl}/images/hero.png`;
 
 export const metadata: Metadata = {
@@ -46,7 +48,7 @@ export const metadata: Metadata = {
     images: [ogImage],
   },
   other: {
-    "base:app_id": "xxx", // yahan apna Base app id
+    "base:app_id": "697782ba88e3bac59cf3d9c8", // yahan apna Base app id
   },
 };
 
@@ -67,7 +69,12 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
     >
       <body className="min-h-screen bg-black text-white antialiased">
-        <Providers>{children}</Providers>
+        <OnchainKitProvider
+          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY!}
+          chain={baseSepolia}
+        >
+          <Providers>{children}</Providers>
+        </OnchainKitProvider>
       </body>
     </html>
   );

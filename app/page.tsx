@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import HomePageClient from "./home-client";
 
-const appUrl = "https://daretask.vercel.app";
+const appUrl = "https://dareprotocol.com";
 
 const dareMiniAppEmbed = {
   version: "next",
