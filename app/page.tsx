@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import HomePageClient from "./home-client";
 
-const appUrl = "https://dareprotocol.com";
+const appUrl = "https://www.dareprotocol.com";
 
 const dareMiniAppEmbed = {
   version: "next",

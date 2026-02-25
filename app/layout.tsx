@@ -9,7 +9,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const appUrl = "https://dareprotocol.com";
+// final domain jo browser me dikh raha hai
+const appUrl = "https://www.dareprotocol.com";
 
 const dareMiniAppEmbed = {
   version: "next",
@@ -33,6 +34,8 @@ export const metadata: Metadata = {
   other: {
     "fc:miniapp": JSON.stringify(dareMiniAppEmbed),
     "fc:frame": JSON.stringify(dareMiniAppEmbed),
+    // yahi tag Base dev dhund raha hai
+    "base:app_id": "697782ba88e3bac59cf3d9c8",
   },
 };
 
@@ -43,7 +46,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* yahi se global font apply hoga */}
+      <head>
+        {/* extra safety in case Metadata.other miss ho jaaye */}
+        <meta name="base:app_id" content="697782ba88e3bac59cf3d9c8" />
+      </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
