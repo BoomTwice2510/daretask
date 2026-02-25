@@ -15,19 +15,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const toEmail = process.env.FEEDBACK_TO_EMAIL!;
+    const toEmail = process.env.FEEDBACK_TO_EMAIL;
     if (!toEmail) {
-      throw new Error("FEEDBACK_TO_EMAIL not set");
+      console.error("FEEDBACK_TO_EMAIL not set");
+      return NextResponse.json(
+        { error: "Config error" },
+        { status: 500 }
+      );
     }
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: "Dare Feedback <feedback@dareprotocol.com>",
       to: toEmail,
       subject: `New Dare feedback (rating: ${rating || "N/A"})`,
       text: `Feedback:\n\n${message}\n\nRating: ${rating || "N/A"}`,
     });
 
-    return NextResponse.json({ ok: true });
+    if (result.error) {
+      console.error("Resend error:", result.error);
+      return NextResponse.json(
+        { error: "Email send failed" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true }, { status: 200 });
   } catch (err) {
     console.error("feedback error", err);
     return NextResponse.json(
