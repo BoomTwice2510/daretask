@@ -16,70 +16,74 @@ import {
 export function LandingMobile() {
   return (
     <main className="px-4 pb-24 pt-4">
-      {/* Top hero card like mini‑app */}
-      <section className="mt-4">
-        <div className="relative overflow-hidden rounded-3xl border border-[rgba(212,175,55,0.5)] bg-[rgba(5,5,5,0.98)] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.9)]">
-          <div className="absolute -top-16 right-[-40px] h-32 w-32 rounded-full bg-[radial-gradient(circle_at_center,rgba(245,213,102,0.45),transparent_55%)] blur-xl opacity-80" />
-          <div className="flex items-center gap-3">
-            <div className="relative h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.7)] bg-black/80 flex items-center justify-center overflow-hidden">
-              <Image
-                src="/images/logo-gold.png"
-                alt="Dare Protocol"
-                width={48}
-                height={48}
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs uppercase tracking-[0.18em] text-[#f5d566]/80">
-                Dare Protocol
-              </span>
-              <span className="text-[11px] text-white/60">
-                Base Sepolia • On‑chain dares
-              </span>
-            </div>
-          </div>
+      // HERO – optimized, tighter card
+<section className="mt-2">
+  <div className="relative mx-auto max-w-sm overflow-hidden rounded-2xl border border-[rgba(212,175,55,0.45)] bg-[#050505]/95 px-4 py-3 shadow-[0_18px_40px_rgba(0,0,0,0.95)]">
+    {/* soft halo instead of big blob */}
+    <div className="pointer-events-none absolute -top-24 right-[-80px] h-40 w-40 rounded-full bg-[radial-gradient(circle_at_center,rgba(245,213,102,0.5),transparent_60%)] blur-2xl opacity-80" />
 
-          <h1 className="mt-4 text-2xl font-semibold text-white leading-snug">
-            Dare. Stake. Prove it.
-          </h1>
-          <p className="mt-2 text-[13px] text-white/70">
-            Turn real‑life commitments into on‑chain dares. Stake ETH, invite
-            friends, and settle everything on Base.
-          </p>
-
-          <div className="mt-4 flex flex-col gap-2">
-            <Link href="/create">
-              <Button
-                className="w-full h-11 text-[15px] font-semibold shadow-[0_12px_30px_rgba(212,175,55,0.45)]"
-                style={{
-                  background:
-                    "linear-gradient(135deg,#d4af37,#facc15,#e6c547)",
-                  color: "#000",
-                }}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Create a Dare
-              </Button>
-            </Link>
-            <Link href="/explore" className="w-full">
-              <Button
-                variant="outline"
-                className="w-full h-10 border-white/15 bg-black/60 text-[13px] text-white/80"
-              >
-                <Zap className="mr-2 h-4 w-4 text-[#f5d566]" />
-                Explore live dares
-              </Button>
-            </Link>
-          </div>
-
-          <div className="mt-4 flex items-center gap-2 text-[11px] text-white/60">
-            <Sparkles className="h-3.5 w-3.5 text-[#f5d566]" />
-            <span>Win dares to earn XP and climb the leaderboard.</span>
-          </div>
+    {/* top row: logo + chain + menu gap adjust ho jayega layout se */}
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <div className="relative h-11 w-11 rounded-xl border border-[rgba(212,175,55,0.7)] bg-black/80 flex items-center justify-center overflow-hidden">
+          <Image
+            src="/images/logo-gold.png"
+            alt="Dare Protocol"
+            width={44}
+            height={44}
+            className="object-contain"
+            priority
+          />
         </div>
-      </section>
+        <div className="flex flex-col">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-[#f5d566]/80">
+            Dare Protocol
+          </span>
+          <span className="text-[10px] text-white/60">
+            Base Sepolia • On‑chain dares
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <h1 className="mt-3 text-[19px] font-semibold leading-snug text-white">
+      Dare. Stake. Prove it.
+    </h1>
+    <p className="mt-1.5 text-[12px] text-white/70">
+      Put real stakes behind real commitments. No screenshots. No promises.
+      Every dare, decision and payout is locked onchain.
+    </p>
+
+    <div className="mt-3 flex flex-col gap-1.5">
+      <Link href="/create">
+        <Button
+          className="w-full h-10 text-[14px] font-semibold shadow-[0_10px_26px_rgba(212,175,55,0.6)]"
+          style={{
+            background: "linear-gradient(135deg,#d4af37,#facc15,#e6c547)",
+            color: "#000",
+          }}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Create a Dare
+        </Button>
+      </Link>
+      <Link href="/explore" className="w-full">
+        <Button
+          variant="outline"
+          className="w-full h-9 border-white/15 bg-black/70 text-[12px] text-white/80"
+        >
+          <Zap className="mr-2 h-3.5 w-3.5 text-[#f5d566]" />
+          Explore live dares
+        </Button>
+      </Link>
+    </div>
+
+    <div className="mt-3 flex items-center gap-2 text-[10px] text-white/65">
+      <Sparkles className="h-3.5 w-3.5 text-[#f5d566]" />
+      <span>Win dares to earn XP and climb the leaderboard.</span>
+    </div>
+  </div>
+</section>
 
       {/* Quick bullets – mini info */}
       <section className="mt-4 space-y-3">
