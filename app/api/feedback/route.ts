@@ -25,14 +25,14 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await resend.emails.send({
-      from: "Dare Feedback <feedback@dareprotocol.com>",
+      from: "Dare Feedback <onboarding@resend.dev>", // <-- IMPORTANT
       to: toEmail,
       subject: `New Dare feedback (rating: ${rating || "N/A"})`,
       text: `Feedback:\n\n${message}\n\nRating: ${rating || "N/A"}`,
     });
 
-    if (result.error) {
-      console.error("Resend error:", result.error);
+    if ((result as any).error) {
+      console.error("Resend error:", (result as any).error);
       return NextResponse.json(
         { error: "Email send failed" },
         { status: 500 }
