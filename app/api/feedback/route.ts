@@ -1,4 +1,3 @@
-// app/api/feedback/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -25,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await resend.emails.send({
-      from: "Dare Feedback <onboarding@resend.dev>", // <-- IMPORTANT
+      from: "Dare Feedback <onboarding@resend.dev>", // default Resend sender
       to: toEmail,
       subject: `New Dare feedback (rating: ${rating || "N/A"})`,
       text: `Feedback:\n\n${message}\n\nRating: ${rating || "N/A"}`,
