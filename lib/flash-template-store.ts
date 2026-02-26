@@ -7,6 +7,8 @@ import type { FlashTaskTemplate, FlashTaskCategory } from "./flash-templates";
 export interface FlashTemplatePayload {
   template: FlashTaskTemplate;
   category: FlashTaskCategory;
+  // optional: convenience field, direct ref URL
+  oracleLink?: string;
 }
 
 interface FlashTemplateState {
@@ -17,7 +19,13 @@ interface FlashTemplateState {
 
 export const useFlashTemplateStore = create<FlashTemplateState>((set, get) => ({
   pending: null,
-  setPending: (payload) => set({ pending: payload }),
+  setPending: (payload) =>
+    set({
+      pending: {
+        ...payload,
+        oracleLink: payload.template.oracleLink, // auto copy from template
+      },
+    }),
   consumePending: () => {
     const current = get().pending;
     if (current) {

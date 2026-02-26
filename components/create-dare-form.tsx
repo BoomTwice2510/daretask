@@ -131,7 +131,10 @@ export function CreateDareForm() {
   const [description, setDescription] = useState("");
   const [durationValue, setDurationValue] = useState(3);
   const [durationType, setDurationType] = useState<"hours" | "days">("days");
-  const [token, setToken] = useState(ZERO_ADDRESS);
+
+  // token: sirf ETH allow, string type to avoid TS narrow error
+  const [token, setToken] = useState<string>(ZERO_ADDRESS);
+
   const [stake, setStake] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -139,13 +142,15 @@ export function CreateDareForm() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successTxHash, setSuccessTxHash] = useState<string | undefined>(undefined);
 
+  // flash oracle reference url (frontend-only)
+  const [referenceUrl, setReferenceUrl] = useState<string | null>(null);
+
   const durationSeconds =
     durationType === "hours" ? durationValue * 3600 : durationValue * 86400;
   const isETH = token === ZERO_ADDRESS;
 
-  const filteredTokens = ALLOWED_TOKENS.filter(
-    (t) => !["TKN2", "TOKEN2", "TKN3", "TOKEN3"].includes(t.symbol),
-  );
+  // Sirf ETH ko stake token ke liye allow karo
+  const filteredTokens = ALLOWED_TOKENS.filter((t) => t.symbol === "ETH");
 
   const searchParams = useSearchParams();
 
@@ -154,6 +159,8 @@ export function CreateDareForm() {
     const desc = searchParams.get("flashDesc");
     const proof = searchParams.get("flashProof");
     const deadlineStr = searchParams.get("flashDeadline");
+    const oracle = searchParams.get("flashOracle"); // flash oracle link
+
     if (!title || !desc || !proof || !deadlineStr) return;
 
     const deadline = Number(deadlineStr);
@@ -169,7 +176,15 @@ export function CreateDareForm() {
       value = Math.max(1, Math.round(deadline / 3600));
     }
 
-    setDescription(`${title}\n\n${desc}\n\nProof: ${proof}`);
+    let fullDesc = `${title}\n\n${desc}\n\nProof: ${proof}`;
+    if (oracle) {
+      fullDesc += `\n\nReference: ${oracle}`;
+      setReferenceUrl(oracle);
+    } else {
+      setReferenceUrl(null);
+    }
+
+    setDescription(fullDesc);
     setDurationType(type);
     setDurationValue(value);
   }, [searchParams]);
@@ -190,7 +205,7 @@ export function CreateDareForm() {
 
   function getTokenLabel() {
     const t = filteredTokens.find((tok) => tok.address === token);
-    if (!t) return "???";
+    if (!t) return "ETH";
     return symbolToDisplayName(t.symbol);
   }
 
@@ -231,7 +246,7 @@ export function CreateDareForm() {
 
       const txHash = await writeContract(
         "createDare",
-        [description, BigInt(durationSeconds), token, stakeWei],
+        [description, BigInt(durationSeconds), token as Address, stakeWei],
         isETH ? stakeWei : undefined,
       );
 
@@ -242,6 +257,7 @@ export function CreateDareForm() {
       setStake("");
       setDurationType("days");
       setDurationValue(3);
+      setReferenceUrl(null);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Transaction failed";
       if (message.includes("Wait 30m")) {
@@ -278,6 +294,18 @@ export function CreateDareForm() {
           <span className="text-xs text-white/45 text-right">
             {description.length}/500
           </span>
+
+          {/* Reference link preview */}
+          {referenceUrl && (
+            <a
+              href={referenceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-flex items-center gap-1 text-[11px] text-amber-300 underline decoration-amber-400/70 decoration-dotted"
+            >
+              📡 Open live price / data reference
+            </a>
+          )}
         </div>
 
         {/* Duration */}
@@ -369,7 +397,7 @@ export function CreateDareForm() {
           </div>
         </div>
 
-        {/* Token Selection */}
+        {/* Token Selection (ETH only) */}
         <div className="flex flex-col gap-2.5">
           <Label className="text-sm font-semibold text-white">Stake Token</Label>
           <Select
@@ -409,7 +437,7 @@ export function CreateDareForm() {
                   <SelectItem
                     key={t.address}
                     value={t.address}
-                    className="text-white focus:bg-white/10"
+                    className="text-white focus:bg:white/10"
                   >
                     <div className="flex items-center gap-2">
                       <div className="h-5 w-5 rounded-full overflow-hidden bg-black flex-shrink-0">
@@ -464,7 +492,7 @@ export function CreateDareForm() {
                   {stake} {getTokenLabel()}
                 </span>
               </div>
-              <div className="h-px bg-white/10" />
+              <div className="h-px bg:white/10" />
               <div className="flex justify-between items-center">
                 <span className="text-white/70">Total pot (with opponent)</span>
                 <span className="text-white font-semibold font-mono">

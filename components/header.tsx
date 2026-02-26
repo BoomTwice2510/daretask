@@ -80,18 +80,24 @@ export function Header() {
     : "Wrong network";
 
   const handleFlashPick = (
-    template: FlashTaskTemplate,
-    category: FlashTaskCategory,
-  ) => {
-    const params = new URLSearchParams({
-      flashTitle: template.title,
-      flashDesc: template.description,
-      flashProof: template.proofType,
-      flashDeadline: String(template.deadline),
-    });
-    setFlashOpen(false);
-    router.push(`/create?${params.toString()}`);
-  };
+  template: FlashTaskTemplate,
+  category: FlashTaskCategory,
+) => {
+  const params = new URLSearchParams({
+    flashTitle: template.title,
+    flashDesc: template.description,
+    flashProof: template.proofType,
+    flashDeadline: String(template.deadline),
+  });
+
+  // yahi se oracleLink ko bhi bhej rahe hain agar present hai
+  if (template.oracleLink) {
+    params.set("flashOracle", template.oracleLink);
+  }
+
+  setFlashOpen(false);
+  router.push(`/create?${params.toString()}`);
+};
 
   async function handleConnect() {
     try {

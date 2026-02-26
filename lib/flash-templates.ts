@@ -7,6 +7,7 @@ export interface FlashTaskTemplate {
   deadline: number; // seconds
   proofType: string;
   failureRate: string;
+  oracleLink?: string; // reference URL for frontend-only oracle/result
 }
 
 export interface FlashTaskCategory {
@@ -28,6 +29,169 @@ export function secondsToDuration(
 }
 
 export const FLASH_TASK_CATEGORIES: FlashTaskCategory[] = [
+  // 🚀 FEATURED: CRYPTO / MARKETS ON TOP
+  {
+    id: "crypto",
+    name: "Crypto / Markets",
+    emoji: "📈",
+    description: "Featured: short‑term onchain bets for degens. Pure P2P jackpots.",
+    failureRating: 4,
+    templates: [
+      {
+        id: "eth-15m-updown",
+        title: "Will ETH go UP or DOWN in 15 minutes?",
+        description:
+          "Create a dare on ETH 15-minute move. Choose direction in description like: 'ETH UP in 15m' or 'ETH DOWN in 15m'. Use this price feed as reference.",
+        deadline: 15 * 60,
+        proofType: "Price screenshot or oracle link at end time",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://www.coinbase.com/price/ethereum",
+      },
+      {
+        id: "btc-1h-range-break",
+        title: "Will BTC break today's high in 1 hour?",
+        description:
+          "Dare that BTC will make a new intraday high within the next 1 hour. Both sides agree to use this chart as reference (e.g. BTC/USDT).",
+        deadline: 60 * 60,
+        proofType: "Exchange chart screenshot at end time",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://www.tradingview.com/symbols/BTCUSD/",
+      },
+      {
+        id: "sol-4h-pump",
+        title: "Will SOL pump 3%+ in 4 hours?",
+        description:
+          "Create a dare that SOL will move +3% or more in the next 4 hours. Pick a single reference price now from this page and lock it in description.",
+        deadline: 4 * 60 * 60,
+        proofType: "Price change calculation from chosen reference",
+        failureRate: "🔥🔥",
+        oracleLink: "https://www.coingecko.com/en/coins/solana",
+      },
+      {
+        id: "meme-24h-2x",
+        title: "Can this meme coin 2x in 24 hours?",
+        description:
+          "Pick any meme coin and dare that its price will at least 2x within 24 hours. Clearly mention token contract + starting price in description using this site.",
+        deadline: 24 * 60 * 60,
+        proofType: "Dexscreener / CEX chart link",
+        failureRate: "🔥🔥🔥🔥",
+        oracleLink: "https://dexscreener.com",
+      },
+      {
+        id: "gas-6h-spike",
+        title: "Will Ethereum gas spike above 40 gwei in 6 hours?",
+        description:
+          "Bet that average gas price on Ethereum will cross 40 gwei at least once in the next 6 hours. Use this gas tracker as reference.",
+        deadline: 6 * 60 * 60,
+        proofType: "Etherscan gas tracker screenshot",
+        failureRate: "🔥🔥",
+        oracleLink: "https://etherscan.io/gastracker",
+      },
+      {
+        id: "whale-tx-12h",
+        title: "Will there be a $10M+ BTC or ETH onchain transfer in 12 hours?",
+        description:
+          "Dare that there will be at least one onchain transfer worth $10M+ in BTC or ETH in the next 12 hours. Track using this whale-alert style feed.",
+        deadline: 12 * 60 * 60,
+        proofType: "Whale tracker link or transaction hash",
+        failureRate: "🔥🔥",
+        oracleLink: "https://whale-alert.io/",
+      },
+      {
+        id: "alt-24h-top-gainer",
+        title: "Will your chosen altcoin be a top gainer in 24 hours?",
+        description:
+          "Pick any mid‑cap alt and bet it will be in the top gainers list (e.g. top 10 by % gain) within 24 hours on this page.",
+        deadline: 24 * 60 * 60,
+        proofType: "CoinGecko / CMC top gainers page",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://www.coingecko.com/en/coins/trending",
+      },
+      {
+        id: "eth-btc-ratio-move",
+        title: "Will the BTC/ETH ratio move 1%+ today?",
+        description:
+          "Dare that BTC/ETH ratio will change by at least 1% (up or down) by end of day. Both sides reference the ratio chart on this link.",
+        deadline: 24 * 60 * 60,
+        proofType: "Ratio calculation from price history site",
+        failureRate: "🔥🔥",
+        oracleLink: "https://www.tradingview.com/symbols/ETHBTC/",
+      },
+      {
+        id: "nft-floor-move",
+        title: "Will this NFT collection floor move 5% in 24 hours?",
+        description:
+          "Pick any NFT collection and dare its floor price will move at least 5% (up or down) within 24 hours on the chosen marketplace.",
+        deadline: 24 * 60 * 60,
+        proofType: "Marketplace floor history screenshot",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://blur.io",
+      },
+      {
+        id: "no-hack-48h",
+        title: "No major DeFi hack over $5M in 48 hours",
+        description:
+          "Bet that there will be no DeFi hack or exploit above $5M in the next 48 hours. Use this security/news feed as reference.",
+        deadline: 48 * 60 * 60,
+        proofType: "News / security feed links",
+        failureRate: "🔥🔥",
+        oracleLink: "https://rekt.news",
+      },
+      {
+        id: "eth-weekend-gap",
+        title: "Will ETH close this weekend above its Friday close?",
+        description:
+          "Dare that ETH weekend closing price will be above its Friday closing price on a chosen exchange. Use this chart for both prices.",
+        deadline: 3 * 24 * 60 * 60,
+        proofType: "Weekend vs Friday close chart",
+        failureRate: "🔥🔥",
+        oracleLink: "https://www.tradingview.com/symbols/ETHUSD/",
+      },
+      {
+        id: "btc-event-react",
+        title: "Will BTC move 2%+ after a big news/event?",
+        description:
+          "Use any scheduled event (FOMC, ETF, election speech) and bet BTC will move at least 2% within X hours after the event starts. Reference this chart.",
+        deadline: 12 * 60 * 60,
+        proofType: "Event timestamp + price move screenshot",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://www.tradingview.com/symbols/BTCUSD/",
+      },
+      {
+        id: "sol-vs-eth-perf",
+        title: "Will SOL outperform ETH by 1% today?",
+        description:
+          "Dare that SOL daily % change will be at least 1% higher than ETH by end of day. Compare both via this chart layout.",
+        deadline: 24 * 60 * 60,
+        proofType: "Daily % change comparison screenshot",
+        failureRate: "🔥🔥",
+        oracleLink:
+          "https://www.tradingview.com/chart/?symbol=SOLUSD,ETHUSD",
+      },
+      {
+        id: "degen-meme-top10",
+        title: "Will any new meme coin enter top 10 volume today?",
+        description:
+          "Bet that some new meme coin (launched in last 7 days) will hit top 10 by 24h volume on a chosen DEX or tracker like this.",
+        deadline: 24 * 60 * 60,
+        proofType: "Volume ranking page screenshot",
+        failureRate: "🔥🔥🔥",
+        oracleLink: "https://www.coingecko.com/en/categories/meme-token",
+      },
+      {
+        id: "funding-flip",
+        title: "Will perp funding turn negative/positive in 12 hours?",
+        description:
+          "Pick any major perp market (BTC/ETH) and dare that funding rate will flip sign (positive to negative or reverse) within 12 hours using this data.",
+        deadline: 12 * 60 * 60,
+        proofType: "Perp funding history screenshot",
+        failureRate: "🔥🔥",
+        oracleLink: "https://www.coinglass.com/funding/BTC",
+      },
+    ],
+  },
+
+  // BELOW: original categories as‑is
   {
     id: "build",
     name: "Build / Ship",
