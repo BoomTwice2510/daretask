@@ -1,8 +1,8 @@
 // components/feedback-button.tsx
 "use client";
 
-import { useState, useRef } from "react";
-import { MessageCircle, Upload } from "lucide-react";
+import { useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,59 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 
-type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
-
 export function FeedbackButton() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
-  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const uploadScreenshot = async (file: File) => {
-    try {
-      setUploadStatus("uploading");
-
-      // Simple anonymous upload via imgbb or similar service would go here.
-      // For now we just convert to data URL and include that inline.
-      // (You can later replace this with Supabase / S3 upload.)
-      const reader = new FileReader();
-      const filePromise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-      });
-      reader.readAsDataURL(file);
-      const dataUrl = await filePromise;
-
-      setScreenshotUrl(dataUrl);
-      setUploadStatus("uploaded");
-    } catch (err) {
-      console.error("Screenshot upload error:", err);
-      setUploadStatus("error");
-      setScreenshotUrl(null);
-    }
-  };
-
-  const handleFileChange = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
-      e.target.value = "";
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-      alert("Please upload an image smaller than 3 MB.");
-      e.target.value = "";
-      return;
-    }
-
-    await uploadScreenshot(file);
-  };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,28 +28,19 @@ export function FeedbackButton() {
       const res = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, rating, screenshotUrl }),
+        body: JSON.stringify({ message, rating }),
       });
 
-      let data: any = null;
-      try {
-        data = await res.json();
-      } catch {
-        // ignore json error
-      }
-
-      if (!res.ok || !data?.ok) {
-        console.error("Feedback error:", data || (await res.text()));
-        alert("Feedback could not be sent. Please try again later.");
+      // Do NOT parse JSON if not needed; just check status code
+      if (res.status >= 200 && res.status < 300) {
+        alert("Thank you for your feedback!");
+        (e.currentTarget as HTMLFormElement).reset();
+        setOpen(false);
         return;
       }
 
-      alert("Thank you for your feedback!");
-      (e.currentTarget as HTMLFormElement).reset();
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setScreenshotUrl(null);
-      setUploadStatus("idle");
-      setOpen(false);
+      console.error("Feedback error status:", res.status);
+      alert("Feedback could not be sent. Please try again later.");
     } catch (err) {
       console.error("Network error:", err);
       alert("Network error. Please try again.");
@@ -138,7 +79,7 @@ export function FeedbackButton() {
           Help us improve Dare Protocol
         </DialogTitle>
         <p className="text-xs text-white/70 mb-3">
-          Share bugs, UX issues, or ideas. You can also attach a screenshot.
+          Share bugs, UX issues, or ideas. No login, no email required.
         </p>
 
         <form onSubmit={onSubmit} className="space-y-3">
@@ -171,50 +112,17 @@ export function FeedbackButton() {
             </select>
           </div>
 
-          <div className="space-y-1">
-            <span className="text-xs font-medium text-white/80">
-              Optional screenshot
-            </span>
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-2 rounded-lg border border-dashed border-[#facc15]/60 bg-black/60 px-3 py-2 text-[11px] cursor-pointer hover:bg-black/80 transition">
-                <Upload className="h-3.5 w-3.5 text-[#facc15]" />
-                <span>
-                  {uploadStatus === "uploading"
-                    ? "Uploading…"
-                    : "Attach screenshot (max 3 MB)"}
-                </span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </label>
-              {screenshotUrl && (
-                <span className="text-[10px] text-green-400">
-                  Screenshot attached
-                </span>
-              )}
-              {uploadStatus === "error" && (
-                <span className="text-[10px] text-red-400">
-                  Upload failed
-                </span>
-              )}
-            </div>
-          </div>
-
           <Button
             type="submit"
             className="w-full h-9 text-xs font-semibold bg-gradient-to-r from-[#facc15] via-[#f5d566] to-[#d4af37] text-black"
-            disabled={loading || uploadStatus === "uploading"}
+            disabled={loading}
           >
             {loading ? "Sending…" : "Submit feedback"}
           </Button>
         </form>
 
         <p className="mt-2 text-[10px] text-white/45 text-center">
-          100% anonymous – only your feedback and optional screenshot are sent.
+          100% anonymous – only your feedback text is stored.
         </p>
       </DialogContent>
     </Dialog>
