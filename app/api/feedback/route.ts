@@ -1,3 +1,4 @@
+// app/api/feedback/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
@@ -5,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, rating } = await req.json();
+    const { message, rating, screenshotUrl } = await req.json();
 
     if (!message) {
       return NextResponse.json(
@@ -23,11 +24,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const textParts = [
+      `Feedback:\n${message}`,
+      `\nRating: ${rating || "N/A"}`,
+      screenshotUrl ? `\nScreenshot (data URL):\n${screenshotUrl}` : "",
+    ];
+
     const result = await resend.emails.send({
-      from: "Dare Feedback <onboarding@resend.dev>", // default Resend sender
+      from: "Dare Feedback <onboarding@resend.dev>",
       to: toEmail,
       subject: `New Dare feedback (rating: ${rating || "N/A"})`,
-      text: `Feedback:\n\n${message}\n\nRating: ${rating || "N/A"}`,
+      text: textParts.join("\n"),
     });
 
     if ((result as any).error) {
