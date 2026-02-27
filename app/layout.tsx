@@ -1,9 +1,11 @@
-// app/layout.tsx
+// app/layout.tsx - Complete with Analytics + Speed Insights (named import fix)
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Inter } from "next/font/google";
 import { FeedbackButton } from "@/components/feedback-button";
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';  // Named import (braces ke saath)
 
 const inter = Inter({
   subsets: ["latin"],
@@ -51,6 +53,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>{children}</Providers>
         <FeedbackButton />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
