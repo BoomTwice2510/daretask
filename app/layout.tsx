@@ -49,6 +49,13 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="base:app_id" content="697782ba88e3bac59cf3d9c8" />
+
+        {/* Talent Protocol Verification */}
+        <meta
+          name="talentapp:project_verification"
+          content="2ebf03996d850c884f6183eb2455c2e2f7f2bceb4a541675b8cdfc30d57764b607c5c6cc09ef50b4323e60b45cd654d9ceb67f7157069cdbfe7f5ce46d058db7"
+        />
+
       </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
