@@ -12,6 +12,7 @@ import {
   Sparkles,
   Clock,
   Trophy,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -91,110 +92,113 @@ export default function DareDetailPage({
   }, [fetchDare]);
 
   return (
-    <div className="dare-light-shell dare-detail-page">
+    <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">
+      {/* Background Ambient Moving Light Spheres */}
+      <div className="pointer-events-none absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div
+        className="pointer-events-none absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+        style={{ animationDelay: "-6s" }}
+      />
+
       <Header />
 
-      {/* yahan core fix: pb-32 md:pb-24 */}
-      <main className="dare-page-wide">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-6">
+      <main className="relative mx-auto w-full max-w-[1240px] px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:pb-20 lg:pt-8">
+        
+        {/* Top Navigation Row */}
+        <div className="mb-6 flex items-center justify-between">
           <Link
-            href="/"
-            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
+            href="/explore"
+            className="glass-card-interactive group inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black text-slate-600 hover:text-[#0052FF] transition-all"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            <span className="relative">
-              Back to feed
-              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
-            </span>
+            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
+            <span>Back to Explore</span>
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.35)]">
+          <div className="glass-panel inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-black text-slate-700 shadow-xs">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0052FF] opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#0052FF]" />
             </span>
-            On‑chain dare detail
+            <span>On-Chain Escrow</span>
           </div>
         </div>
 
-        {/* Hero header */}
+        {/* Hero Header when Loaded */}
         {dare && !loading && !error && (
-          <section className="mb-4 flex items-start justify-between gap-4">
-            <div className="space-y-1.5">
-              <div className="inline-flex items-center gap-1 rounded-full border border-yellow-500/20 bg-yellow-500/5 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
-                <Sparkles className="h-3 w-3 text-yellow-300" />
-                <span>Dare detail</span>
+          <section className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50/90 border border-blue-200/70 px-3 py-1 text-[10.5px] font-black uppercase tracking-[0.16em] text-[#0052FF] shadow-xs">
+                <Sparkles className="h-3 w-3" />
+                <span>Base Challenge Protocol</span>
               </div>
 
-              <h1
-                className="text-2xl md:text-3xl font-bold tracking-tight"
-                style={{
-                  background:
-                    "linear-gradient(to right,#f5d566,#e6c547,#d4af37,#f97316)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Dare #{dareId}
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-tight">
+                Dare <span className="text-gradient-soothing">#{dareId}</span>
               </h1>
 
-              <p className="mt-0.5 text-xs text-white/60 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-[#f5d566]" />
-                Created at{" "}
-                {new Date(Number(dare.createdAt) * 1000).toLocaleString()}
+              <p className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-400">
+                <Clock className="h-4 w-4 text-slate-400" />
+                Created on {new Date(Number(dare.createdAt) * 1000).toLocaleDateString()} at {new Date(Number(dare.createdAt) * 1000).toLocaleTimeString()}
               </p>
             </div>
 
+            {/* Winner Badge Card */}
             {winnerAddress &&
               winnerAddress !==
                 "0x0000000000000000000000000000000000000000" && (
                 <Link
                   href={`/profile/${winnerAddress}`}
-                  className="group inline-flex flex-col items-end text-xs text-emerald-400"
+                  className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3.5 shadow-xs"
                 >
-                  <span className="inline-flex items-center gap-1 font-medium">
-                    <div className="relative">
-                      <span className="absolute inset-0 rounded-full bg-emerald-500/30 blur-sm group-hover:blur-md transition-all" />
-                      <Trophy className="relative h-3.5 w-3.5 text-emerald-300 group-hover:scale-110 transition-transform duration-200" />
-                    </div>
-                    <span>Winner</span>
-                  </span>
-                  <span className="font-mono text-white/80 group-hover:text-white transition-colors">
-                    {winnerAddress.slice(0, 6)}...{winnerAddress.slice(-4)}
-                  </span>
-                  <span className="mt-0.5 text-[10px] text-white/40 group-hover:text-emerald-300/80 transition-colors">
-                    View on‑chain profile
-                  </span>
+                  <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 via-white to-emerald-100/80 border border-emerald-200/80 text-emerald-600 shadow-xs group-hover:scale-105 transition-transform">
+                    <div className="absolute inset-1 rounded-lg bg-emerald-400/10 blur-xs" />
+                    <Trophy className="relative z-10 h-5 w-5 stroke-[2.2]" />
+                  </div>
+                  
+                  <div className="flex flex-col text-left">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
+                      Verified Winner
+                    </span>
+                    <span className="font-mono text-xs sm:text-sm font-black text-slate-900 group-hover:text-[#0052FF] transition-colors">
+                      {winnerAddress.slice(0, 6)}...{winnerAddress.slice(-4)}
+                    </span>
+                    <span className="inline-flex items-center gap-0.5 text-[10.5px] font-bold text-slate-400 group-hover:text-slate-600 transition-colors">
+                      View profile <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
                 </Link>
               )}
           </section>
         )}
 
-        {/* Loading */}
+        {/* Loading Skeleton View */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
-            <p className="text-xs text-white/60">
-              Fetching on‑chain dare data…
+          <div className="glass-panel flex flex-col items-center justify-center rounded-[30px] py-24 gap-3.5 text-center shadow-xs">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0052FF] shadow-xs">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-slate-500">
+              Fetching verified on-chain dare data from Base...
             </p>
           </div>
         )}
 
-        {/* Error */}
+        {/* Error Feedback View */}
         {error && !loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <AlertCircle className="h-10 w-10 text-red-400" />
-            <p className="text-white font-medium">{error}</p>
-            <p className="text-xs text-white/50">
-              Check your connection or try again in a moment.
+          <div className="glass-panel flex flex-col items-center justify-center rounded-[30px] border-rose-200 py-20 gap-3 text-center shadow-xs">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 shadow-xs">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <p className="text-base font-black text-slate-900">{error}</p>
+            <p className="text-xs text-slate-400 font-medium">
+              Please check your wallet connection and network, then refresh.
             </p>
           </div>
         )}
 
-        {/* Dare content */}
+        {/* Dare Content Core Wrapper */}
         {dare && !loading && !error && (
-          <div className="group rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-5 md:p-6 shadow-[0_18px_60px_rgba(0,0,0,0.9)] transition-all duration-300 hover:shadow-[0_24px_80px_rgba(0,0,0,1)] hover:-translate-y-0.5">
+          <div className="glass-panel relative rounded-[32px] p-5 sm:p-7 md:p-8 shadow-[0_12px_45px_rgba(15,23,42,0.04)]">
             <DareDetail dare={dare} onRefresh={fetchDare} />
           </div>
         )}

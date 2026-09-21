@@ -4,6 +4,7 @@ import { use, useState, useEffect, useCallback } from "react";
 import { useWeb3 } from "@/lib/web3-provider";
 import { Header } from "@/components/header";
 import { DareCard } from "@/components/dare-card";
+import { BadgeDisplay } from "@/components/badge-display";
 import type { DareData, UserStats } from "@/lib/types";
 import { shortenAddress } from "@/lib/helpers";
 import {
@@ -24,9 +25,11 @@ import {
   Camera,
   X,
   Save,
+  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 type FarcasterUser = {
   fid: number;
@@ -337,42 +340,57 @@ export default function ProfilePage({
   const nextXp = badge < 7 ? BADGE_MIN_XP[badge + 1] : BADGE_MIN_XP[7];
 
   return (
-    <div className="dare-light-shell min-h-screen bg-[#f5f8fc] text-[#173154]">
+    <div className="relative min-h-screen w-full overflow-x-hidden bg-white text-slate-900">
+      {/* Background Ambient Moving Light Spheres */}
+      <div className="pointer-events-none absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div
+        className="pointer-events-none absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+        style={{ animationDelay: "-6s" }}
+      />
+
       <Header />
 
-      <main className="dare-page-wide pb-16 pt-5 sm:pt-7">
-        <div className="mb-5 flex items-center justify-between gap-3">
+      <main className="relative mx-auto w-full max-w-[1240px] px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-5 sm:px-6 lg:px-8 lg:pb-20 lg:pt-8">
+        
+        {/* Top Navigation Row */}
+        <div className="mb-6 flex items-center justify-between gap-3">
           <Link
             href="/explore"
-            className="group inline-flex items-center gap-2 text-xs font-semibold text-[#60718c] transition-colors hover:text-[#1268f3]"
+            className="glass-card-interactive group inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black text-slate-600 hover:text-[#0052FF] transition-all"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            Back to explore
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            <span>Back to Explore</span>
           </Link>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#dce5f1] bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#60718c] shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            On-chain profile
-          </span>
+          
+          <div className="glass-panel inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-black text-slate-700 shadow-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+            <span>On-Chain Identity</span>
+          </div>
         </div>
 
-        <section className="overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_18px_55px_rgba(35,65,110,0.08)]">
-          <div className="h-1.5 bg-gradient-to-r from-[#1268f3] via-[#f5d566] to-[#1268f3]" />
-          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 lg:p-7">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="relative shrink-0">
-                <div className="absolute -inset-1 rounded-[20px] bg-[#f5d566]/20 blur-md" />
-                {profileMeta.avatar_url || fcUser?.pfp_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={profileMeta.avatar_url || fcUser?.pfp_url || ""}
-                    alt={profileMeta.username || fcUser?.display_name || fcUser?.username || "Profile"}
-                    className="relative h-16 w-16 rounded-[20px] border border-[#d8b93f] object-cover sm:h-[72px] sm:w-[72px]"
-                  />
-                ) : (
-                  <div className="relative flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#dce5f1] bg-[#f5f8fc] text-[#1268f3] sm:h-[72px] sm:w-[72px]">
-                    <span className="text-lg font-black">D</span>
-                  </div>
-                )}
+        {/* User Profile Card */}
+        <section className="glass-panel relative overflow-hidden rounded-[32px] p-5 sm:p-8 shadow-[0_12px_45px_rgba(15,23,42,0.04)]">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start sm:items-center gap-4 sm:gap-5">
+              
+              {/* 3D Glass Avatar Container: strictly locked to 64px on mobile, 80px on sm */}
+              <div className="relative h-16 w-16 min-w-[4rem] max-w-[4rem] sm:h-20 sm:w-20 sm:min-w-[5rem] sm:max-w-[5rem] shrink-0">
+                <div className="relative flex h-full w-full items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br from-blue-50 via-white to-blue-100/80 border border-blue-200/80 shadow-[0_4px_18px_rgba(0,82,255,0.14)] overflow-hidden">
+                  {profileMeta.avatar_url || fcUser?.pfp_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={profileMeta.avatar_url || fcUser?.pfp_url || ""}
+                      alt={profileMeta.username || fcUser?.display_name || fcUser?.username || "Profile"}
+                      className="block h-full w-full max-h-full max-w-full aspect-square object-cover"
+                    />
+                  ) : (
+                    <UserRound className="h-8 w-8 sm:h-9 sm:w-9 text-slate-400" />
+                  )}
+                </div>
+
                 {isOwnProfile && (
                   <button
                     type="button"
@@ -381,80 +399,94 @@ export default function ProfilePage({
                       setEditingProfile((value) => !value);
                       setProfileSaveError("");
                     }}
-                    className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#1268f3] text-white shadow-lg transition hover:bg-[#0d58d1]"
+                    className="absolute -bottom-1.5 -right-1.5 sm:-bottom-2 sm:-right-2 flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl border border-white bg-[#0052FF] text-white shadow-md transition hover:bg-[#0045d8] hover:scale-105 active:scale-90 cursor-pointer"
                     aria-label="Edit profile"
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <Pencil className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </button>
                 )}
               </div>
 
-              <div className="min-w-0">
-                <div className="mb-1 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-[#eef5ff] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#1268f3]">
-                    Dare reputation
-                  </span>
+              {/* User Address & Identity Details */}
+              <div className="min-w-0 flex-1 overflow-hidden">
+                <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-1 rounded-full bg-blue-50/90 border border-blue-200/70 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-[0.16em] text-[#0052FF] shadow-xs">
+                    Base Reputation
+                  </div>
+
                   {isOwnProfile && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#fff8df] px-2 py-0.5 text-[9px] font-bold text-[#9a7610]">
-                      <Sparkles className="h-3 w-3" /> Your profile
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50/90 border border-amber-200/80 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-amber-700 shadow-xs">
+                      <Sparkles className="h-3 w-3" /> Connected Wallet
                     </span>
                   )}
                 </div>
+
                 {(profileMeta.username || fcUser?.username) && (
-                  <div className="text-xs font-semibold text-[#60718c]">
+                  <div className="truncate text-xs font-bold text-slate-500 mb-0.5">
                     @{profileMeta.username || fcUser?.username}
                   </div>
                 )}
+
                 <div className="mt-1 flex min-w-0 items-center gap-2">
-                  <span className="truncate font-mono text-sm font-bold text-[#173154] sm:text-base">
+                  <span className="truncate font-mono text-base sm:text-lg font-black text-slate-900">
                     {shortenAddress(profileAddress)}
                   </span>
+                  
                   <button
                     onClick={handleCopy}
-                    className="shrink-0 rounded-lg border border-[#dce5f1] bg-[#f8fafc] p-1.5 text-[#7b8aa1] transition hover:border-[#b9cde8] hover:bg-[#eef5ff] hover:text-[#1268f3]"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
                     aria-label="Copy address"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-4 w-4 text-emerald-500 stroke-[3]" /> : <Copy className="h-4 w-4" />}
                   </button>
+
                   <a
                     href={`https://basescan.org/address/${profileAddress}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="shrink-0 rounded-lg border border-[#dce5f1] bg-[#f8fafc] p-1.5 text-[#7b8aa1] transition hover:border-[#b9cde8] hover:bg-[#eef5ff] hover:text-[#1268f3]"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-[#0052FF] hover:bg-slate-50 active:scale-90 transition-all shadow-xs"
                     aria-label="View on BaseScan"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" />
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 </div>
-                <p className="mt-1 text-[11px] text-[#7b8aa1]">
-                  {isOwnProfile ? "Your on-chain dare history" : "Public dare profile"}
+
+                <p className="mt-1 text-xs font-semibold text-slate-400 truncate sm:whitespace-normal">
+                  {isOwnProfile ? "Your decentralized challenge history on Base" : "Public profile & on-chain track record"}
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:min-w-[250px]">
-              <div className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-4 py-3">
-                <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">Wins</div>
-                <div className="mt-1 flex items-center gap-1.5 text-lg font-black text-[#173154]">
-                  <Trophy className="h-4 w-4 text-[#d8ad25]" />
+            {/* Quick Header Metric Pills */}
+            <div className="grid grid-cols-2 gap-3 sm:min-w-[260px]">
+              <div className="glass-card-interactive flex flex-col justify-between rounded-2xl p-3.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Wins</span>
+                <div className="mt-1.5 flex items-center gap-2 font-mono text-xl sm:text-2xl font-black text-emerald-600">
+                  <Trophy className="h-5 w-5" />
                   {stats ? Number(stats.totalWins) : 0}
                 </div>
               </div>
-              <div className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-4 py-3">
-                <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">XP</div>
-                <div className="mt-1 text-lg font-black text-[#1268f3]">{xp}</div>
+              
+              <div className="glass-card-interactive flex flex-col justify-between rounded-2xl p-3.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total XP</span>
+                <div className="mt-1.5 font-mono text-xl sm:text-2xl font-black text-[#0052FF]">
+                  {xp.toLocaleString()}
+                </div>
               </div>
             </div>
           </div>
         </section>
 
+        {/* Profile Customizer Drawer */}
         {isOwnProfile && editingProfile && (
-          <section className="mt-4 rounded-[24px] border border-[#cfe0f8] bg-white p-5 shadow-[0_14px_40px_rgba(35,65,110,0.07)] sm:p-6">
+          <section className="glass-panel mt-4 rounded-[28px] p-6 shadow-xs animate-menu-slide">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1268f3]">Profile settings</div>
-                <h2 className="mt-1 text-lg font-black text-[#173154]">Customize your Dare identity</h2>
-                <p className="mt-1 text-xs text-[#7b8aa1]">Username and avatar are stored off-chain. Your wallet and reputation remain on-chain.</p>
+                <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#0052FF]">
+                  <Sparkles className="h-3 w-3" /> Identity Settings
+                </div>
+                <h2 className="mt-1 text-lg font-black text-slate-900">Customize Your Dare Profile</h2>
+                <p className="mt-1 text-xs font-medium text-slate-500">Username and avatar are stored off-chain. Your wallet reputation remains verifiable on Base.</p>
               </div>
               <button
                 type="button"
@@ -464,7 +496,7 @@ export default function ProfilePage({
                   setAvatarPreview(null);
                   setProfileSaveError("");
                 }}
-                className="rounded-xl border border-[#dce5f1] p-2 text-[#7b8aa1] hover:bg-[#f5f8fc]"
+                className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition cursor-pointer"
                 aria-label="Close profile editor"
               >
                 <X className="h-4 w-4" />
@@ -472,18 +504,18 @@ export default function ProfilePage({
             </div>
 
             <div className="mt-5 grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
-              <label className="group relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-[24px] border border-[#dce5f1] bg-[#f5f8fc]">
+              <label className="group relative flex h-24 w-24 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition shadow-xs">
                 {avatarPreview || profileMeta.avatar_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={avatarPreview || profileMeta.avatar_url || ""}
                     alt="Avatar preview"
-                    className="h-full w-full object-cover"
+                    className="block h-full w-full aspect-square object-cover"
                   />
                 ) : (
-                  <div className="flex flex-col items-center gap-1 text-[#1268f3]">
-                    <Camera className="h-5 w-5" />
-                    <span className="text-[9px] font-bold uppercase">Add DP</span>
+                  <div className="flex flex-col items-center gap-1.5 text-[#0052FF]">
+                    <Camera className="h-6 w-6 stroke-[2.2]" />
+                    <span className="text-[10px] font-black uppercase">Upload DP</span>
                   </div>
                 )}
                 <input
@@ -495,152 +527,197 @@ export default function ProfilePage({
               </label>
 
               <div>
-                <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">
-                  Username
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  Custom Handle
                 </label>
                 <div className="mt-2 flex gap-2">
-                  <div className="flex min-w-0 flex-1 items-center rounded-xl border border-[#dce5f1] bg-[#f8fafc] px-3">
-                    <span className="text-sm font-bold text-[#9aa7b8]">@</span>
+                  <div className="flex min-w-0 flex-1 items-center rounded-2xl border border-slate-200/80 bg-white px-3.5 shadow-xs">
+                    <span className="text-sm font-bold text-slate-400">@</span>
                     <input
                       value={usernameInput}
                       onChange={(event) => setUsernameInput(event.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 24))}
-                      placeholder="your_username"
-                      className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm font-semibold text-[#173154] outline-none placeholder:text-[#aeb9c7]"
+                      placeholder="your_handle"
+                      className="min-w-0 flex-1 bg-transparent px-2 py-3 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-300"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={handleSaveProfile}
                     disabled={savingProfile}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#1268f3] px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_20px_rgba(18,104,243,0.18)] transition hover:bg-[#0d58d1] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] px-5 py-3 text-xs font-black text-white shadow-[0_6px_20px_rgba(0,82,255,0.25)] active:scale-95 transition disabled:opacity-60 cursor-pointer"
                   >
                     {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    Save
+                    <span>Save</span>
                   </button>
                 </div>
-                <p className="mt-2 text-[10px] text-[#9aa7b8]">3-24 characters. Letters, numbers and underscore only. Max avatar size: 5 MB.</p>
+                <p className="mt-2 text-[10.5px] font-semibold text-slate-400">3-24 characters (letters, numbers, underscore). Maximum avatar size: 5 MB.</p>
                 {profileSaveError && (
-                  <p className="mt-2 text-xs font-semibold text-rose-600">{profileSaveError}</p>
+                  <p className="mt-2 text-xs font-bold text-rose-600">{profileSaveError}</p>
                 )}
               </div>
             </div>
           </section>
         )}
 
+        {/* Loading Skeleton */}
         {loading && (
-          <div className="flex flex-col items-center justify-center gap-3 py-24">
-            <Loader2 className="h-8 w-8 animate-spin text-[#1268f3]" />
-            <p className="text-xs font-medium text-[#7b8aa1]">Reading on-chain profile data…</p>
+          <div className="glass-panel flex flex-col items-center justify-center rounded-[32px] py-24 gap-3 text-center shadow-xs mt-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0052FF] shadow-xs">
+              <Loader2 className="h-6 w-6 animate-spin" />
+            </div>
+            <p className="text-xs sm:text-sm font-bold text-slate-500">Reading on-chain profile data from Base…</p>
           </div>
         )}
 
         {!loading && stats && (
           <>
-            <section className="mt-5 overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_16px_45px_rgba(35,65,110,0.07)]">
-              <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:p-7">
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[22px] border border-[#e4d17a] bg-gradient-to-br from-[#fffdf2] to-[#fff6c9] text-[#b18a16] shadow-[0_8px_25px_rgba(216,173,37,0.16)]">
-                    <Trophy className="h-7 w-7" />
+            {/* Rank Showcase & Level Up Progression */}
+            <section className="glass-panel mt-6 overflow-hidden rounded-[30px] p-6 sm:p-8 shadow-xs">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex min-w-0 items-center gap-4.5">
+                  <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-amber-100/80 border border-amber-200/90 text-amber-600 shadow-[0_4px_16px_rgba(245,158,11,0.16)]">
+                    <div className="absolute inset-1 rounded-xl bg-amber-400/10 blur-xs" />
+                    <Trophy className="relative z-10 h-8 w-8 stroke-[2.2]" />
                   </div>
+
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#7b8aa1]">Current rank</div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-black tracking-tight text-[#173154] sm:text-3xl">{BADGES[badge]}</h1>
-                      <span className="rounded-full border border-[#f0df91] bg-[#fff9df] px-2.5 py-1 text-[10px] font-black text-[#9a7610]">{xp} XP</span>
+                    <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Current Protocol Tier</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2.5">
+                      <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{BADGES[badge]}</h1>
+                      <span className="rounded-xl border border-blue-200/80 bg-blue-50 px-2.5 py-0.5 text-xs font-black text-[#0052FF]">{xp.toLocaleString()} XP</span>
                     </div>
-                    <p className="mt-1 text-xs text-[#7b8aa1]">
-                      {badge >= 7 ? "Maximum reputation tier reached." : `${Math.max(0, nextXp - xp)} XP to ${nextBadge}.`}
+                    <p className="mt-1 text-xs font-semibold text-slate-500">
+                      {badge >= 7 ? "Maximum on-chain reputation tier achieved." : `${Math.max(0, nextXp - xp).toLocaleString()} XP required to reach ${nextBadge}.`}
                     </p>
                   </div>
                 </div>
 
-                <div className="w-full lg:max-w-[520px]">
-                  <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.1em] text-[#7b8aa1]">
+                {/* Progress Bar Container */}
+                <div className="w-full lg:max-w-[500px]">
+                  <div className="mb-2 flex items-center justify-between text-xs font-bold text-slate-600">
                     <span>{BADGES[badge]}</span>
-                    <span>{badge >= 7 ? "MAX" : nextBadge}</span>
+                    <span className="text-[#0052FF]">{badge >= 7 ? "MAX" : nextBadge}</span>
                   </div>
-                  <div className="h-2.5 overflow-hidden rounded-full bg-[#edf2f7]">
+                  <div className="relative h-2.5 overflow-hidden rounded-full bg-slate-100 p-0.5 shadow-inner">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-[#1268f3] via-[#5d8ff0] to-[#f5d566] transition-all duration-700"
+                      className="h-full rounded-full bg-gradient-to-r from-[#0052FF] via-indigo-500 to-emerald-500 transition-all duration-700 shadow-xs"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
-                  <div className="mt-2 text-right text-[10px] font-semibold text-[#9aa7b8]">{progress.toFixed(0)}% complete</div>
+                  <div className="mt-1.5 text-right text-[11px] font-bold text-slate-400">{progress.toFixed(0)}% completed</div>
                 </div>
               </div>
 
-              <div className="grid border-t border-[#edf1f6] sm:grid-cols-2 lg:grid-cols-4">
+              {/* 4-Stat Border Grid */}
+              <div className="mt-8 grid border-t border-slate-100 pt-5 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {([
-                  { label: "Wins", value: Number(stats.totalWins), Icon: Trophy, color: "text-emerald-600" },
-                  { label: "Losses", value: Number(stats.totalLosses), Icon: Target, color: "text-rose-500" },
-                  { label: "Dispute wins", value: Number(stats.totalDisputeWins), Icon: Swords, color: "text-amber-600" },
-                  { label: "Active dares", value: Number(stats.activeCountCreator) + Number(stats.activeCountAccepter), Icon: Activity, color: "text-[#1268f3]" },
-                ] as const).map(({ label, value, Icon: StatIcon, color }, index) => {
+                  { label: "Total Wins", value: Number(stats.totalWins), Icon: Trophy, color: "text-emerald-600" },
+                  { label: "Total Losses", value: Number(stats.totalLosses), Icon: Target, color: "text-rose-500" },
+                  { label: "Dispute Wins", value: Number(stats.totalDisputeWins), Icon: Swords, color: "text-amber-600" },
+                  { label: "Active Dares", value: Number(stats.activeCountCreator) + Number(stats.activeCountAccepter), Icon: Activity, color: "text-[#0052FF]" },
+                ] as const).map(({ label, value, Icon: StatIcon, color }) => {
                   return (
-                    <div key={String(label)} className={`px-5 py-4 ${index > 0 ? "border-t border-[#edf1f6] sm:border-l sm:border-t-0" : ""} ${index === 2 ? "lg:border-l" : ""}`}>
-                      <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] ${String(color)}`}>
-                        <StatIcon className="h-3.5 w-3.5" />
-                        {label}
+                    <div key={String(label)} className="glass-card-interactive flex flex-col justify-between rounded-2xl p-4">
+                      <div className={cn("flex items-center gap-1.5 text-[10.5px] font-black uppercase tracking-wider", color)}>
+                        <StatIcon className="h-4 w-4 stroke-[2.2]" />
+                        <span>{label}</span>
                       </div>
-                      <div className="mt-1 text-xl font-black text-[#173154]">{String(value)}</div>
+                      <div className="mt-2 font-mono text-2xl font-black text-slate-900">{String(value)}</div>
                     </div>
                   );
                 })}
               </div>
             </section>
 
-            <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><Coins className="h-3.5 w-3.5 text-[#1268f3]" /> On-chain volume</div>
-                <div className="mt-2 text-lg font-black text-[#173154]">${(Number(stats.totalVolume) / 1_000_000).toFixed(2)}</div>
-                <div className="mt-1 text-[10px] text-[#9aa7b8]">Tracked by the protocol in USD 6 decimals</div>
+            {/* Sub-Metrics Row */}
+            <section className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+                <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
+                  <Coins className="h-4 w-4 text-[#0052FF]" /> Matched Volume
+                </div>
+                <div className="mt-2.5 font-mono text-xl font-black text-slate-900">
+                  ${(Number(stats.totalVolume) / 1_000_000).toFixed(2)}
+                </div>
+                <div className="mt-1 text-[11px] font-medium text-slate-400">Tracked on Base smart contract escrow</div>
               </div>
-              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Creator activity</div>
-                <div className="mt-2 text-lg font-black text-[#173154]">{Number(stats.activeCountCreator)}</div>
-                <div className="mt-1 text-[10px] text-[#9aa7b8]">Currently active as dare creator</div>
+
+              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+                <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
+                  <ShieldCheck className="h-4 w-4 text-emerald-600" /> Creator Activity
+                </div>
+                <div className="mt-2.5 font-mono text-xl font-black text-slate-900">
+                  {Number(stats.activeCountCreator)} Active
+                </div>
+                <div className="mt-1 text-[11px] font-medium text-slate-400">Challenges currently awaiting match or review</div>
               </div>
-              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
-                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><Activity className="h-3.5 w-3.5 text-[#1268f3]" /> Accepter activity</div>
-                <div className="mt-2 text-lg font-black text-[#173154]">{Number(stats.activeCountAccepter)}</div>
-                <div className="mt-1 text-[10px] text-[#9aa7b8]">Currently active as dare accepter</div>
+
+              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+                <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
+                  <Activity className="h-4 w-4 text-[#0052FF]" /> Challenger Activity
+                </div>
+                <div className="mt-2.5 font-mono text-xl font-black text-slate-900">
+                  {Number(stats.activeCountAccepter)} Active
+                </div>
+                <div className="mt-1 text-[11px] font-medium text-slate-400">Challenges accepted and currently in progress</div>
               </div>
             </section>
 
-            <Tabs defaultValue="active" className="mt-7">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Dares Activity Tabs */}
+            <Tabs defaultValue="active" className="mt-8">
+              <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8aa1]">Dare activity</div>
-                  <h2 className="mt-1 text-xl font-black text-[#173154]">On-chain history</h2>
+                  <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-[#0052FF]">
+                    <Sparkles className="h-3 w-3" /> Challenge Log
+                  </div>
+                  <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900">On-Chain History</h2>
                 </div>
-                <TabsList className="grid h-11 w-full grid-cols-2 rounded-2xl border border-[#dce5f1] bg-white p-1 shadow-[0_8px_25px_rgba(35,65,110,0.05)] sm:w-[330px]">
-                  <TabsTrigger value="active" className="rounded-xl text-xs font-bold text-[#60718c] data-[state=active]:bg-[#1268f3] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_rgba(18,104,243,0.18)]">Active ({activeDaresAll.length})</TabsTrigger>
-                  <TabsTrigger value="history" className="rounded-xl text-xs font-bold text-[#60718c] data-[state=active]:bg-[#eef5ff] data-[state=active]:text-[#1268f3]">History ({pastDaresAll.length})</TabsTrigger>
+
+                <TabsList className="glass-panel grid h-12 w-full grid-cols-2 rounded-2xl p-1 sm:w-[320px] shadow-xs">
+                  <TabsTrigger
+                    value="active"
+                    className="rounded-xl text-xs font-black transition-all data-[state=active]:bg-[#0052FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
+                  >
+                    Active ({activeDaresAll.length})
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="history"
+                    className="rounded-xl text-xs font-black transition-all data-[state=active]:bg-[#0052FF] data-[state=active]:text-white data-[state=active]:shadow-xs"
+                  >
+                    History ({pastDaresAll.length})
+                  </TabsTrigger>
                 </TabsList>
               </div>
 
-              <TabsContent value="active" className="mt-4">
+              <TabsContent value="active" className="mt-5">
                 {activeDares.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-[#cfdbea] bg-white py-14 text-center text-sm text-[#7b8aa1]">No active dares</div>
+                  <div className="glass-panel flex flex-col items-center justify-center rounded-[28px] border-dashed py-16 text-center text-xs sm:text-sm font-bold text-slate-400">
+                    No active challenges found for this wallet.
+                  </div>
                 ) : (
-                  <div className="flex flex-col gap-3">{activeDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
+                  <div className="flex flex-col gap-3.5">{activeDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
                 )}
               </TabsContent>
 
-              <TabsContent value="history" className="mt-4">
+              <TabsContent value="history" className="mt-5">
                 {pastDares.length === 0 ? (
-                  <div className="rounded-3xl border border-dashed border-[#cfdbea] bg-white py-14 text-center text-sm text-[#7b8aa1]">No past dares</div>
+                  <div className="glass-panel flex flex-col items-center justify-center rounded-[28px] border-dashed py-16 text-center text-xs sm:text-sm font-bold text-slate-400">
+                    No completed challenges in protocol archive yet.
+                  </div>
                 ) : (
-                  <div className="flex flex-col gap-3">{pastDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
+                  <div className="flex flex-col gap-3.5">{pastDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
                 )}
               </TabsContent>
             </Tabs>
 
+            {/* Expand / Show More Button */}
             {canExpand && (
-              <div className="mt-6 flex justify-center">
-                <button onClick={handleExpand} className="inline-flex items-center gap-1 rounded-full border border-[#cfe0f8] bg-white px-4 py-2 text-xs font-bold text-[#1268f3] shadow-sm transition hover:bg-[#eef5ff]">
-                  Show more dares
-                  <ChevronRight className="h-3.5 w-3.5" />
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleExpand}
+                  className="glass-card-interactive inline-flex items-center gap-2 rounded-2xl px-6 py-3 text-xs sm:text-sm font-black text-slate-700 hover:text-[#0052FF] transition cursor-pointer"
+                >
+                  <span>Show More Dares</span>
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             )}

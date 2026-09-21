@@ -7,18 +7,19 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const toggleVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 gap-2',
+  'inline-flex items-center justify-center gap-2 select-none font-bold text-slate-600 transition-all duration-200 outline-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0052FF]/15 disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        default: 'bg-transparent',
+        default:
+          'bg-transparent hover:bg-slate-100/80 hover:text-slate-900 data-[state=on]:bg-blue-50/80 data-[state=on]:text-[#0052FF]',
         outline:
-          'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+          'border border-slate-200/85 bg-white/90 shadow-xs backdrop-blur-xl hover:border-slate-300 hover:bg-white hover:text-slate-900 data-[state=on]:border-[#0052FF] data-[state=on]:bg-blue-50/80 data-[state=on]:text-[#0052FF] data-[state=on]:shadow-[0_4px_14px_rgba(0,82,255,0.18)]',
       },
       size: {
-        default: 'h-10 px-3 min-w-10',
-        sm: 'h-9 px-2.5 min-w-9',
-        lg: 'h-11 px-5 min-w-11',
+        default: 'h-11 min-w-11 px-3.5 rounded-2xl text-xs sm:text-sm',
+        sm: 'h-9 min-w-9 px-2.5 rounded-xl text-xs',
+        lg: 'h-12 min-w-12 px-5 rounded-[20px] text-sm sm:text-base',
       },
     },
     defaultVariants: {

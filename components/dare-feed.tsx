@@ -99,67 +99,197 @@ export function DareFeed() {
   const runningCount = dares.filter((d) => d.status === 1).length;
 
   return (
-    <div className="space-y-7">
-      <section className="rounded-[28px] border border-[#dce5f1] bg-white p-5 shadow-[0_18px_55px_rgba(35,65,110,0.07)] sm:p-7">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#dce5f1] bg-[#f7faff] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#1268f3]">
-              <Sparkles className="h-3.5 w-3.5" /> Live on-chain marketplace
+    <div className="space-y-6">
+      {/* Top Banner - Frosted Glass Soft Panel */}
+      <section className="glass-panel relative overflow-hidden rounded-[26px] p-5 sm:p-7 md:p-8 shadow-[0_8px_35px_rgba(15,23,42,0.03)]">
+        {/* Subtle Ambient Glow Orb */}
+        <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-blue-100/30 blur-3xl animate-drift" />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-gradient-to-r from-blue-50/90 to-indigo-50/80 px-3.5 py-1 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#0052FF] shadow-xs">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0052FF] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#0052FF]" />
+              </span>
+              Live On-Chain Marketplace
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-[#10213f] sm:text-4xl">Explore Dares</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#71819a] sm:text-base">
-              Discover real challenges with matched stakes, deadlines and proof rules enforced by the Dare Protocol.
+            
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-tight">
+              Explore Dares
+            </h1>
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
+              Discover real challenges with matched stakes, countdown deadlines, and smart contract escrow proof on Base.
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+
+          {/* Metric Micro-Counters with 3D Layered Glass Icons */}
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
             {([
-              { label: "Dares", value: totalOnChain.toLocaleString(), Icon: Database },
-              { label: "Open", value: openCount.toString(), Icon: Activity },
-              { label: "Running", value: runningCount.toString(), Icon: Clock3 },
-            ] as { label: string; value: string; Icon: LucideIcon }[]).map(({ label, value, Icon }) => (
-              <div key={String(label)} className="min-w-[92px] rounded-2xl border border-[#e1e8f2] bg-[#f9fbfe] px-3 py-3 sm:min-w-[110px]">
-                <Icon className="h-4 w-4 text-[#1268f3]" />
-                <div className="mt-2 text-lg font-extrabold text-[#10213f]">{value}</div>
-                <div className="text-[11px] text-[#8190a7]">{label}</div>
-              </div>
-            ))}
+              {
+                label: "Dares",
+                value: totalOnChain.toLocaleString(),
+                Icon: Database,
+                tone: "bg-gradient-to-br from-blue-50 to-blue-100/60 border-blue-200/70 text-[#0052FF]",
+                numColor: "text-slate-900",
+              },
+              {
+                label: "Open",
+                value: openCount.toString(),
+                Icon: Activity,
+                tone: "bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-emerald-200/70 text-emerald-600",
+                numColor: "text-emerald-600",
+              },
+              {
+                label: "Running",
+                value: runningCount.toString(),
+                Icon: Clock3,
+                tone: "bg-gradient-to-br from-indigo-50 to-indigo-100/60 border-indigo-200/70 text-indigo-600",
+                numColor: "text-indigo-600",
+              },
+            ] as { label: string; value: string; Icon: LucideIcon; tone: string; numColor: string }[]).map(
+              ({ label, value, Icon, tone, numColor }) => (
+                <div
+                  key={String(label)}
+                  className="glass-card-interactive group flex flex-col rounded-2xl p-3 text-center transition-all"
+                >
+                  <div className="flex items-center justify-center">
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-xl border ${tone} shadow-xs group-hover:scale-110 transition-transform`}>
+                      <Icon className="h-4 w-4 stroke-[2.2]" />
+                    </div>
+                  </div>
+                  <div className={`mt-2 font-mono text-base sm:text-lg font-black tracking-tight ${numColor}`}>
+                    {value}
+                  </div>
+                  <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                    {label}
+                  </div>
+                </div>
+              )
+            )}
           </div>
         </div>
       </section>
 
-      <section className="rounded-[24px] border border-[#dce5f1] bg-white p-4 shadow-[0_12px_35px_rgba(35,65,110,0.05)] sm:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row">
+      {/* Filter & Toolbar Shell */}
+      <section className="glass-panel rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(15,23,42,0.02)] space-y-3.5">
+        <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row">
+          
+          {/* Search Input Box */}
           <label className="relative flex-1">
-            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a99ae]" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search dare descriptions..." className="h-11 w-full rounded-xl border border-[#dce5f1] bg-[#f9fbfe] pl-10 pr-4 text-sm text-[#173154] outline-none transition focus:border-[#1268f3] focus:bg-white" />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-lg bg-blue-50 text-[#0052FF]">
+              <Search className="h-3.5 w-3.5 stroke-[2.5]" />
+            </div>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search dare descriptions..."
+              className="h-11 w-full rounded-2xl border border-slate-200/80 bg-white/90 pl-11 pr-4 text-xs sm:text-sm text-slate-900 placeholder-slate-400 shadow-xs outline-none transition-all focus:border-[#0052FF] focus:ring-4 focus:ring-blue-100/70"
+            />
           </label>
-          <div className="flex gap-2">
-            <select value={tokenFilter} onChange={(e) => setTokenFilter(e.target.value as "all" | "ETH" | "USDC")} className="h-11 rounded-xl border border-[#dce5f1] bg-white px-3 text-sm font-semibold text-[#52657f] outline-none">
-              <option value="all">All tokens</option><option value="ETH">ETH</option><option value="USDC">USDC</option>
+
+          {/* Dropdown Filters & Refresh Actions */}
+          <div className="flex items-center gap-2">
+            <select
+              value={tokenFilter}
+              onChange={(e) => setTokenFilter(e.target.value as "all" | "ETH" | "USDC")}
+              className="h-11 rounded-2xl border border-slate-200/80 bg-white/95 px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-xs outline-none transition-all focus:border-[#0052FF] focus:ring-2 focus:ring-blue-100 cursor-pointer"
+            >
+              <option value="all">All Tokens</option>
+              <option value="ETH">ETH</option>
+              <option value="USDC">USDC</option>
             </select>
-            <select value={sort} onChange={(e) => setSort(e.target.value as SortMode)} className="h-11 rounded-xl border border-[#dce5f1] bg-white px-3 text-sm font-semibold text-[#52657f] outline-none">
-              <option value="newest">Newest</option><option value="ending">Ending soon</option><option value="stake">Highest stake</option>
+
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortMode)}
+              className="h-11 rounded-2xl border border-slate-200/80 bg-white/95 px-3.5 text-xs sm:text-sm font-bold text-slate-700 shadow-xs outline-none transition-all focus:border-[#0052FF] focus:ring-2 focus:ring-blue-100 cursor-pointer"
+            >
+              <option value="newest">Newest</option>
+              <option value="ending">Ending Soon</option>
+              <option value="stake">Highest Stake</option>
             </select>
-            <button onClick={fetchDares} disabled={loading} className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#dce5f1] bg-white text-[#1268f3] hover:bg-[#f4f8ff] disabled:opacity-50" aria-label="Refresh dares">
-              <RefreshCw className={loading ? "h-4 w-4 animate-spin" : "h-4 w-4"} />
+
+            <button
+              type="button"
+              onClick={fetchDares}
+              disabled={loading}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-slate-600 hover:text-[#0052FF] hover:border-blue-200/80 hover:bg-blue-50/50 hover:scale-105 active:scale-90 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+              aria-label="Refresh dares"
+            >
+              <RefreshCw className={loading ? "h-4 w-4 animate-spin text-[#0052FF]" : "h-4 w-4 stroke-[2.2]"} />
             </button>
           </div>
         </div>
-        <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-          {STATUS_FILTERS.map(([value, label]) => (
-            <button key={value} onClick={() => setFilter(value)} className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${filter === value ? "border-[#1268f3] bg-[#1268f3] text-white shadow-[0_8px_18px_rgba(18,104,243,0.18)]" : "border-[#dce5f1] bg-white text-[#60718c] hover:border-[#b9cce7]"}`}>
-              {label}{value !== "all" && <span className="ml-1.5 opacity-70">{dares.filter((d) => d.status === Number(value)).length}</span>}
-            </button>
+
+        {/* Horizontal Status Chips */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          {STATUS_FILTERS.map(([value, label]) => {
+            const count = value === "all" ? dares.length : dares.filter((d) => d.status === Number(value)).length;
+            const active = filter === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFilter(value)}
+                className={`shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black transition-all active:scale-95 cursor-pointer ${
+                  active
+                    ? "bg-gradient-to-r from-[#0052FF] to-[#0045d8] text-white shadow-[0_4px_16px_rgba(0,82,255,0.28)] scale-[1.02]"
+                    : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-xs"
+                }`}
+              >
+                <span>{label}</span>
+                <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Error Feedback Box */}
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs font-bold text-rose-700 shadow-xs">
+          Could not load live dares. Please check your wallet network and contract connection.
+        </div>
+      )}
+
+      {/* Loading Skeleton */}
+      {loading && (
+        <div className="glass-panel rounded-3xl py-20 text-center text-xs font-bold text-slate-500 shadow-xs">
+          <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-[#0052FF] shadow-xs">
+            <RefreshCw className="h-5 w-5 animate-spin" />
+          </div>
+          Loading live on-chain dares from Base...
+        </div>
+      )}
+
+      {/* Empty State View */}
+      {!loading && !error && visible.length === 0 && (
+        <div className="glass-panel rounded-3xl border border-dashed border-slate-200 bg-white/80 py-20 text-center shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/70 text-slate-400 shadow-xs">
+            <SlidersHorizontal className="h-6 w-6 stroke-[2]" />
+          </div>
+          <p className="mt-3.5 text-base font-black text-slate-900">No dares match these filters</p>
+          <p className="mt-1 text-xs text-slate-400 font-medium">Try changing the status, token, or searching for different keywords.</p>
+        </div>
+      )}
+
+      {/* Visible Cards Grid */}
+      {!loading && !error && visible.length > 0 && (
+        <div className="grid gap-4 md:grid-cols-2">
+          {visible.map((dare) => (
+            <DareCard key={dare.id} dare={dare} />
           ))}
         </div>
-      </section>
+      )}
 
-      {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">Could not load live dares. Check the wallet network and contract connection.</div>}
-      {loading && <div className="rounded-[24px] border border-[#dce5f1] bg-white py-20 text-center text-sm text-[#71819a]">Loading latest on-chain dares...</div>}
-      {!loading && !error && visible.length === 0 && <div className="rounded-[24px] border border-dashed border-[#cbd8e8] bg-white py-20 text-center"><SlidersHorizontal className="mx-auto h-8 w-8 text-[#9aa9bd]" /><p className="mt-3 font-bold text-[#173154]">No dares match these filters</p><p className="mt-1 text-sm text-[#8190a7]">Try another status, token or search term.</p></div>}
-      {!loading && !error && visible.length > 0 && <div className="grid gap-4 md:grid-cols-2">{visible.map((dare) => <DareCard key={dare.id} dare={dare} />)}</div>}
-
-      {!loading && !error && dares.length > 0 && <p className="text-center text-xs text-[#91a0b4]">Showing the latest {dares.length} on-chain dares.</p>}
+      {!loading && !error && dares.length > 0 && (
+        <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          Showing {visible.length} of {dares.length} live on-chain dares
+        </p>
+      )}
     </div>
   );
 }

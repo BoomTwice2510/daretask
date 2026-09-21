@@ -18,6 +18,7 @@ import {
   User,
   Wallet,
   X,
+  Sparkles,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -80,31 +81,55 @@ export function Header() {
 
   return (
     <>
-      <header className="dare-header sticky top-0 z-50">
-        <div className="dare-header-inner">
-          <Link href="/" className="dare-brand" aria-label="Dare home">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-white/80 bg-white/80 backdrop-blur-2xl shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] transition-all">
+        <div className="mx-auto flex h-14 md:h-16 w-full max-w-[1440px] items-center justify-between px-3.5 sm:px-6 md:px-8">
+          
+          {/* Brand Logo with Gentle Float */}
+          <Link
+            href="/"
+            className="group flex items-center gap-2.5 transition-transform active:scale-95 cursor-pointer"
+            aria-label="Dare Protocol Home"
+          >
+            <div className="relative flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/60 to-blue-100/50 p-1 shadow-[0_4px_14px_rgba(0,82,255,0.08)] ring-1 ring-black/5 group-hover:scale-105 group-hover:shadow-[0_6px_18px_rgba(0,82,255,0.16)] transition-all duration-300">
               <Image
                 src="/images/logo-gold.png"
                 alt="Dare"
-                width={44}
-                height={44}
+                width={36}
+                height={36}
                 priority
-                className="h-11 w-11 object-contain"
+                className="h-7 w-7 md:h-8 md:w-8 object-contain transition-transform group-hover:rotate-6 duration-300"
               />
-            </span>
-            <span className="dare-brand-copy">
-              <strong>Dare</strong>
-              <small>ON-CHAIN DARES</small>
-            </span>
+            </div>
+            <div className="flex flex-col leading-none">
+              <div className="flex items-center gap-1.5">
+                <strong className="text-base md:text-lg font-black tracking-tight text-slate-900">
+                  Dare
+                </strong>
+                <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md bg-blue-50/90 text-[#0052FF] border border-blue-100/60 shadow-xs">
+                  <span className="h-1 w-1 rounded-full bg-[#0052FF]" /> Base
+                </span>
+              </div>
+              <small className="hidden md:block text-[8.5px] font-bold tracking-[0.16em] text-slate-400 uppercase mt-0.5">
+                ON-CHAIN DARES
+              </small>
+            </div>
           </Link>
 
-          <nav className="dare-desktop-nav" aria-label="Primary navigation">
+          {/* Desktop Floating Pill Navigation */}
+          <nav
+            className="hidden md:flex items-center gap-1 rounded-full bg-slate-50/70 p-1 border border-slate-200/60 backdrop-blur-md shadow-[inset_0_1px_3px_rgba(15,23,42,0.03)]"
+            aria-label="Primary navigation"
+          >
             {desktopLinks.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn("dare-nav-link", isActive(item.href) && "is-active")}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer",
+                  isActive(item.href)
+                    ? "bg-white text-[#0052FF] shadow-[0_2px_10px_rgba(0,82,255,0.12)] font-bold ring-1 ring-blue-100/70 scale-[1.02]"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-white/60 hover:scale-[1.01]"
+                )}
               >
                 {item.label}
               </Link>
@@ -112,114 +137,261 @@ export function Header() {
             <Link
               href={`/profile/${address || ""}`}
               className={cn(
-                "dare-nav-link",
-                isActive("/profile") && "is-active",
-                !address && "pointer-events-none opacity-50",
+                "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer",
+                isActive("/profile")
+                  ? "bg-white text-[#0052FF] shadow-[0_2px_10px_rgba(0,82,255,0.12)] font-bold ring-1 ring-blue-100/70 scale-[1.02]"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60",
+                !address && "pointer-events-none opacity-40"
               )}
             >
               Profile
             </Link>
             <Link
               href="/how-it-works"
-              className={cn("dare-nav-link", isActive("/how-it-works") && "is-active")}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer",
+                isActive("/how-it-works")
+                  ? "bg-white text-[#0052FF] shadow-[0_2px_10px_rgba(0,82,255,0.12)] font-bold ring-1 ring-blue-100/70 scale-[1.02]"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              )}
             >
               How It Works
             </Link>
-            <Link href="/faq" className={cn("dare-nav-link", isActive("/faq") && "is-active")}>
+            <Link
+              href="/faq"
+              className={cn(
+                "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer",
+                isActive("/faq")
+                  ? "bg-white text-[#0052FF] shadow-[0_2px_10px_rgba(0,82,255,0.12)] font-bold ring-1 ring-blue-100/70 scale-[1.02]"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+              )}
+            >
               FAQ
-            </Link>
-            <Link href="/legal" className={cn("dare-nav-link", isActive("/legal") && "is-active")}>
-              Legal
             </Link>
           </nav>
 
-          <div className="dare-header-actions">
-            <span className={cn("dare-network-pill", !isBaseSepolia && isConnected && "is-warning")}>
-              <span className="dare-network-dot" />
-              {currentChain}
+          {/* Action Header Pills */}
+          <div className="flex items-center gap-1.5 md:gap-2">
+            {/* Live On-Chain Radar Status Pill */}
+            <span
+              className={cn(
+                "inline-flex h-8 md:h-9 items-center gap-1.5 rounded-full px-2.5 md:px-3 text-[10.5px] md:text-xs font-semibold border backdrop-blur-md transition-all shadow-xs",
+                !isConnected
+                  ? "border-slate-200/70 bg-white/80 text-slate-500"
+                  : isBaseSepolia
+                  ? "border-emerald-200/80 bg-emerald-50/70 text-emerald-800 shadow-[0_2px_8px_rgba(16,185,129,0.08)]"
+                  : "border-amber-200 bg-amber-50 text-amber-800"
+              )}
+            >
+              <span className="relative flex h-2 w-2">
+                {isConnected && (
+                  <span
+                    className={cn(
+                      "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
+                      isBaseSepolia ? "bg-emerald-400" : "bg-amber-400"
+                    )}
+                  />
+                )}
+                <span
+                  className={cn(
+                    "relative inline-flex h-2 w-2 rounded-full",
+                    !isConnected
+                      ? "bg-slate-300"
+                      : isBaseSepolia
+                      ? "bg-emerald-500"
+                      : "bg-amber-500"
+                  )}
+                />
+              </span>
+              <span className="truncate max-w-[85px] sm:max-w-none">
+                {currentChain}
+              </span>
             </span>
+
+            {/* Wallet Address & Disconnect */}
             {isConnected && address ? (
-              <>
-                <Link href={`/profile/${address}`} className="dare-address-pill">
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href={`/profile/${address}`}
+                  className="inline-flex h-8 md:h-9 items-center rounded-full bg-white/90 border border-slate-200/80 px-3 font-mono text-[11px] md:text-xs font-bold text-slate-800 shadow-xs hover:border-[#0052FF]/40 hover:text-[#0052FF] hover:scale-[1.02] active:scale-95 transition-all"
+                >
                   {shortenAddress(address)}
                 </Link>
                 <button
                   type="button"
-                  className="dare-icon-button desktop-only"
                   onClick={handleDisconnect}
+                  className="hidden md:flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white/90 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/60 active:scale-90 hover:scale-105 transition-all cursor-pointer shadow-xs"
                   aria-label="Disconnect wallet"
+                  title="Disconnect wallet"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
-              </>
+              </div>
             ) : (
               <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
-                className="dare-connect-button"
+                className="relative overflow-hidden h-8 md:h-9 rounded-full bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white px-3.5 md:px-4.5 text-xs font-bold shadow-[0_4px_16px_rgba(0,82,255,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,82,255,0.35)] active:scale-95 cursor-pointer"
               >
-                <Wallet className="mr-1.5 h-4 w-4" />
-                {isConnecting ? "Connecting" : "Connect"}
+                <div className="mr-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20">
+                  <Wallet className="h-2.5 w-2.5 stroke-[2.5]" />
+                </div>
+                {isConnecting ? "Connecting..." : "Connect"}
               </Button>
             )}
+
+            {/* Mobile Menu Trigger */}
             <button
               type="button"
-              className="dare-menu-button"
+              className="grid md:hidden h-8 w-8 place-items-center rounded-xl border border-slate-200/80 bg-white/90 text-slate-700 shadow-xs active:scale-90 transition-all cursor-pointer"
               onClick={() => setMenuOpen((value) => !value)}
               aria-label="Open menu"
             >
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {menuOpen ? <X className="h-4 w-4 transition-transform rotate-90" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
+        {/* Mobile Dropdown Menu with Slide & Fade Animation */}
         {menuOpen && (
-          <div className="dare-mobile-menu">
-            <div className="dare-mobile-menu-grid">
-              {[...desktopLinks, { href: "/profile", label: "Profile" }, { href: "/how-it-works", label: "How It Works" }, { href: "/faq", label: "FAQ" }, { href: "/legal", label: "Legal" }].map(
-                (item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href === "/profile" && address ? `/profile/${address}` : item.href}
-                    onClick={() => setMenuOpen(false)}
-                    className={cn("dare-mobile-menu-link", isActive(item.href) && "is-active")}
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
+          <div className="animate-menu-slide md:hidden border-t border-slate-100 bg-white/95 px-3.5 py-3 backdrop-blur-2xl shadow-xl">
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                ...desktopLinks,
+                { href: "/profile", label: "Profile" },
+                { href: "/how-it-works", label: "How It Works" },
+                { href: "/faq", label: "FAQ" },
+                { href: "/legal", label: "Legal" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={
+                    item.href === "/profile" && address
+                      ? `/profile/${address}`
+                      : item.href
+                  }
+                  onClick={() => setMenuOpen(false)}
+                  className={cn(
+                    "flex items-center justify-center rounded-xl border border-slate-100 bg-slate-50/70 py-2.5 px-3 text-xs font-bold text-slate-700 transition-all active:scale-95",
+                    isActive(item.href) &&
+                      "bg-blue-50/90 text-[#0052FF] border-blue-200/80 font-black shadow-xs"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
+
             {isConnected && address && (
-              <button type="button" className="dare-mobile-logout" onClick={handleDisconnect}>
-                <LogOut className="h-4 w-4" /> Disconnect wallet
+              <button
+                type="button"
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50/80 border border-rose-200/70 py-2.5 text-xs font-bold text-rose-600 transition-all active:scale-95 cursor-pointer"
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleDisconnect();
+                }}
+              >
+                <LogOut className="h-3.5 w-3.5" /> Disconnect wallet
               </button>
             )}
           </div>
         )}
       </header>
 
-      <nav className="dare-mobile-bottom-nav" aria-label="Mobile navigation">
-        <Link href="/" className={cn("dare-bottom-item", isActive("/") && "is-active")}>
-          <Home />
-          <span>Home</span>
-        </Link>
-        <Link href="/explore" className={cn("dare-bottom-item", isActive("/explore") && "is-active")}>
-          <Compass />
-          <span>Explore</span>
-        </Link>
-        <Link href="/create" className="dare-bottom-create" aria-label="Create a dare">
-          <Plus />
-        </Link>
-        <Link href="/leaderboard" className={cn("dare-bottom-item", isActive("/leaderboard") && "is-active")}>
-          <Trophy />
-          <span>Leaders</span>
-        </Link>
+      {/* Mobile PWA Floating Bottom Navigation Bar with Breathing Pulse Glow on Center FAB */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 grid md:hidden grid-cols-5 items-center bg-white/92 backdrop-blur-2xl border-t border-white/80 px-2 pt-1 pb-[calc(0.4rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(15,23,42,0.04)]"
+        aria-label="Mobile navigation"
+      >
         <Link
-          href={address ? `/profile/${address}` : "/"}
-          className={cn("dare-bottom-item", isActive("/profile") && "is-active")}
+          href="/"
+          className={cn(
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
+            isActive("/") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
+          )}
         >
-          <User />
-          <span>Profile</span>
+          <div
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-200",
+              isActive("/")
+                ? "bg-blue-50/90 border border-blue-200/80 shadow-[0_2px_8px_rgba(0,82,255,0.15)] text-[#0052FF] scale-105"
+                : "bg-transparent text-slate-400 group-hover:text-slate-600"
+            )}
+          >
+            <Home className="h-4 w-4 stroke-[2.2]" />
+          </div>
+          <span className="text-[9.5px] font-bold tracking-tight">Home</span>
+        </Link>
+
+        <Link
+          href="/explore"
+          className={cn(
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
+            isActive("/explore") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <div
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-200",
+              isActive("/explore")
+                ? "bg-blue-50/90 border border-blue-200/80 shadow-[0_2px_8px_rgba(0,82,255,0.15)] text-[#0052FF] scale-105"
+                : "bg-transparent text-slate-400 group-hover:text-slate-600"
+            )}
+          >
+            <Compass className="h-4 w-4 stroke-[2.2]" />
+          </div>
+          <span className="text-[9.5px] font-bold tracking-tight">Explore</span>
+        </Link>
+
+        {/* Center Elevating Action Button: Create with Animated Pulse Glow */}
+        <div className="flex items-center justify-center">
+          <Link
+            href="/create"
+            className="animate-pulse-glow flex h-11 w-11 -translate-y-3 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0052FF] via-[#0048e6] to-[#0038b8] text-white ring-4 ring-white active:scale-90 transition-all duration-200 cursor-pointer"
+            aria-label="Create a dare"
+          >
+            <Plus className="h-5 w-5 stroke-[2.8]" />
+          </Link>
+        </div>
+
+        <Link
+          href="/leaderboard"
+          className={cn(
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
+            isActive("/leaderboard") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <div
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-200",
+              isActive("/leaderboard")
+                ? "bg-violet-50/90 border border-violet-200/80 shadow-[0_2px_8px_rgba(139,92,246,0.15)] text-violet-600 scale-105"
+                : "bg-transparent text-slate-400 group-hover:text-slate-600"
+            )}
+          >
+            <Trophy className="h-4 w-4 stroke-[2.2]" />
+          </div>
+          <span className="text-[9.5px] font-bold tracking-tight">Leaders</span>
+        </Link>
+
+        <Link
+          href={address ? `/profile/${address}` : "/profile"}
+          className={cn(
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
+            isActive("/profile") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <div
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-xl transition-all duration-200",
+              isActive("/profile")
+                ? "bg-blue-50/90 border border-blue-200/80 shadow-[0_2px_8px_rgba(0,82,255,0.15)] text-[#0052FF] scale-105"
+                : "bg-transparent text-slate-400 group-hover:text-slate-600"
+            )}
+          >
+            <User className="h-4 w-4 stroke-[2.2]" />
+          </div>
+          <span className="text-[9.5px] font-bold tracking-tight">Profile</span>
         </Link>
       </nav>
     </>

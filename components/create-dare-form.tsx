@@ -9,7 +9,21 @@ import { ALLOWED_TOKENS, DARE_ABI, TOKEN_MAP, ZERO_ADDRESS } from "@/lib/contrac
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { AlertCircle, ArrowLeft, Check, CheckCircle2, ChevronRight, Clock3, Coins, FileCheck2, Loader2, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Coins,
+  FileCheck2,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+  Wallet,
+  Zap,
+} from "lucide-react";
 import { formatUnits, parseUnits, type Address } from "viem";
 import Image from "next/image";
 
@@ -68,7 +82,6 @@ export function CreateDareForm() {
     async function loadLimits() {
       setLimitsLoading(true);
       try {
-        // These names match the already-deployed DareProtocol contract.
         const [minEthResult, minUsdcResult, maxUsdResult, maxDurationResult, feeBpsResult] = await Promise.all([
           readContract("MIN_ETH_STAKE"),
           readContract("MIN_USDC_STAKE"),
@@ -78,8 +91,8 @@ export function CreateDareForm() {
         ]);
 
         const minStake = token === ZERO_ADDRESS
-          ? minEthResult as bigint
-          : minUsdcResult as bigint;
+          ? (minEthResult as bigint)
+          : (minUsdcResult as bigint);
         const maxUsdStake6 = maxUsdResult as bigint;
         const maxDuration = maxDurationResult as bigint;
         const feeBps = feeBpsResult as bigint;
@@ -107,7 +120,9 @@ export function CreateDareForm() {
       }
     }
     loadLimits();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [readContract, token]);
 
   useEffect(() => {
@@ -166,9 +181,6 @@ export function CreateDareForm() {
     if (!stake || Number(stake) <= 0) return setError("Enter a stake amount.");
     if (stakeUnits < contractLimits.minStake) return setError(`Stake is below the contract minimum (${formatUnits(contractLimits.minStake, tokenMeta.decimals)} ${symbol}).`);
     if (durationSeconds > maxDurationSeconds) return setError(`Duration exceeds the contract maximum of ${formatDuration(maxDurationSeconds)}.`);
-    // The deployed contract caps stake by USD value: $500 equivalent.
-    // Token-specific max conversion is enforced on-chain, so do not compare
-    // ETH units directly with the 6-decimal USD cap.
     if (proofMode === "required" && !proofSample.trim()) return setError("Add a provable sample so the accepter knows what evidence counts.");
     setProvable(null);
     setSamplesExpanded(false);
@@ -226,8 +238,6 @@ export function CreateDareForm() {
       const inputs = createAbi?.inputs ?? [];
       const args: any[] = [finalDescription, BigInt(durationSeconds), token as Address, stakeUnits];
 
-      // The deployed contract has evolved. Build the fifth argument from the
-      // active ABI instead of guessing or changing the contract.
       if (inputs.length === 5) {
         const fifthType = inputs[4]?.type;
         if (fifthType === "bool") args.push(proofMode === "required");
@@ -253,79 +263,127 @@ export function CreateDareForm() {
     }
   }
 
+  /* Success Confirmation Screen */
   if (successTxHash) {
     return (
-      <div className="mx-auto max-w-2xl rounded-3xl border border-emerald-200 bg-white p-6 shadow-[0_18px_60px_rgba(35,65,110,0.10)] sm:p-8">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-            <CheckCircle2 className="h-7 w-7" />
+      <div className="glass-card-interactive mx-auto max-w-2xl rounded-[30px] p-6 sm:p-9 shadow-[0_12px_45px_rgba(16,185,129,0.08)]">
+        <div className="flex items-start gap-4 sm:gap-5">
+          <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-emerald-100/70 border border-emerald-200/80 shadow-[0_6px_20px_rgba(16,185,129,0.18)]">
+            <div className="absolute inset-1 rounded-xl bg-emerald-400/10 blur-xs" />
+            <CheckCircle2 className="relative z-10 h-8 w-8 text-emerald-600 stroke-[2.2]" />
           </div>
           <div>
-            <div className="text-xs font-bold uppercase tracking-[0.16em] text-emerald-600">Dare created</div>
-            <h2 className="mt-1 text-2xl font-extrabold text-[#10213f]">Your dare is live.</h2>
-            <p className="mt-2 text-sm leading-6 text-[#64758f]">The configuration was signed and submitted to Base Sepolia.</p>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/90 border border-emerald-200/70 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Dare Live On-Chain
+            </div>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              Challenge Locked in Escrow
+            </h2>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
+              Your challenge configuration was signed and deposited directly to the Base Sepolia contract.
+            </p>
           </div>
         </div>
+
         {successTxHash && (
           <a
             href={`https://sepolia.basescan.org/tx/${successTxHash}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-5 block rounded-xl border border-[#dce5f1] bg-[#f7f9fc] px-4 py-3 text-sm font-semibold text-[#1268f3]"
+            className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-xs sm:text-sm font-bold text-[#0052FF] shadow-xs hover:bg-slate-50/80 hover:border-[#0052FF]/30 transition-all cursor-pointer"
           >
-            View transaction on BaseScan
+            <span>View verified transaction on BaseScan</span>
+            <ChevronRight className="h-4 w-4" />
           </a>
         )}
-        <Button onClick={() => router.push("/explore")} className="mt-4 h-12 w-full rounded-xl bg-[#1268f3] text-white hover:bg-[#0757d8]">
-          Explore dares
+
+        <Button
+          onClick={() => router.push("/explore")}
+          className="mt-4 h-12 w-full rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] text-white text-sm font-black shadow-[0_6px_20px_rgba(0,82,255,0.28)] hover:shadow-[0_8px_24px_rgba(0,82,255,0.36)] active:scale-[0.98] transition-all cursor-pointer"
+        >
+          Explore Live Dares
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_18px_60px_rgba(35,65,110,0.09)]">
-      <div className="border-b border-[#e7edf5] px-5 py-4 sm:px-7">
+    <div className="glass-panel overflow-hidden rounded-[28px] shadow-[0_8px_35px_rgba(15,23,42,0.035)]">
+      {/* Visual Stepper Bar */}
+      <div className="border-b border-slate-100/90 bg-white/70 px-5 py-4 sm:px-8">
         <div className="flex items-center gap-3">
-          <div className={cn("flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold", step === 1 ? "bg-[#1268f3] text-white" : "bg-emerald-500 text-white")}>
-            {step === 1 ? "1" : <Check className="h-4 w-4" />}
+          <div
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all shadow-xs",
+              step === 1
+                ? "bg-gradient-to-br from-[#0052FF] to-[#0045d8] text-white ring-4 ring-blue-100/70"
+                : "bg-emerald-500 text-white"
+            )}
+          >
+            {step === 1 ? "1" : <Check className="h-4 w-4 stroke-[3]" />}
           </div>
-          <div className="h-px flex-1 bg-[#dce5f1]" />
-          <div className={cn("flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold", step === 2 ? "bg-[#1268f3] text-white" : "bg-[#eef3f9] text-[#8190a7]")}>2</div>
-          <div>
-            <div className="text-xs font-bold text-[#173154]">{step === 1 ? "Configure dare" : "Review before creation"}</div>
+          <div className="h-0.5 flex-1 bg-gradient-to-r from-blue-100 to-slate-100 rounded-full" />
+          <div
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-xl text-xs font-black transition-all shadow-xs",
+              step === 2
+                ? "bg-gradient-to-br from-[#0052FF] to-[#0045d8] text-white ring-4 ring-blue-100/70"
+                : "bg-slate-100 text-slate-400"
+            )}
+          >
+            2
+          </div>
+          <div className="text-xs font-black text-slate-800 tracking-tight">
+            {step === 1 ? "1. Configure Challenge" : "2. Review & Deposit"}
           </div>
         </div>
       </div>
 
       {step === 1 ? (
-        <form onSubmit={(e) => { e.preventDefault(); validateForReview(); }} className="p-5 sm:p-7 lg:p-8">
+        <form onSubmit={(e) => { e.preventDefault(); validateForReview(); }} className="p-5 sm:p-7 md:p-8">
           <div className="grid gap-7 lg:grid-cols-[1.45fr_0.8fr]">
+            
+            {/* Left Configuration Column */}
             <div className="space-y-6">
-              <section>
-                <label htmlFor="description" className="text-sm font-bold text-[#173154]">What exactly must happen?</label>
-                <p className="mt-1 text-xs leading-5 text-[#7b8aa1]">Write one outcome an accepter can understand and complete without guessing.</p>
+              
+              {/* Task Description */}
+              <section className="space-y-2">
+                <label htmlFor="description" className="block text-sm font-black text-slate-900">
+                  What exactly must happen?
+                </label>
+                <p className="text-xs leading-relaxed text-slate-500 font-medium">
+                  State one clear, objective challenge an accepter can prove without ambiguity.
+                </p>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Example: Complete a 5 km run in one continuous activity."
+                  placeholder="Example: Complete a 5 km outdoor run in a single continuous session."
                   maxLength={500}
-                  className="mt-3 min-h-[132px] w-full resize-none rounded-2xl border border-[#d9e2ef] bg-[#fbfcfe] px-4 py-3 text-sm text-[#173154] outline-none transition focus:border-[#1268f3] focus:ring-4 focus:ring-[#1268f3]/10"
+                  className="min-h-[125px] w-full resize-none rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-xs sm:text-sm text-slate-900 placeholder-slate-400 shadow-[inset_0_2px_4px_rgba(15,23,42,0.02)] outline-none transition-all focus:border-[#0052FF] focus:ring-4 focus:ring-blue-100/70"
                 />
-                <div className="mt-1 flex justify-between text-[11px] text-[#8997aa]"><span>Be specific, measurable and time-bounded.</span><span>{description.length}/500</span></div>
+                <div className="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>Objective, verifiable & measurable</span>
+                  <span>{description.length}/500</span>
+                </div>
               </section>
 
-              <section>
+              {/* Duration Settings */}
+              <section className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-bold text-[#173154]">Duration</div>
-                    <div className="mt-1 text-xs text-[#7b8aa1]">Maximum contract duration: {limitsLoading ? "loading..." : formatDuration(maxDurationSeconds)}.</div>
+                    <span className="block text-sm font-black text-slate-900">Duration</span>
+                    <span className="text-[11px] font-medium text-slate-400">
+                      Contract limit: {limitsLoading ? "loading..." : formatDuration(maxDurationSeconds)}
+                    </span>
                   </div>
-                  <div className="rounded-full bg-[#eef5ff] px-3 py-1 text-xs font-bold text-[#1268f3]">{durationValue} {durationType === "days" ? "day" : "hour"}{durationValue === 1 ? "" : "s"}</div>
+                  <div className="rounded-full bg-blue-50/90 border border-blue-200/70 px-3 py-1 text-xs font-black text-[#0052FF] shadow-xs">
+                    {durationValue} {durationType === "days" ? "day" : "hour"}{durationValue === 1 ? "" : "s"}
+                  </div>
                 </div>
 
-                <div className="mt-3 grid grid-cols-2 rounded-xl border border-[#dce5f1] bg-[#f8fafc] p-1">
+                <div className="grid grid-cols-2 rounded-2xl border border-slate-200/70 bg-slate-50/60 p-1.5 backdrop-blur-xs">
                   {(["hours", "days"] as const).map((type) => (
                     <button
                       key={type}
@@ -336,12 +394,18 @@ export function CreateDareForm() {
                         setDurationType(type);
                         setDurationValue(Math.min(nextDefault, nextMax));
                       }}
-                      className={cn("rounded-lg px-3 py-2.5 text-sm font-semibold transition", durationType === type ? "bg-white text-[#1268f3] shadow-sm" : "text-[#71819a]")}
+                      className={cn(
+                        "rounded-xl py-2 text-xs font-bold transition-all cursor-pointer",
+                        durationType === type
+                          ? "bg-white text-[#0052FF] shadow-[0_2px_8px_rgba(15,23,42,0.04)] font-black scale-[1.01]"
+                          : "text-slate-500 hover:text-slate-900"
+                      )}
                     >
                       {type === "hours" ? "Hours" : "Days"}
                     </button>
                   ))}
                 </div>
+
                 <input
                   aria-label="Duration"
                   type="range"
@@ -353,32 +417,57 @@ export function CreateDareForm() {
                     const max = durationType === "hours" ? maxHours : maxDays;
                     setDurationValue(Math.min(Math.max(1, next), max));
                   }}
-                  className="mt-5 w-full accent-[#1268f3]"
+                  className="w-full accent-[#0052FF] cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] text-[#8997aa]"><span>{durationType === "hours" ? "1 hour" : "1 day"}</span><span>{durationType === "hours" ? `${maxHours} hours` : `${maxDays} days`}</span></div>
+                <div className="flex justify-between text-[11px] font-semibold text-slate-400">
+                  <span>{durationType === "hours" ? "1 hour" : "1 day"}</span>
+                  <span>{durationType === "hours" ? `${maxHours} hours` : `${maxDays} days`}</span>
+                </div>
               </section>
 
-              <section>
-                <div className="text-sm font-bold text-[#173154]">Stake asset</div>
-                <div className="mt-3 grid grid-cols-2 gap-3">
+              {/* Stake Token Selection with 3D Layered Glass Icons */}
+              <section className="space-y-3">
+                <span className="block text-sm font-black text-slate-900">Stake Asset</span>
+                <div className="grid grid-cols-2 gap-3">
                   {CREATE_TOKENS.map((item) => (
                     <button
                       key={item.address}
                       type="button"
                       onClick={() => setToken(item.address)}
-                      className={cn("flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition", token === item.address ? "border-[#1268f3] bg-[#f1f7ff] ring-2 ring-[#1268f3]/10" : "border-[#dce5f1] bg-white hover:border-[#b9c9df]")}
+                      className={cn(
+                        "glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3.5 text-left transition-all cursor-pointer",
+                        token === item.address
+                          ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                          : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
+                      )}
                     >
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3f6fa]"><Image src={`/images/${item.symbol.toLowerCase()}.png`} alt={item.symbol} width={22} height={22} /></span>
-                      <span><span className="block text-sm font-bold text-[#173154]">{item.symbol}</span><span className="block text-[11px] text-[#8190a7]">Base Sepolia</span></span>
+                      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white border border-slate-100 p-1.5 shadow-xs group-hover:scale-105 transition-transform">
+                        <Image
+                          src={`/images/${item.symbol.toLowerCase()}.png`}
+                          alt={item.symbol}
+                          width={26}
+                          height={26}
+                          className="h-6 w-6 object-contain"
+                        />
+                      </div>
+                      <div>
+                        <span className="block text-sm font-black text-slate-900">{item.symbol}</span>
+                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Base Sepolia</span>
+                      </div>
                     </button>
                   ))}
                 </div>
               </section>
 
-              <section>
-                <label htmlFor="stake" className="text-sm font-bold text-[#173154]">Stake amount</label>
-                <div className="relative mt-3">
-                  <Coins className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c8da6]" />
+              {/* Stake Amount Input */}
+              <section className="space-y-2">
+                <label htmlFor="stake" className="block text-sm font-black text-slate-900">
+                  Stake Amount
+                </label>
+                <div className="relative">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-[#0052FF]">
+                    <Coins className="h-4 w-4" />
+                  </div>
                   <Input
                     id="stake"
                     type="number"
@@ -387,39 +476,46 @@ export function CreateDareForm() {
                     value={stake}
                     onChange={(e) => setStake(e.target.value)}
                     placeholder={`Enter ${symbol} amount`}
-                    className="h-12 rounded-xl border-[#d9e2ef] bg-[#fbfcfe] pl-12 text-sm text-[#173154] focus-visible:ring-[#1268f3]/20"
+                    className="h-12 rounded-2xl border-slate-200/80 bg-white/90 pl-12 pr-16 font-mono text-sm font-black text-slate-900 placeholder:font-sans focus-visible:border-[#0052FF] focus-visible:ring-4 focus-visible:ring-blue-100/70 shadow-xs"
                   />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#60718c]">{symbol}</span>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">
+                    {symbol}
+                  </span>
                 </div>
-                <div className="mt-2 grid gap-2 text-[11px] text-[#71819a] sm:grid-cols-2">
-                  <div className="rounded-xl bg-[#f7f9fc] px-3 py-2">Min: <b className="text-[#173154]">{limitsLoading || !contractLimits ? "Loading contract limit" : `${formatUnits(contractLimits.minStake, tokenMeta.decimals)} ${symbol}`}</b></div>
-                  <div className="rounded-xl bg-[#f7f9fc] px-3 py-2">Max: <b className="text-[#173154]">{limitsLoading || !contractLimits ? "Loading contract limit" : "$500 USD equivalent"}</b></div>
+                <div className="grid gap-2 text-[11px] font-semibold text-slate-500 sm:grid-cols-2 pt-1">
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-3.5 py-2">
+                    Min Required: <b className="font-mono text-slate-900">{limitsLoading || !contractLimits ? "Loading..." : `${formatUnits(contractLimits.minStake, tokenMeta.decimals)} ${symbol}`}</b>
+                  </div>
+                  <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-3.5 py-2">
+                    Max Allowed: <b className="font-mono text-slate-900">{limitsLoading || !contractLimits ? "Loading..." : "$500 USD equivalent"}</b>
+                  </div>
                 </div>
               </section>
 
+              {/* Sample Task Ideas Accordion with Glass Refraction */}
               <section>
                 <button
                   type="button"
                   onClick={() => setSamplesExpanded((value) => !value)}
-                  className="flex w-full items-center justify-between gap-3 rounded-full border border-[#dce5f1] bg-[#f8fafc] px-4 py-3 text-left transition hover:border-[#b9c9df] hover:bg-[#f4f8ff]"
+                  className="glass-card-interactive flex w-full items-center justify-between gap-3 rounded-2xl p-3.5 text-left transition-all cursor-pointer"
                   aria-expanded={samplesExpanded}
                 >
-                  <span className="flex min-w-0 items-center gap-2.5">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#eef5ff] text-[#1268f3]">
-                      <Sparkles className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-bold text-[#173154]">Sample tasks</span>
-                      <span className="block truncate text-[11px] text-[#7b8aa1]">
-                        {samplesExpanded ? "Choose a starting template" : "Need inspiration? Browse ready-made dare ideas"}
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF] shadow-xs">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <span className="block text-xs sm:text-sm font-black text-slate-900">Sample Task Ideas</span>
+                      <span className="block truncate text-[11px] text-slate-400 font-medium">
+                        {samplesExpanded ? "Choose a starting template" : "Browse inspiration templates"}
                       </span>
-                    </span>
-                  </span>
-                  <ChevronRight className={cn("h-4 w-4 shrink-0 text-[#7b8aa1] transition-transform", samplesExpanded && "rotate-90 text-[#1268f3]")} />
+                    </div>
+                  </div>
+                  <ChevronRight className={cn("h-4 w-4 text-slate-400 transition-transform duration-200", samplesExpanded && "rotate-90 text-[#0052FF]")} />
                 </button>
 
                 {samplesExpanded && (
-                  <div className="mt-3 grid gap-2 rounded-2xl border border-[#dce5f1] bg-[#f8fafc] p-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="mt-3 grid gap-2.5 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 sm:grid-cols-2">
                     {SAMPLE_TASKS.map((sample) => (
                       <button
                         key={sample.title}
@@ -431,42 +527,66 @@ export function CreateDareForm() {
                           setError("");
                           setSamplesExpanded(false);
                         }}
-                        className="rounded-xl border border-[#dce5f1] bg-white p-3 text-left transition hover:border-[#1268f3] hover:bg-[#f4f8ff]"
+                        className="glass-card-interactive rounded-xl p-3 text-left transition-all hover:border-[#0052FF] cursor-pointer"
                       >
-                        <div className="text-xs font-bold text-[#173154]">{sample.title}</div>
-                        <div className="mt-1 text-[11px] leading-4 text-[#71819a]">{sample.task}</div>
+                        <div className="text-xs font-black text-slate-900">{sample.title}</div>
+                        <div className="mt-1 text-[11px] leading-snug text-slate-500 font-medium line-clamp-2">{sample.task}</div>
                       </button>
                     ))}
                   </div>
                 )}
               </section>
 
-              <section>
-                <div className="text-sm font-bold text-[#173154]">Does this dare need proof?</div>
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <button type="button" onClick={() => setProofMode("none")} className={cn("rounded-2xl border p-4 text-left", proofMode === "none" ? "border-[#1268f3] bg-[#f1f7ff]" : "border-[#dce5f1]")}>
-                    <div className="text-sm font-bold text-[#173154]">No proof</div>
-                    <div className="mt-1 text-xs leading-5 text-[#7b8aa1]">Outcome resolves by the protocol rules.</div>
+              {/* Proof Specification Switch */}
+              <section className="space-y-3">
+                <span className="block text-sm font-black text-slate-900">Does this dare need proof?</span>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => setProofMode("none")}
+                    className={cn(
+                      "glass-card-interactive rounded-2xl p-4 text-left transition-all cursor-pointer",
+                      proofMode === "none"
+                        ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                        : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
+                    )}
+                  >
+                    <div className="text-xs sm:text-sm font-black text-slate-900">No Proof</div>
+                    <div className="mt-1 text-[11px] text-slate-500 font-medium">Outcome resolved strictly by contract deadline.</div>
                   </button>
-                  <button type="button" onClick={() => setProofMode("required")} className={cn("rounded-2xl border p-4 text-left", proofMode === "required" ? "border-[#1268f3] bg-[#f1f7ff]" : "border-[#dce5f1]")}>
-                    <div className="text-sm font-bold text-[#173154]">Proof required</div>
-                    <div className="mt-1 text-xs leading-5 text-[#7b8aa1]">Accepter submits evidence after the deadline.</div>
+
+                  <button
+                    type="button"
+                    onClick={() => setProofMode("required")}
+                    className={cn(
+                      "glass-card-interactive rounded-2xl p-4 text-left transition-all cursor-pointer",
+                      proofMode === "required"
+                        ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                        : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
+                    )}
+                  >
+                    <div className="text-xs sm:text-sm font-black text-slate-900">Proof Required</div>
+                    <div className="mt-1 text-[11px] text-slate-500 font-medium">Accepter must upload verifiable proof before deadline.</div>
                   </button>
                 </div>
 
                 {proofMode === "required" && (
-                  <div className="mt-3 rounded-2xl border border-[#cfe0f8] bg-[#f6faff] p-4">
+                  <div className="rounded-2xl border border-blue-200/70 bg-gradient-to-br from-blue-50/60 to-white p-4 shadow-xs">
                     <div className="flex items-start gap-3">
-                      <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-[#1268f3]" />
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF]">
+                        <FileCheck2 className="h-4 w-4" />
+                      </div>
                       <div className="min-w-0 flex-1">
-                        <div className="text-sm font-bold text-[#173154]">Provable sample</div>
-                        <div className="mt-1 text-xs leading-5 text-[#71819a]">State what evidence should count. Example: “Strava activity link or screenshot showing 5 km, date and one continuous activity.”</div>
+                        <div className="text-xs font-black text-slate-900">Required Evidence Specification</div>
+                        <div className="mt-0.5 text-[11px] leading-relaxed text-slate-500 font-medium">
+                          State what qualifies as proof. E.g., “Strava activity link showing 5 km with matching date.”
+                        </div>
                         <textarea
                           value={proofSample}
                           onChange={(e) => setProofSample(e.target.value)}
                           maxLength={280}
-                          placeholder="Example: Strava activity link or screenshot showing 5 km..."
-                          className="mt-3 min-h-[82px] w-full resize-none rounded-xl border border-[#d9e2ef] bg-white px-3 py-2.5 text-xs text-[#173154] outline-none focus:border-[#1268f3] focus:ring-4 focus:ring-[#1268f3]/10"
+                          placeholder="Example: Strava link or screenshot showing 5 km..."
+                          className="mt-3 min-h-[75px] w-full resize-none rounded-xl border border-slate-200/80 bg-white p-3 text-xs text-slate-900 placeholder-slate-400 outline-none focus:border-[#0052FF] focus:ring-4 focus:ring-blue-100/70 shadow-xs"
                         />
                       </div>
                     </div>
@@ -475,75 +595,153 @@ export function CreateDareForm() {
               </section>
             </div>
 
-            <aside className="h-fit rounded-3xl border border-[#dce5f1] bg-[#f8fafc] p-5 lg:sticky lg:top-24">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#1268f3]"><Sparkles className="h-4 w-4" /> Before you review</div>
-              <div className="mt-4 space-y-3">
+            {/* Right Sticky Summary Card */}
+            <aside className="h-fit rounded-3xl border border-slate-100 bg-slate-50/70 p-5 lg:sticky lg:top-20 space-y-4 shadow-xs">
+              <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.14em] text-[#0052FF]">
+                <Sparkles className="h-3.5 w-3.5" /> Challenge Overview
+              </div>
+
+              <div className="space-y-2.5">
                 <InfoRow icon={<Clock3 className="h-4 w-4" />} label="Duration" value={`${durationValue} ${durationType}`} />
                 <InfoRow icon={<Wallet className="h-4 w-4" />} label="Stake" value={stake ? `${stake} ${symbol}` : "Not set"} />
-                <InfoRow icon={<Coins className="h-4 w-4" />} label="Matched pot" value={stake ? `${totalPot.toFixed(6)} ${symbol}` : "Not set"} />
-                <InfoRow icon={<ShieldCheck className="h-4 w-4" />} label="Proof" value={proofMode === "required" ? "Required" : "Not required"} />
+                <InfoRow icon={<Coins className="h-4 w-4" />} label="Matched Pot" value={stake ? `${totalPot.toFixed(4)} ${symbol}` : "Not set"} />
+                <InfoRow icon={<ShieldCheck className="h-4 w-4" />} label="Proof" value={proofMode === "required" ? "Required" : "None"} />
               </div>
-              <div className="mt-5 rounded-2xl border border-[#dce5f1] bg-white p-4 text-xs leading-5 text-[#71819a]">
-                <b className="text-[#173154]">Creator check:</b> the next screen shows the complete dare in one place. You must explicitly confirm that an accepter can prove it before the transaction button appears.
+
+              <div className="rounded-2xl border border-slate-100 bg-white/90 p-3.5 text-[11px] leading-relaxed text-slate-500 font-medium shadow-xs">
+                <b className="text-slate-800">Creator Verification:</b> On step 2 you must explicitly confirm that the outcome is provable by an independent party before the transaction signs.
               </div>
             </aside>
           </div>
 
           {error && <ErrorBox message={error} />}
 
-          <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <Button type="submit" className="h-12 rounded-xl bg-[#1268f3] px-7 text-sm font-bold text-white shadow-[0_10px_25px_rgba(18,104,243,0.22)] hover:bg-[#0757d8]">Next: Review <ChevronRight className="ml-1 h-4 w-4" /></Button>
+          <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <Button
+              type="submit"
+              className="h-12 rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] px-7 text-xs sm:text-sm font-black text-white shadow-[0_8px_22px_rgba(0,82,255,0.32)] active:scale-[0.98] transition-all cursor-pointer"
+            >
+              Next: Review Dare <ChevronRight className="ml-1 h-4 w-4 stroke-[2.5]" />
+            </Button>
           </div>
         </form>
       ) : (
-        <div className="p-5 sm:p-7 lg:p-8">
-          <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-            <div>
-              <div className="mb-5 flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eef5ff] text-[#1268f3]"><ShieldCheck className="h-5 w-5" /></div>
-                <div><div className="text-sm font-bold text-[#173154]">Final creator review</div><div className="mt-1 text-xs text-[#71819a]">Everything below is what the accepter will need to understand.</div></div>
+        /* Step 2: Final Creator Review Screen */
+        <div className="p-5 sm:p-7 md:p-8">
+          <div className="grid gap-7 lg:grid-cols-[1fr_340px]">
+            <div className="space-y-5">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50/90 border border-blue-200/70 text-[#0052FF] shadow-xs">
+                  <ShieldCheck className="h-6 w-6 stroke-[2.2]" />
+                </div>
+                <div>
+                  <div className="text-sm font-black text-slate-900">Final Creator Review</div>
+                  <div className="mt-0.5 text-xs text-slate-500 font-medium">Verify exactly what will be recorded on Base.</div>
+                </div>
               </div>
 
-              <div className="rounded-2xl border border-[#dce5f1] bg-white p-5">
-                <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#1268f3]">Challenge</div>
-                <div className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-[#173154]">{description}</div>
+              {/* Challenge Description Card */}
+              <div className="rounded-2xl border border-slate-100 bg-white/95 p-5 shadow-xs">
+                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-[#0052FF]">Challenge Description</div>
+                <div className="mt-2 whitespace-pre-wrap text-sm font-bold leading-relaxed text-slate-900">
+                  {description}
+                </div>
               </div>
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {/* Review Metrics 2-Col Grid */}
+              <div className="grid gap-3 sm:grid-cols-2">
                 <ReviewCard label="Duration" value={`${durationValue} ${durationType}`} />
-                <ReviewCard label="Stake asset" value={`${stake || "0"} ${symbol}`} />
-                <ReviewCard label="Matched pot" value={`${totalPot.toFixed(6)} ${symbol}`} />
-                <ReviewCard label={`Platform fee (${contractLimits ? `${Number(contractLimits.feeBps) / 100}%` : "contract rate"})`} value={`${platformFee.toFixed(6)} ${symbol}`} />
-                <ReviewCard label="Winner receives after fee" value={`${winnerAmount.toFixed(6)} ${symbol}`} />
-                <ReviewCard label="Proof" value={proofMode === "required" ? "Required" : "Not required"} />
+                <ReviewCard label="Stake Asset" value={`${stake || "0"} ${symbol}`} />
+                <ReviewCard label="Matched Total Pot" value={`${totalPot.toFixed(4)} ${symbol}`} />
+                <ReviewCard
+                  label={`Protocol Escrow Fee (${contractLimits ? `${Number(contractLimits.feeBps) / 100}%` : "3%"})`}
+                  value={`${platformFee.toFixed(4)} ${symbol}`}
+                />
+                <ReviewCard label="Winner Payout" value={`${winnerAmount.toFixed(4)} ${symbol}`} />
+                <ReviewCard label="Proof Status" value={proofMode === "required" ? "Required" : "None"} />
               </div>
 
               {proofMode === "required" && (
-                <div className="mt-4 rounded-2xl border border-[#cfe0f8] bg-[#f6faff] p-4">
-                  <div className="flex gap-3"><FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-[#1268f3]" /><div><div className="text-sm font-bold text-[#173154]">Proof sample</div><div className="mt-1 text-xs leading-5 text-[#60718c]">{proofSample}</div></div></div>
+                <div className="rounded-2xl border border-blue-200/70 bg-blue-50/40 p-4 shadow-xs">
+                  <div className="flex gap-3">
+                    <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-[#0052FF]" />
+                    <div>
+                      <div className="text-xs font-black text-slate-900">Required Proof Specification</div>
+                      <div className="mt-1 text-xs leading-relaxed text-slate-600 font-medium">{proofSample}</div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
 
-            <aside className="h-fit rounded-3xl border border-[#dce5f1] bg-[#f8fafc] p-5">
-              <div className="text-sm font-bold text-[#173154]">Is this provable for the accepter?</div>
-              <p className="mt-2 text-xs leading-5 text-[#71819a]">Only choose Yes if the stated outcome and evidence are clear enough for an independent accepter to complete and prove.</p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => setProvable(true)} className={cn("rounded-xl border px-4 py-3 text-sm font-bold transition", provable === true ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-[#dce5f1] bg-white text-[#60718c]")}><Check className="mx-auto mb-1 h-5 w-5" />Yes</button>
-                <button type="button" onClick={() => setProvable(false)} className={cn("rounded-xl border px-4 py-3 text-sm font-bold transition", provable === false ? "border-red-300 bg-red-50 text-red-600" : "border-[#dce5f1] bg-white text-[#60718c]")}><ArrowLeft className="mx-auto mb-1 h-5 w-5" />No</button>
+            {/* Provable Confirmation Aside */}
+            <aside className="h-fit rounded-3xl border border-slate-100 bg-slate-50/70 p-5 space-y-4 shadow-xs">
+              <div className="text-sm font-black text-slate-900">Is this objectively provable?</div>
+              <p className="text-xs leading-relaxed text-slate-500 font-medium">
+                Confirm only if any independent accepter can complete and verify the challenge outcome.
+              </p>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setProvable(true)}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-2xl border py-3 text-xs font-black transition-all cursor-pointer",
+                    provable === true
+                      ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-xs scale-[1.02]"
+                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50"
+                  )}
+                >
+                  <Check className="mb-1 h-5 w-5 stroke-[2.5]" /> Yes
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setProvable(false)}
+                  className={cn(
+                    "flex flex-col items-center justify-center rounded-2xl border py-3 text-xs font-black transition-all cursor-pointer",
+                    provable === false
+                      ? "border-rose-300 bg-rose-50 text-rose-700 shadow-xs scale-[1.02]"
+                      : "border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50"
+                  )}
+                >
+                  <ArrowLeft className="mb-1 h-5 w-5 stroke-[2.5]" /> No
+                </button>
               </div>
-              <div className="mt-5 rounded-2xl border border-[#dce5f1] bg-white p-4 text-xs leading-5 text-[#71819a]">
-                <b className="text-[#173154]">Contract limits:</b> {limitsLoading || !contractLimits ? "Loading current contract values." : `${formatDuration(maxDurationSeconds)} max duration; minimum ${formatUnits(contractLimits.minStake, tokenMeta.decimals)} ${symbol}; $500 USD equivalent max stake.`}
+
+              <div className="rounded-2xl border border-slate-100 bg-white/90 p-3.5 text-[11px] leading-relaxed text-slate-500 font-medium shadow-xs">
+                <b className="text-slate-800">Contract Safeguards:</b> {limitsLoading || !contractLimits ? "Loading parameters..." : `${formatDuration(maxDurationSeconds)} maximum duration; ${formatUnits(contractLimits.minStake, tokenMeta.decimals)} ${symbol} minimum stake.`}
               </div>
             </aside>
           </div>
 
           {error && <ErrorBox message={error} />}
 
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <Button type="button" variant="outline" onClick={() => { setStep(1); setProvable(null); setSamplesExpanded(false); setError(""); }} className="h-12 rounded-xl border-[#dce5f1] bg-white text-[#52657f]">Back to edit</Button>
-            <Button type="button" onClick={createDare} disabled={isSubmitting || provable !== true} className="h-12 rounded-xl bg-[#1268f3] px-8 text-sm font-bold text-white shadow-[0_10px_25px_rgba(18,104,243,0.22)] hover:bg-[#0757d8] disabled:bg-[#b9c8dd] disabled:text-white">
-              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating dare...</> : <><CheckCircle2 className="mr-2 h-4 w-4" /> Create Dare</>}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setStep(1); setProvable(null); setSamplesExpanded(false); setError(""); }}
+              className="h-12 rounded-2xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs sm:text-sm font-bold cursor-pointer"
+            >
+              Back to Edit
+            </Button>
+
+            <Button
+              type="button"
+              onClick={createDare}
+              disabled={isSubmitting || provable !== true}
+              className="animate-pulse-glow h-12 rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] px-8 text-xs sm:text-sm font-black text-white shadow-[0_8px_24px_rgba(0,82,255,0.32)] disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none active:scale-[0.98] transition-all cursor-pointer"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Locking on Base...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4 stroke-[2.5]" /> Lock & Create Dare
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -569,13 +767,31 @@ function formatDuration(seconds: number) {
 }
 
 function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-3 py-2.5"><div className="flex items-center gap-2 text-xs text-[#71819a]">{icon}{label}</div><div className="text-xs font-bold text-[#173154]">{value}</div></div>;
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white/95 px-3.5 py-2.5 shadow-xs">
+      <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+        <span className="text-[#0052FF]">{icon}</span>
+        {label}
+      </div>
+      <div className="font-mono text-xs font-black text-slate-900">{value}</div>
+    </div>
+  );
 }
 
 function ReviewCard({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl border border-[#dce5f1] bg-[#f8fafc] px-4 py-3"><div className="text-[11px] text-[#8190a7]">{label}</div><div className="mt-1 text-sm font-bold text-[#173154]">{value}</div></div>;
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-xs">
+      <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">{label}</div>
+      <div className="mt-1 font-mono text-sm sm:text-base font-black text-slate-900">{value}</div>
+    </div>
+  );
 }
 
 function ErrorBox({ message }: { message: string }) {
-  return <div className="mt-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{message}</div>;
+  return (
+    <div className="mt-5 flex items-start gap-3 rounded-2xl border border-rose-200/80 bg-rose-50/80 p-4 text-xs font-bold text-rose-700 shadow-xs">
+      <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+      <span>{message}</span>
+    </div>
+  );
 }

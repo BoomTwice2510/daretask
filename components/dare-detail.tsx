@@ -33,17 +33,19 @@ import {
   Gavel,
   XCircle,
   Ban,
+  Sparkles,
+  ShieldCheck,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Address, type Hash } from "viem";
 import Link from "next/link";
 
 interface DareDetailProps {
-  dare: DareData | null; // allow null for skeleton state
+  dare: DareData | null;
   onRefresh: () => void;
 }
 
-// helpers shared with create form
 function symbolToDisplayName(symbol: string) {
   if (symbol === "USDC9CIRCLE0" || symbol === "USDC_CIRCLE") return "USDC";
   if (symbol === "TKN1" || symbol === "TOKEN1") return "JESSE";
@@ -74,7 +76,6 @@ function tokenMetaFromAddress(tokenAddress: string) {
   };
 }
 
-// compact duration text: 2d 5h, 3h 12m, 45m
 function formatDurationShort(totalSeconds: number) {
   if (totalSeconds <= 0) return "0m";
   const d = Math.floor(totalSeconds / 86400);
@@ -89,7 +90,7 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-md bg-slate-50",
+        "animate-pulse rounded-2xl bg-slate-100/80 border border-slate-200/60",
         className
       )}
     />
@@ -119,7 +120,6 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
   >("idle");
   const [acceptStep, setAcceptStep] = useState<0 | 1 | 2>(0);
 
-  // confirm modal
   const [confirmAction, setConfirmAction] = useState<
     | null
     | {
@@ -135,7 +135,6 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       }
   >(null);
 
-  // close dialog via Esc
   useEffect(() => {
     if (!confirmAction) return;
     const onKey = (e: KeyboardEvent) => {
@@ -147,7 +146,6 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [confirmAction]);
 
-  // Fetch judge address
   useEffect(() => {
     readContract("judge")
       .then((j) => setJudgeAddress(j as string))
@@ -186,21 +184,20 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     }
   };
 
-  // skeleton state
   if (!dare) {
     return (
       <div className="flex flex-col gap-6 text-slate-900">
-        <SkeletonBlock className="h-6 w-40" />
+        <SkeletonBlock className="h-10 w-48" />
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <SkeletonBlock className="h-7 w-28 rounded-full" />
-          <SkeletonBlock className="h-9 w-48 rounded-full" />
+          <SkeletonBlock className="h-8 w-32 rounded-full" />
+          <SkeletonBlock className="h-10 w-52 rounded-2xl" />
         </div>
-        <SkeletonBlock className="h-24 w-full rounded-xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <SkeletonBlock className="h-14 w-full rounded-xl" />
-          <SkeletonBlock className="h-14 w-full rounded-xl" />
+        <SkeletonBlock className="h-32 w-full rounded-3xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <SkeletonBlock className="h-20 w-full rounded-2xl" />
+          <SkeletonBlock className="h-20 w-full rounded-2xl" />
         </div>
-        <SkeletonBlock className="h-5 w-64" />
+        <SkeletonBlock className="h-6 w-64" />
       </div>
     );
   }
@@ -216,13 +213,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     dare.accepter === ZERO_ADDRESS ||
     dare.accepter === "0x0000000000000000000000000000000000000000";
 
-  // time windows (seconds)
   const now = useMemo(() => Math.floor(Date.now() / 1000), []);
   const proofWindowText = useMemo(() => {
     if (!isDeadlinePassed(dare.deadline) || !isInProofWindow(dare.deadline)) {
       return null;
     }
-    const proofEnd = Number(dare.deadline) + 24 * 60 * 60; // 24h after deadline
+    const proofEnd = Number(dare.deadline) + 24 * 60 * 60;
     const remaining = proofEnd - now;
     return `Proof window ends in ${formatDurationShort(remaining)}`;
   }, [dare.deadline, now]);
@@ -231,9 +227,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     if (!dare.proofTime || !isInConfirmWindow(dare.proofTime)) return null;
     const confirmEnd = Number(dare.proofTime) + 24 * 60 * 60;
     const remaining = confirmEnd - now;
-    return `Creator has ${formatDurationShort(
-      remaining
-    )} to confirm or dispute`;
+    return `Creator has ${formatDurationShort(remaining)} to confirm or dispute`;
   }, [dare.proofTime, now]);
 
   const judgeWindowText = useMemo(() => {
@@ -243,17 +237,15 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     return `Judge has ${formatDurationShort(remaining)} left to decide`;
   }, [dare.disputeTime, now]);
 
-  // Accept Dare with 2-step progress (approve -> accept)
   const handleAcceptDare = () =>
     executeAction(
       async () => {
         if (!address) throw new Error("Wallet not connected");
 
-        // Step 1: Approve if ERC20 allowance insufficient
         if (!isETH) {
           const allowance = await getAllowance(dare.token as Address, address);
           if (allowance < dare.stake) {
-            setAcceptStep(1); // 1/2 Approving
+            setAcceptStep(1);
             setTxStage("sign");
             const approveHash = await approveToken(
               dare.token as Address,
@@ -265,8 +257,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
           }
         }
 
-        // Step 2: Accept dare
-        setAcceptStep(2); // 2/2 Accepting
+        setAcceptStep(2);
         setTxStage("sign");
         const hash = await writeContract(
           "acceptDare",
@@ -278,63 +269,54 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       "Dare accepted"
     );
 
-  // Cancel Dare (creator only, open)
   const handleCancel = () =>
     executeAction(
       () => writeContract("cancelOpenDare", [BigInt(dare.id)]),
       "Dare cancelled"
     );
 
-  // Expire unaccepted dare
   const handleExpire = () =>
     executeAction(
       () => writeContract("expireUnacceptedDare", [BigInt(dare.id)]),
       "Dare expired"
     );
 
-  // Submit proof (accepter only)
   const handleSubmitProof = () =>
     executeAction(
       () => writeContract("submitProof", [BigInt(dare.id), proofURI]),
       "Proof submitted"
     );
 
-  // Confirm success (creator only)
   const handleConfirmSuccess = () =>
     executeAction(
       () => writeContract("confirmSuccess", [BigInt(dare.id)]),
       "Dare confirmed"
     );
 
-  // Dispute (creator only)
   const handleDispute = () =>
     executeAction(
       () => writeContract("disputeDare", [BigInt(dare.id)]),
       "Dare disputed"
     );
 
-  // Resolve after confirm timeout (anyone)
   const handleResolveConfirmTimeout = () =>
     executeAction(
       () => writeContract("resolveAfterConfirmTimeout", [BigInt(dare.id)]),
       "Resolved"
     );
 
-  // Resolve after proof timeout (anyone)
   const handleResolveProofTimeout = () =>
     executeAction(
       () => writeContract("resolveAfterProofTimeout", [BigInt(dare.id)]),
       "Resolved"
     );
 
-  // Judge resolve
   const handleJudgeResolve = (creatorWins: boolean) =>
     executeAction(
       () => writeContract("judgeResolve", [BigInt(dare.id), creatorWins]),
       "Judge resolved"
     );
 
-  // Proof URL validation
   const validateProof = (value: string) => {
     const v = value.trim();
     if (!v) {
@@ -352,9 +334,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
     setProofError("");
   };
 
-  const handleProofKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
+  const handleProofKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       if (!isLoading && proofURI.trim() && !proofError) {
@@ -367,190 +347,236 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
 
   return (
     <div className="flex flex-col gap-6 text-slate-900">
-      {/* Timeline */}
-      <DareTimeline status={dare.status} />
+      {/* Timeline with Frosted Glass Container */}
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 shadow-xs">
+        <DareTimeline status={dare.status} />
+      </div>
 
-      {/* Status badge + stake */}
+      {/* Status Badge + Staking Pool Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span
           key={dare.status}
           className={cn(
-            "inline-flex items-center rounded-full px-3 py-1 text-sm font-medium border border-slate-200 bg-white",
-            "transition-all duration-300 ease-out",
-            dare.status === DareStatus.Resolved &&
-              "shadow-[0_0_25px_rgba(16,185,129,0.65)] scale-[1.03]",
+            "inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-black uppercase tracking-wider border shadow-xs transition-all duration-300",
+            dare.status === DareStatus.Resolved
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-[0_0_20px_rgba(16,185,129,0.25)] scale-[1.02]"
+              : dare.status === DareStatus.Open
+              ? "bg-emerald-50/90 text-emerald-700 border-emerald-200/80"
+              : dare.status === DareStatus.Disputed
+              ? "bg-rose-50 text-rose-700 border-rose-200/80"
+              : "bg-blue-50/90 text-[#0052FF] border-blue-200/80",
             getStatusColor(dare.status)
           )}
         >
+          {dare.status === DareStatus.Open && (
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+            </span>
+          )}
           {getStatusLabel(dare.status)}
         </span>
-        <div className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 border border-slate-200">
-          <div className="h-5 w-5 rounded-full overflow-hidden bg-slate-50 flex-shrink-0">
+
+        {/* Stake Module */}
+        <div className="glass-card-interactive flex items-center gap-2.5 rounded-2xl px-4 py-2 shadow-xs">
+          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white p-1 border border-slate-100 shadow-xs">
             <Image
               src={tokenMeta.icon}
               alt={tokenMeta.symbol}
-              width={20}
-              height={20}
+              width={22}
+              height={22}
               className="h-full w-full object-contain"
             />
           </div>
-          <span className="font-mono text-sm font-bold text-slate-900">
+          <span className="font-mono text-sm sm:text-base font-black text-slate-900">
             {stakeFormatted} {tokenMeta.symbol}
           </span>
-          <span className="text-xs text-slate-500">each side</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            each side
+          </span>
         </div>
       </div>
 
-      {/* Description */}
-      <div className="rounded-xl bg-slate-50 border border-slate-200 p-4">
-        <p className="leading-relaxed text-slate-700">{dare.description}</p>
+      {/* Description Glass Card */}
+      <div className="glass-card-interactive rounded-[26px] p-5 sm:p-7 shadow-xs">
+        <div className="mb-2 inline-flex items-center gap-1.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#0052FF]">
+          <Sparkles className="h-3.5 w-3.5" /> Challenge Statement
+        </div>
+        <p className="text-base sm:text-lg font-bold leading-relaxed text-slate-900 whitespace-pre-wrap">
+          {dare.description}
+        </p>
       </div>
 
-      {/* Participants */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 bg-white">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[rgba(245,213,102,0.18)]">
-            <User className="h-5 w-5 text-[#f5d566]" />
+      {/* Participants with Bigger 3D Glass Avatars */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Creator Card */}
+        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-4 shadow-xs">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-amber-100/70 border border-amber-200/80 text-amber-600 shadow-[0_4px_16px_rgba(245,158,11,0.14)] group-hover:scale-105 transition-transform">
+            <div className="absolute inset-1 rounded-xl bg-amber-400/10 blur-xs" />
+            <User className="relative z-10 h-6 w-6 stroke-[2.2]" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs text-slate-400">Creator</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Creator</span>
             <Link
               href={`/profile/${dare.creator}`}
-              className="font-mono text-xs text-slate-900 hover:text-[#f5d566] truncate"
+              className="font-mono text-xs sm:text-sm font-black text-slate-900 hover:text-[#0052FF] truncate transition-colors"
             >
               {shortenAddress(dare.creator)}
             </Link>
           </div>
           <button
             onClick={() => copyAddress(dare.creator)}
-            className="ml-auto shrink-0 h-11 w-11 flex items-center justify-center rounded-full hover:bg-slate-50"
+            className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
             aria-label="Copy address"
           >
             {copied ? (
-              <Check className="h-4 w-4 text-emerald-400" />
+              <Check className="h-4 w-4 text-emerald-500 stroke-[3]" />
             ) : (
-              <Copy className="h-4 w-4 text-slate-400" />
+              <Copy className="h-4 w-4" />
             )}
           </button>
         </div>
 
-        {!noAccepter && (
-          <div className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 bg-slate-50">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500/20">
-              <Swords className="h-5 w-5 text-sky-400" />
+        {/* Accepter Card */}
+        {!noAccepter ? (
+          <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-4 shadow-xs">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-blue-100/70 border border-blue-200/80 text-[#0052FF] shadow-[0_4px_16px_rgba(0,82,255,0.14)] group-hover:scale-105 transition-transform">
+              <div className="absolute inset-1 rounded-xl bg-blue-400/10 blur-xs" />
+              <Swords className="relative z-10 h-6 w-6 stroke-[2.2]" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-xs text-slate-400">Accepter</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Accepter</span>
               <Link
                 href={`/profile/${dare.accepter}`}
-                className="font-mono text-xs text-slate-900 hover:text-sky-400 truncate"
+                className="font-mono text-xs sm:text-sm font-black text-slate-900 hover:text-[#0052FF] truncate transition-colors"
               >
                 {shortenAddress(dare.accepter)}
               </Link>
+            </div>
+            <button
+              onClick={() => copyAddress(dare.accepter)}
+              className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
+              aria-label="Copy address"
+            >
+              <Copy className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="glass-panel flex items-center gap-3.5 rounded-2xl border-dashed p-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-50 border border-slate-200/70 text-slate-400">
+              <Swords className="h-6 w-6 stroke-[1.8]" />
+            </div>
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Challenger Slot</span>
+              <p className="text-xs font-bold text-slate-700">Open for anyone to accept</p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Time info */}
-      <div className="flex flex-col gap-2 text-xs text-slate-500">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+      {/* Time & Windows Info */}
+      <div className="glass-panel flex flex-col gap-2 rounded-2xl p-4 text-xs font-semibold text-slate-500 shadow-xs">
+        <div className="flex flex-wrap gap-3.5 items-center">
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-slate-400" />
             <span>
               Deadline:{" "}
-              {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
-              {new Date(Number(dare.deadline) * 1000).toLocaleTimeString()}
+              <b className="text-slate-800">
+                {new Date(Number(dare.deadline) * 1000).toLocaleDateString()}{" "}
+                {new Date(Number(dare.deadline) * 1000).toLocaleTimeString()}
+              </b>
             </span>
           </div>
           {(dare.status === DareStatus.Open ||
             dare.status === DareStatus.Running) && (
-            <div className="flex items-center gap-1">
-              <span className="text-[#f5d566] font-medium">
-                {timeRemaining(dare.deadline)} remaining
-              </span>
+            <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-[#0052FF]">
+              <span>{timeRemaining(dare.deadline)} remaining</span>
             </div>
           )}
         </div>
 
         {proofWindowText && (
-          <div className="flex items-center gap-1 text-[11px] text-slate-500">
-            <Clock className="h-3 w-3 text-[#f5d566]" />
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-600">
+            <Clock className="h-3.5 w-3.5 text-amber-500" />
             <span>{proofWindowText}</span>
           </div>
         )}
 
         {confirmWindowText && (
-          <div className="flex items-center gap-1 text-[11px] text-slate-500">
-            <Clock className="h-3 w-3 text-emerald-400" />
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600">
+            <Clock className="h-3.5 w-3.5 text-emerald-500" />
             <span>{confirmWindowText}</span>
           </div>
         )}
 
         {judgeWindowText && (
-          <div className="flex items-center gap-1 text-[11px] text-slate-500">
-            <Gavel className="h-3 w-3 text-sky-400" />
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-indigo-600">
+            <Gavel className="h-3.5 w-3.5 text-indigo-500" />
             <span>{judgeWindowText}</span>
           </div>
         )}
       </div>
 
-      {/* Proof info */}
+      {/* Proof Info Box */}
       {dare.proofSubmitted && dare.proofURI && (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <div className="glass-card-interactive rounded-2xl p-4.5 shadow-xs">
           <div className="flex items-center gap-2 mb-2">
-            <FileCheck className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm font-medium text-slate-900">
-              Proof Submitted
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <FileCheck className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-black text-slate-900">
+              Verified Proof Submitted
             </span>
           </div>
           <a
             href={dare.proofURI}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-sm text-sky-400 hover:underline break-all"
+            className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#0052FF] hover:underline break-all"
           >
-            {dare.proofURI.length > 60
-              ? dare.proofURI.slice(0, 60) + "..."
-              : dare.proofURI}
-            <ExternalLink className="h-3 w-3 shrink-0" />
+            <span>
+              {dare.proofURI.length > 60
+                ? dare.proofURI.slice(0, 60) + "..."
+                : dare.proofURI}
+            </span>
+            <ExternalLink className="h-3.5 w-3.5 shrink-0" />
           </a>
         </div>
       )}
 
-      {/* Transaction status banner */}
+      {/* Transaction Status Banner */}
       {txStage !== "idle" && (
-        <div className="flex items-start gap-2 rounded-lg bg-white border border-slate-200 p-3 text-xs text-slate-600">
+        <div className="glass-panel flex items-start gap-3 rounded-2xl p-4 text-xs font-semibold text-slate-700 shadow-xs">
           <Loader2
-            className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
+            className={`h-4 w-4 mt-0.5 shrink-0 text-[#0052FF] ${
               txStage === "sign" || txStage === "pending" ? "animate-spin" : ""
             }`}
           />
-          <div className="flex flex-col gap-0.5">
+          <div className="flex flex-col gap-1">
             {txStage === "sign" && (
               <span>
                 {acceptStep === 1
-                  ? "Step 1/2: Approving token spend. Check your wallet and sign."
+                  ? "Step 1/2: Approving token spend. Check your wallet to sign."
                   : acceptStep === 2
-                  ? "Step 2/2: Accepting dare. Check your wallet and sign."
+                  ? "Step 2/2: Accepting dare collateral. Check your wallet to sign."
                   : "Check your wallet and sign the transaction."}
               </span>
             )}
             {txStage === "pending" && (
               <span>
                 {acceptStep === 1
-                  ? "Step 1/2: Approval sent. Waiting for confirmation…"
+                  ? "Step 1/2: Token approval sent. Waiting for Base confirmation…"
                   : acceptStep === 2
-                  ? "Step 2/2: Accept sent. Waiting for confirmation…"
-                  : "Transaction sent. Waiting for blockchain confirmation…"}
+                  ? "Step 2/2: Accept transaction sent. Locking collateral in escrow…"
+                  : "Transaction sent. Waiting for Base Sepolia block confirmation…"}
               </span>
             )}
             {txStage === "success" && (
-              <span>Transaction confirmed on-chain.</span>
+              <span className="text-emerald-600 font-bold">Transaction confirmed on-chain!</span>
             )}
             {txStage === "error" && (
-              <span>
-                Transaction failed. Please check the error message below.
+              <span className="text-rose-600 font-bold">
+                Transaction failed. Please check the error details below.
               </span>
             )}
             {txHash && (
@@ -558,37 +584,35 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 href={`https://sepolia.basescan.org/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[11px] text-sky-400 hover:underline break-all"
+                className="text-[11px] font-bold text-[#0052FF] hover:underline break-all"
               >
-                View on BaseScan: {txHash}
+                View on BaseScan: {txHash} ↗
               </a>
             )}
           </div>
         </div>
       )}
 
-      {/* Action Buttons based on state */}
+      {/* Action States */}
       <div className="flex flex-col gap-3">
         {/* --- OPEN STATE --- */}
         {dare.status === DareStatus.Open && (
           <>
-            {/* Accept button (not creator) */}
             {isConnected && !isCreator && (
               <Button
                 onClick={handleAcceptDare}
                 disabled={isLoading}
-                className="w-full h-12 min-h-[48px] bg-[#1268f3] text-white hover:bg-[#0757d8] text-base font-semibold shadow-[0_10px_25px_rgba(18,104,243,0.22)]"
+                className="animate-pulse-glow h-13 w-full min-h-[50px] rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white text-base font-black shadow-[0_8px_24px_rgba(0,82,255,0.32)] active:scale-[0.98] transition-all cursor-pointer"
               >
                 {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                 ) : (
-                  <Swords className="mr-2 h-4 w-4" />
+                  <Swords className="mr-2 h-5 w-5 stroke-[2.2]" />
                 )}
                 {primaryAcceptLabel}
               </Button>
             )}
 
-            {/* Cancel (creator only, before deadline) */}
             {isConnected && isCreator && !isDeadlinePassed(dare.deadline) && (
               <Button
                 onClick={() =>
@@ -599,18 +623,17 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 }
                 disabled={isLoading}
                 variant="outline"
-                className="w-full h-12 min-h-[48px] border-red-500 text-red-400 hover:bg-red-500/10"
+                className="h-12 w-full min-h-[48px] rounded-2xl border-rose-200 bg-rose-50/60 text-rose-600 hover:bg-rose-100/70 text-sm font-bold transition-all cursor-pointer"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <XCircle className="mr-2 h-4 w-4" />
                 )}
-                Cancel Dare
+                Cancel Dare & Unlock Stake
               </Button>
             )}
 
-            {/* Expire (anyone, after deadline) */}
             {isDeadlinePassed(dare.deadline) && (
               <Button
                 onClick={() =>
@@ -621,7 +644,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 }
                 disabled={isLoading}
                 variant="outline"
-                className="w-full h-12 min-h-[48px] border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="h-12 w-full min-h-[48px] rounded-2xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-sm font-bold transition-all cursor-pointer"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -635,7 +658,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {!isConnected && (
               <Button
                 onClick={connect}
-                className="w-full h-12 min-h-[48px] bg-[#1268f3] text-white hover:bg-[#0757d8]"
+                className="h-13 w-full min-h-[50px] rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] text-white text-base font-black shadow-[0_8px_24px_rgba(0,82,255,0.32)] active:scale-[0.98] transition-all cursor-pointer"
               >
                 Connect Wallet to Accept
               </Button>
@@ -646,16 +669,17 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {/* --- RUNNING STATE --- */}
         {dare.status === DareStatus.Running && (
           <>
-            {/* Submit proof (accepter only, within proof window) */}
             {isConnected &&
               isAccepter &&
               isDeadlinePassed(dare.deadline) &&
               isInProofWindow(dare.deadline) && (
-                <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4">
-                  <div className="flex items-center gap-2">
-                    <FileCheck className="h-4 w-4 text-[#f5d566]" />
-                    <span className="text-sm font-medium text-slate-900">
-                      Submit Your Proof
+                <div className="glass-card-interactive flex flex-col gap-3.5 rounded-[24px] p-5 sm:p-6 shadow-xs">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF]">
+                      <FileCheck className="h-5 w-5 stroke-[2.2]" />
+                    </div>
+                    <span className="text-sm font-black text-slate-900">
+                      Submit Your Verifiable Proof
                     </span>
                   </div>
                   <Input
@@ -665,39 +689,39 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                       validateProof(e.target.value);
                     }}
                     onKeyDown={handleProofKeyDown}
-                    placeholder="Proof URL (e.g. tweet link, image URL, IPFS, Google Drive)"
-                    className="bg-white border-slate-200 text-slate-900 text-base"
+                    placeholder="Proof URL (e.g. Strava link, X post, image URI, IPFS)"
+                    className="h-12 rounded-2xl border-slate-200/80 bg-white/95 text-slate-900 text-sm focus-visible:border-[#0052FF] focus-visible:ring-4 focus-visible:ring-blue-100/70 shadow-xs"
                   />
                   {proofError && (
-                    <p className="text-[11px] text-red-400">{proofError}</p>
+                    <p className="text-xs font-bold text-rose-500">{proofError}</p>
                   )}
                   <Button
                     onClick={handleSubmitProof}
                     disabled={
                       isLoading || !proofURI.trim() || proofError.length > 0
                     }
-                    className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547]"
+                    className="h-12 w-full min-h-[48px] rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] text-white font-black shadow-[0_6px_20px_rgba(0,82,255,0.28)] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <FileCheck className="mr-2 h-4 w-4" />
                     )}
-                    Submit Proof
+                    Submit Proof On-Chain
                   </Button>
                 </div>
               )}
 
-            {/* Show message if not yet deadline */}
             {isAccepter && !isDeadlinePassed(dare.deadline) && (
-              <div className="rounded-lg bg-white border border-slate-200 p-4 text-sm text-slate-600">
-                <Clock className="inline h-4 w-4 mr-1" />
-                Dare is in progress. Submit proof after the deadline (
-                {timeRemaining(dare.deadline)} remaining).
+              <div className="glass-panel flex items-center gap-3 rounded-2xl p-4 text-xs sm:text-sm font-semibold text-slate-600 shadow-xs">
+                <Clock className="h-4 w-4 text-[#0052FF] shrink-0" />
+                <span>
+                  Challenge is currently in progress. Submit proof after the deadline (
+                  <b className="text-slate-900">{timeRemaining(dare.deadline)}</b> remaining).
+                </span>
               </div>
             )}
 
-            {/* Resolve after proof timeout (anyone) */}
             {isDeadlinePassed(dare.deadline) &&
               !isInProofWindow(dare.deadline) &&
               !dare.proofSubmitted && (
@@ -709,7 +733,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     })
                   }
                   disabled={isLoading}
-                  className="w-full h-12 min-h-[48px] bg-amber-500 text-black hover:bg-amber-400"
+                  className="h-12 w-full min-h-[48px] rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black shadow-[0_6px_20px_rgba(245,158,11,0.25)] active:scale-[0.98] transition-all cursor-pointer"
                 >
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -725,24 +749,23 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {/* --- PROOF SUBMITTED STATE --- */}
         {dare.status === DareStatus.ProofSubmitted && (
           <>
-            {/* Creator actions */}
             {isConnected && isCreator && isInConfirmWindow(dare.proofTime) && (
-              <div className="flex flex-col gap-3">
-                <p className="text-sm text-slate-600">
-                  Review the proof and confirm or dispute within 24 hours.
+              <div className="glass-panel flex flex-col gap-3 rounded-[24px] p-5 shadow-xs">
+                <p className="text-xs sm:text-sm font-semibold text-slate-600">
+                  Review the submitted proof above and choose to confirm or dispute within 24 hours.
                 </p>
                 <div className="flex gap-3">
                   <Button
                     onClick={handleConfirmSuccess}
                     disabled={isLoading}
-                    className="flex-1 h-12 min-h-[48px] bg-emerald-500 text-black hover:bg-emerald-400"
+                    className="flex-1 h-12 min-h-[48px] rounded-2xl bg-gradient-to-b from-emerald-500 to-emerald-600 text-white font-black shadow-[0_6px_20px_rgba(16,185,129,0.25)] active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
-                      <Check className="mr-2 h-4 w-4" />
+                      <Check className="mr-2 h-4 w-4 stroke-[3]" />
                     )}
-                    Confirm
+                    Confirm & Release Stake
                   </Button>
                   <Button
                     onClick={() =>
@@ -753,31 +776,29 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                     }
                     disabled={isLoading}
                     variant="outline"
-                    className="flex-1 h-12 min-h-[48px] border-red-500 text-red-400 hover:bg-red-500/10"
+                    className="flex-1 h-12 min-h-[48px] rounded-2xl border-rose-200 bg-rose-50/60 text-rose-600 hover:bg-rose-100 font-bold active:scale-[0.98] transition-all cursor-pointer"
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <ShieldAlert className="mr-2 h-4 w-4" />
                     )}
-                    Dispute
+                    Dispute Proof
                   </Button>
                 </div>
               </div>
             )}
 
-            {/* Resolve after confirm timeout (anyone) */}
             {!isInConfirmWindow(dare.proofTime) && (
               <Button
                 onClick={() =>
                   setConfirmAction({
                     type: "resolveConfirmTimeout",
-                    label:
-                      "Resolve (Creator Inactive - Accepter Wins)",
+                    label: "Resolve (Creator Inactive - Accepter Wins)",
                   })
                 }
                 disabled={isLoading}
-                className="w-full h-12 min-h-[48px] bg-sky-500 text-black hover:bg-sky-400"
+                className="h-12 w-full min-h-[48px] rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] text-white font-black shadow-[0_6px_20px_rgba(0,82,255,0.25)] active:scale-[0.98] transition-all cursor-pointer"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -794,15 +815,17 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {dare.status === DareStatus.Disputed && (
           <>
             {isJudge && isInJudgeWindow(dare.disputeTime) && (
-              <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4">
+              <div className="glass-card-interactive flex flex-col gap-3.5 rounded-[24px] p-5 shadow-xs">
                 <div className="flex items-center gap-2">
-                  <Gavel className="h-4 w-4 text-[#f5d566]" />
-                  <span className="text-sm font-medium text-slate-900">
-                    Judge Resolution
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                    <Gavel className="h-4 w-4" />
+                  </div>
+                  <span className="text-sm font-black text-slate-900">
+                    Judge Official Resolution
                   </span>
                 </div>
-                <p className="text-xs text-slate-500">
-                  As the judge, decide who wins this disputed dare.
+                <p className="text-xs font-semibold text-slate-500">
+                  As the designated protocol judge, review the proof evidence and award the escrowed pool.
                 </p>
                 <div className="flex gap-3">
                   <Button
@@ -813,8 +836,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                       })
                     }
                     disabled={isLoading}
-                    variant="outline"
-                    className="flex-1 h-12 min-h-[48px] border-[rgba(212,175,55,0.7)] text-[#f5d566] hover:bg-[rgba(245,213,102,0.1)]"
+                    className="flex-1 h-12 min-h-[48px] rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black shadow-xs active:scale-[0.98] cursor-pointer"
                   >
                     Creator Wins
                   </Button>
@@ -826,8 +848,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                       })
                     }
                     disabled={isLoading}
-                    variant="outline"
-                    className="flex-1 h-12 min-h-[48px] border-sky-500 text-sky-400 hover:bg-sky-500/10"
+                    className="flex-1 h-12 min-h-[48px] rounded-2xl bg-[#0052FF] hover:bg-[#0045d8] text-white font-black shadow-xs active:scale-[0.98] cursor-pointer"
                   >
                     Accepter Wins
                   </Button>
@@ -836,11 +857,10 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             )}
 
             {!isJudge && (
-              <div className="rounded-lg bg-red-500/10 border border-red-500/40 p-4 text-sm text-red-400 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4" />
+              <div className="glass-panel flex items-center gap-3 rounded-2xl border-rose-200 bg-rose-50/70 p-4 text-xs sm:text-sm font-bold text-rose-700 shadow-xs">
+                <ShieldAlert className="h-5 w-5 shrink-0 text-rose-600" />
                 <span>
-                  This dare is under dispute. A judge will resolve it within 72
-                  hours.
+                  This dare is currently under dispute review. The protocol judge will inspect the evidence and declare a winner within 72 hours.
                 </span>
               </div>
             )}
@@ -849,76 +869,82 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
 
         {/* --- RESOLVED --- */}
         {dare.status === DareStatus.Resolved && (
-          <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-4 text-center animate-[flash-green_0.6s_ease-out]">
-            <Check className="h-6 w-6 text-emerald-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-emerald-400">
-              Dare Resolved
+          <div className="glass-panel rounded-3xl border-emerald-200 bg-emerald-50/70 p-5 text-center shadow-xs">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100/80 text-emerald-700">
+              <Check className="h-6 w-6 stroke-[3]" />
+            </div>
+            <p className="text-sm font-black text-emerald-800">
+              Dare Resolved & Payout Released
             </p>
           </div>
         )}
 
         {/* --- CANCELLED --- */}
         {dare.status === DareStatus.Cancelled && (
-          <div className="rounded-lg bg-white border border-slate-200 p-4 text-center">
-            <Ban className="h-6 w-6 text-slate-500 mx-auto mb-2" />
-            <p className="text-sm font-medium text-slate-600">
-              Dare Cancelled
+          <div className="glass-panel rounded-3xl p-5 text-center shadow-xs">
+            <Ban className="mx-auto mb-2 h-6 w-6 text-slate-400" />
+            <p className="text-sm font-black text-slate-600">
+              Dare Cancelled & Funds Refunded
             </p>
           </div>
         )}
       </div>
 
-      {/* Feedback messages */}
+      {/* Feedback Messages */}
       {error && (
-        <div className="flex items-start gap-2 rounded-lg bg-red-500/10 border border-red-500/40 p-3 text-sm text-red-400">
-          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50/80 p-4 text-xs font-bold text-rose-700 shadow-xs">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
           <span>{error}</span>
         </div>
       )}
       {success && (
-        <div className="flex items-start gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/40 p-3 text-sm text-emerald-400">
-          <Check className="h-4 w-4 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4 text-xs font-bold text-emerald-700 shadow-xs">
+          <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500 stroke-[3]" />
           <span>{success}</span>
         </div>
       )}
 
-      {/* Confirm modal */}
+      {/* Confirmation Modal with Frosted Glass Backdrop */}
       {confirmAction && (
-        <div className="fixed inset-0 z-40 flex items-end sm:items-center justify-center bg-slate-950/30 backdrop-blur-sm p-3">
-          <div className="w-full sm:max-w-sm rounded-2xl bg-white border border-slate-200 p-5 space-y-3 shadow-[0_24px_70px_rgba(15,23,42,0.2)]">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-[#f5d566]" />
-              <span className="text-sm font-semibold text-slate-900">
-                Confirm action
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 backdrop-blur-md p-4 animate-menu-slide">
+          <div className="glass-panel w-full sm:max-w-md rounded-[28px] p-6 space-y-4 shadow-[0_24px_70px_rgba(15,23,42,0.25)]">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <ShieldAlert className="h-5 w-5" />
+              </div>
+              <span className="text-base font-black text-slate-900">
+                Confirm Action
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            
+            <p className="text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
               {confirmAction.type === "cancel" &&
-                "Are you sure you want to cancel this open dare? Funds will be refunded to the creator."}
+                "Are you sure you want to cancel this open dare? Escrowed collateral will be refunded to your wallet."}
               {confirmAction.type === "expire" &&
                 "Expire this dare and refund the creator? Anyone can trigger this after the deadline."}
               {confirmAction.type === "dispute" &&
-                "Open a dispute on this dare? The judge will review the proof and decide a winner."}
+                "Open an official dispute on this dare? The designated protocol judge will review the evidence and declare a winner."}
               {confirmAction.type === "resolveConfirmTimeout" &&
-                "Resolve in favor of the accepter because the creator did not respond in time?"}
+                "Resolve in favor of the accepter because the creator did not respond within the 24h window?"}
               {confirmAction.type === "resolveProofTimeout" &&
-                "Resolve in favor of the creator because no proof was submitted in time?"}
+                "Resolve in favor of the creator because no verifiable proof was uploaded on time?"}
               {confirmAction.type === "judgeCreator" &&
-                "Confirm that the creator wins this disputed dare?"}
+                "Confirm judge ruling that the creator wins this disputed challenge?"}
               {confirmAction.type === "judgeAccepter" &&
-                "Confirm that the accepter wins this disputed dare?"}
+                "Confirm judge ruling that the accepter wins this disputed challenge?"}
             </p>
-            <div className="flex gap-2 mt-1">
+
+            <div className="flex gap-2.5 pt-2">
               <Button
                 variant="outline"
-                className="flex-1 h-9 min-h-[44px] border-slate-200 text-slate-600 hover:bg-slate-50/60"
+                className="flex-1 h-11 min-h-[44px] rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-xs font-bold cursor-pointer"
                 onClick={() => setConfirmAction(null)}
                 disabled={isLoading}
               >
-                Go back
+                Go Back
               </Button>
               <Button
-                className="flex-1 h-9 min-h-[44px] bg-red-500 text-black hover:bg-red-400 text-sm font-semibold"
+                className="flex-1 h-11 min-h-[44px] rounded-xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] text-white hover:to-[#003bb8] text-xs font-black shadow-[0_4px_14px_rgba(0,82,255,0.25)] cursor-pointer"
                 disabled={isLoading}
                 onClick={() => {
                   if (confirmAction.type === "cancel") return handleCancel();
@@ -937,13 +963,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
                 {isLoading ? (
                   <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                 ) : null}
-                Confirm
+                Confirm Action
               </Button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

@@ -27,16 +27,23 @@ export default function HomePageClient() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
+    <div className="relative min-h-screen w-full overflow-x-clip bg-white text-slate-900">
+      {/* Background Ambient Moving Light Spheres */}
+      <div className="pointer-events-none fixed -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div
+        className="pointer-events-none fixed top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+        style={{ animationDelay: "-6s" }}
+      />
+
       <Header />
 
-      {/* Desktop landing */}
-      <div className="hidden md:block">
+      {/* Desktop landing view */}
+      <div className="relative z-10 hidden md:block">
         <LandingDesktop />
       </div>
 
-      {/* Mobile landing – mini‑app style */}
-      <div className="block md:hidden">
+      {/* Mobile landing view – PWA & Farcaster Mini-App style */}
+      <div className="relative z-10 block pb-[calc(4rem+env(safe-area-inset-bottom))] md:hidden">
         <LandingMobile />
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, X, Zap } from "lucide-react";
+import { CheckCircle2, X, Zap, ExternalLink, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type DareSuccessModalProps = {
@@ -15,83 +15,90 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 backdrop-blur-xl p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Card */}
+          {/* Card Shell with Pure White Frosted Glass */}
           <motion.div
-            className="relative w-full max-w-sm rounded-3xl border border-[rgba(212,175,55,0.45)] bg-gradient-to-b from-black via-[#050505] to-black shadow-[0_0_80px_rgba(0,0,0,0.9)] px-5 py-6"
-            initial={{ scale: 0.85, opacity: 0, y: 16 }}
+            className="glass-panel relative w-full max-w-sm rounded-[32px] p-6 sm:p-7 shadow-[0_24px_80px_rgba(15,23,42,0.18)]"
+            initial={{ scale: 0.88, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 10 }}
-            transition={{ type: "spring", stiffness: 210, damping: 20 }}
+            exit={{ scale: 0.92, opacity: 0, y: 12 }}
+            transition={{ type: "spring", stiffness: 260, damping: 24 }}
           >
-            {/* close button */}
+            {/* Close Button */}
             <button
               onClick={onClose}
-              className="absolute right-3 top-3 rounded-full bg-white p-1 text-slate-500 hover:text-slate-950"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/70 bg-white/90 text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
+              aria-label="Close modal"
             >
               <X className="h-4 w-4" />
             </button>
 
-            {/* glow ring + icon */}
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)] relative">
-              <div className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.5)] blur-xl opacity-60" />
+            {/* Bigger 3D Glass Celebration Node with Micro-Glow */}
+            <div className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center">
+              {/* Outer Ambient Aura */}
+              <div className="absolute inset-0 rounded-full bg-emerald-400/25 blur-xl animate-pulse" />
+
+              {/* Multi-layer Frosted Container */}
               <motion.div
-                className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white"
-                initial={{ scale: 0 }}
+                className="relative flex h-16 w-16 items-center justify-center rounded-3xl bg-gradient-to-br from-emerald-50 via-white to-emerald-100/80 border border-emerald-200/90 text-emerald-600 shadow-[0_6px_24px_rgba(16,185,129,0.22)]"
+                initial={{ scale: 0, rotate: -15 }}
                 animate={{ scale: 1, rotate: 0 }}
-                transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.05 }}
+                transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.08 }}
               >
-                <CheckCircle2 className="h-7 w-7 text-[#f5d566]" />
+                <div className="absolute inset-1 rounded-2xl bg-emerald-400/10 blur-xs" />
+                <CheckCircle2 className="relative z-10 h-8 w-8 stroke-[2.4]" />
               </motion.div>
             </div>
 
+            {/* Typography & Details */}
             <div className="text-center space-y-2">
-              <p className="text-xs uppercase tracking-[0.2em] text-[#f5d566] flex items-center justify-center gap-1">
-                <Zap className="h-3 w-3" />
-                Dare created
-              </p>
-              <h2 className="text-xl font-semibold text-slate-950">
-                You’re officially live
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50/90 border border-emerald-200/80 px-3 py-0.5 text-[10.5px] font-black uppercase tracking-[0.16em] text-emerald-700 shadow-xs">
+                <Zap className="h-3 w-3 fill-emerald-500" />
+                Dare Created
+              </div>
+              
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-tight">
+                You’re Officially Live
               </h2>
-              <p className="text-sm text-slate-500">
-                Your dare is on‑chain on Base Sepolia. Share it or wait for someone
-                to match your stake.
+              
+              <p className="text-xs sm:text-sm leading-relaxed text-slate-500 font-medium">
+                Your challenge is locked into escrow on Base Sepolia. Share the dare or wait for a challenger to match your stake.
               </p>
             </div>
 
+            {/* BaseScan Explorer Pill */}
             {txHash && (
               <a
                 href={`https://sepolia.basescan.org/tx/${txHash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 hover:border-[rgba(245,213,102,0.7)] hover:text-[#fefce8] transition-colors"
+                className="mt-4 flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/90 p-3 text-xs font-bold text-[#0052FF] hover:bg-slate-50 hover:border-[#0052FF]/30 shadow-xs transition-all cursor-pointer"
               >
-                View transaction on BaseScan
+                <span>View on BaseScan</span>
+                <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
               </a>
             )}
 
-            <div className="mt-5 flex items-center gap-2">
+            {/* Action Buttons */}
+            <div className="mt-6 flex items-center gap-2.5">
               <Button
-                className="flex-1 h-10 text-sm font-semibold"
-                style={{
-                  background: "linear-gradient(135deg,#d4af37,#e6c547)",
-                  color: "#000",
-                  boxShadow: "0 14px 30px rgba(212,175,55,0.45)",
-                }}
+                className="animate-pulse-glow flex-1 h-11 rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white text-xs sm:text-sm font-black shadow-[0_6px_20px_rgba(0,82,255,0.28)] active:scale-[0.98] transition-all cursor-pointer"
                 onClick={onClose}
               >
-                Back to feed
+                <span>Back to Feed</span>
+                <ArrowRight className="ml-1 h-4 w-4 stroke-[2.5]" />
               </Button>
+              
               <Button
                 variant="outline"
-                className="h-10 border-slate-200 bg-white text-xs text-slate-500 hover:border-[rgba(245,213,102,0.7)]"
+                className="h-11 rounded-2xl border-slate-200 bg-white/90 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
                 onClick={onClose}
               >
-                Stay here
+                Stay Here
               </Button>
             </div>
           </motion.div>

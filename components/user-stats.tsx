@@ -12,6 +12,8 @@ import {
   Shield,
   Swords,
   TrendingUp,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
@@ -50,116 +52,154 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
 
   const statItems = [
     {
-      label: "Wins",
+      label: "Total Wins",
       value: Number(stats.totalWins),
-      icon: <Trophy className="h-4 w-4" />,
-      color: "text-emerald-400",
+      icon: Trophy,
+      tone: "from-emerald-50 via-white to-emerald-100/70 border-emerald-200/80 text-emerald-600 shadow-[0_4px_14px_rgba(16,185,129,0.12)]",
+      aura: "bg-emerald-400/10",
+      numColor: "text-emerald-700",
     },
     {
-      label: "Losses",
+      label: "Total Losses",
       value: Number(stats.totalLosses),
-      icon: <Target className="h-4 w-4" />,
-      color: "text-red-400",
+      icon: Target,
+      tone: "from-rose-50 via-white to-rose-100/70 border-rose-200/80 text-rose-600 shadow-[0_4px_14px_rgba(244,63,94,0.12)]",
+      aura: "bg-rose-400/10",
+      numColor: "text-slate-900",
     },
     {
-      label: "XP",
-      value: xp,
-      icon: <Flame className="h-4 w-4" />,
-      color: "text-[#f5d566]",
+      label: "Protocol XP",
+      value: xp.toLocaleString(),
+      icon: Flame,
+      tone: "from-amber-50 via-white to-amber-100/70 border-amber-200/80 text-amber-600 shadow-[0_4px_14px_rgba(245,158,11,0.14)]",
+      aura: "bg-amber-400/10",
+      numColor: "text-amber-700",
     },
     {
-      label: "Volume",
-      value: formatStake(stats.totalVolume) + " ETH",
-      icon: <Coins className="h-4 w-4" />,
-      color: "text-sky-400",
+      label: "Total Volume",
+      value: `${formatStake(stats.totalVolume)} ETH`,
+      icon: Coins,
+      tone: "from-blue-50 via-white to-blue-100/70 border-blue-200/80 text-[#0052FF] shadow-[0_4px_14px_rgba(0,82,255,0.12)]",
+      aura: "bg-blue-400/10",
+      numColor: "text-[#0052FF]",
     },
     {
       label: "Dispute Wins",
       value: Number(stats.totalDisputeWins),
-      icon: <Swords className="h-4 w-4" />,
-      color: "text-amber-400",
+      icon: Swords,
+      tone: "from-violet-50 via-white to-violet-100/70 border-violet-200/80 text-violet-600 shadow-[0_4px_14px_rgba(139,92,246,0.12)]",
+      aura: "bg-violet-400/10",
+      numColor: "text-slate-900",
     },
     {
-      label: "Active (Creator)",
+      label: "Active as Creator",
       value: Number(stats.activeCountCreator),
-      icon: <Shield className="h-4 w-4" />,
-      color: "text-slate-600",
+      icon: Shield,
+      tone: "from-slate-50 via-white to-slate-100/80 border-slate-200/80 text-slate-600 shadow-xs",
+      aura: "bg-slate-300/10",
+      numColor: "text-slate-900",
     },
     {
-      label: "Active (Accepter)",
+      label: "Active as Accepter",
       value: Number(stats.activeCountAccepter),
-      icon: <TrendingUp className="h-4 w-4" />,
-      color: "text-slate-600",
+      icon: TrendingUp,
+      tone: "from-indigo-50 via-white to-indigo-100/70 border-indigo-200/80 text-indigo-600 shadow-[0_4px_14px_rgba(99,102,241,0.12)]",
+      aura: "bg-indigo-400/10",
+      numColor: "text-slate-900",
     },
   ];
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Badge + XP Progress */}
-      <div className="rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[radial-gradient(circle_at_top,_rgba(245,213,102,0.16),_rgba(5,5,5,0.98))] p-4 shadow-[0_18px_40px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-[2px] hover:shadow-[0_24px_70px_rgba(0,0,0,0.95)]">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
+      {/* Badge & XP Progress Showcase Card */}
+      <div className="glass-panel relative overflow-hidden rounded-[28px] p-5 sm:p-6 shadow-[0_8px_35px_rgba(15,23,42,0.035)] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(0,82,255,0.06)]">
+        {/* Subtle Ambient Light Wash */}
+        <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-blue-100/30 blur-3xl animate-drift" />
+
+        <div className="relative flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3.5">
             <div className="relative">
-              <div className="absolute -inset-2 rounded-2xl bg-[conic-gradient(from_0deg,_rgba(245,213,102,0.25),_transparent_40%,_rgba(56,189,248,0.25),_transparent_80%)] opacity-60 blur-md" />
-              <div className="relative rounded-2xl bg-slate-50 p-1.5 border border-[rgba(212,175,55,0.6)]">
-                <BadgeDisplay badge={badge} size="lg" />
-              </div>
+              <BadgeDisplay badge={badge} size="lg" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs uppercase tracking-[0.16em] text-slate-950/55">
-                Badge
+              <span className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">
+                Rank Badge
               </span>
-              <span className="text-sm font-semibold text-[#f5d566]">
+              <span className="text-base font-black tracking-tight text-slate-900">
                 {badgeLabel}
               </span>
             </div>
           </div>
+
           <div className="flex flex-col items-end">
-            <span className="text-xs text-slate-950/55">Total XP</span>
-            <span className="font-mono text-lg font-bold text-[#f5d566]">
-              {xp}
+            <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-400">
+              Total XP
+            </span>
+            <span className="font-mono text-xl sm:text-2xl font-black text-[#0052FF]">
+              {xp.toLocaleString()}
             </span>
           </div>
         </div>
 
-        {badge < 7 && nextBadge && (
-          <div className="flex flex-col gap-1.5 mt-2">
-            <div className="flex justify-between text-[11px] text-slate-500">
-              <span>{badgeLabel}</span>
-              <span>Next: {nextBadge}</span>
+        {/* Progress Bar Module */}
+        {badge < 7 && nextBadge ? (
+          <div className="relative flex flex-col gap-2 pt-2 border-t border-slate-100/90">
+            <div className="flex justify-between text-xs font-bold text-slate-600">
+              <span>{badgeLabel} Tier</span>
+              <span className="text-[#0052FF]">Next: {nextBadge}</span>
             </div>
-            <Progress
-              value={progressPercent}
-              className="h-2 bg-white [&>div]:bg-gradient-to-r [&>div]:from-[#f5d566] [&>div]:via-amber-400 [&>div]:to-emerald-400"
-            />
-            <span className="text-[11px] text-slate-950/45">
-              {progressPercent.toFixed(0)}% of the way to {nextBadge}.
-            </span>
+            
+            <div className="relative h-2.5 w-full overflow-hidden rounded-full bg-slate-100/90 p-0.5 shadow-inner">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#0052FF] via-indigo-500 to-emerald-500 transition-all duration-500 shadow-xs"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400">
+              <span>{progressPercent.toFixed(0)}% completed</span>
+              <span>Level up on-chain</span>
+            </div>
           </div>
-        )}
-        {badge === 7 && (
-          <p className="text-xs text-sky-400 text-center font-medium mt-1">
-            Max rank achieved. You’re at the top of the ladder.
-          </p>
+        ) : (
+          <div className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-50/90 to-indigo-50/80 border border-blue-200/70 p-3 text-center shadow-xs">
+            <Sparkles className="h-4 w-4 text-[#0052FF]" />
+            <p className="text-xs font-black text-[#0052FF] uppercase tracking-wider">
+              Max Rank Achieved · Top of the Leaderboard
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {statItems.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-xl border border-slate-200 bg-[rgba(10,10,10,0.95)] p-3 flex flex-col gap-1.5 transition-all duration-200 hover:-translate-y-[1px] hover:border-[rgba(245,213,102,0.7)] hover:shadow-[0_0_26px_rgba(245,213,102,0.25)]"
-          >
-            <div className={`flex items-center gap-1.5 ${item.color}`}>
-              {item.icon}
-              <span className="text-xs text-slate-500">{item.label}</span>
+      {/* Stats Grid with 3D Layered Glass Icons */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {statItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.label}
+              className="glass-card-interactive group flex flex-col justify-between rounded-2xl p-4 transition-all duration-300"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold text-slate-500">
+                  {item.label}
+                </span>
+                
+                {/* 3D Micro-Glass Squircle Container */}
+                <div
+                  className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br border ${item.tone} group-hover:scale-105 group-hover:rotate-3 transition-all duration-300`}
+                >
+                  <div className={`absolute inset-1 rounded-lg blur-xs ${item.aura}`} />
+                  <Icon className="relative z-10 h-4 w-4 stroke-[2.2]" />
+                </div>
+              </div>
+
+              <div className={`mt-3 font-mono text-xl sm:text-2xl font-black tracking-tight ${item.numColor}`}>
+                {item.value}
+              </div>
             </div>
-            <span className="font-mono text-lg font-bold text-slate-950">
-              {item.value}
-            </span>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -52,7 +52,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-xs font-semibold [&_.recharts-cartesian-axis-tick_text]:fill-slate-400 [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-slate-200/70 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[#0052FF]/30 [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-slate-200/70 [&_.recharts-radial-bar-background-sector]:fill-slate-100/70 [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-blue-50/40 [&_.recharts-reference-line_[stroke='#ccc']]:stroke-slate-200/80 [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-sector]:outline-none [&_.recharts-surface]:outline-none",
           className,
         )}
         {...props}
@@ -88,7 +88,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return color ? `  --color-${key}:${color};` : null
   })
   .join('\n')}
 }
@@ -148,7 +148,7 @@ const ChartTooltipContent = React.forwardRef<
 
       if (labelFormatter) {
         return (
-          <div className={cn('font-medium', labelClassName)}>
+          <div className={cn('text-[11px] font-black tracking-wide text-slate-800', labelClassName)}>
             {labelFormatter(value, payload)}
           </div>
         )
@@ -158,7 +158,7 @@ const ChartTooltipContent = React.forwardRef<
         return null
       }
 
-      return <div className={cn('font-medium', labelClassName)}>{value}</div>
+      return <div className={cn('text-[11px] font-black tracking-wide text-slate-800', labelClassName)}>{value}</div>
     }, [
       label,
       labelFormatter,
@@ -179,7 +179,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl',
+          'grid min-w-[8.5rem] items-start gap-2 rounded-2xl border border-slate-200/85 bg-white/95 p-3 text-xs shadow-[0_12px_36px_rgba(15,23,42,0.12)] backdrop-blur-2xl',
           className,
         )}
       >
@@ -194,7 +194,7 @@ const ChartTooltipContent = React.forwardRef<
               <div
                 key={item.dataKey}
                 className={cn(
-                  'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
+                  'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-slate-400',
                   indicator === 'dot' && 'items-center',
                 )}
               >
@@ -208,7 +208,7 @@ const ChartTooltipContent = React.forwardRef<
                       !hideIndicator && (
                         <div
                           className={cn(
-                            'shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]',
+                            'shrink-0 rounded-md border-[--color-border] bg-[--color-bg] shadow-2xs',
                             {
                               'h-2.5 w-2.5': indicator === 'dot',
                               'w-1': indicator === 'line',
@@ -232,14 +232,14 @@ const ChartTooltipContent = React.forwardRef<
                         nestLabel ? 'items-end' : 'items-center',
                       )}
                     >
-                      <div className="grid gap-1.5">
+                      <div className="grid gap-1">
                         {nestLabel ? tooltipLabel : null}
-                        <span className="text-muted-foreground">
+                        <span className="text-[11px] font-semibold text-slate-500">
                           {itemConfig?.label || item.name}
                         </span>
                       </div>
                       {item.value && (
-                        <span className="font-mono font-medium tabular-nums text-foreground">
+                        <span className="font-mono text-xs font-black tabular-nums text-slate-900 ml-2">
                           {item.value.toLocaleString()}
                         </span>
                       )}
@@ -280,8 +280,8 @@ const ChartLegendContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-center gap-4',
-          verticalAlign === 'top' ? 'pb-3' : 'pt-3',
+          'inline-flex items-center justify-center gap-4 rounded-full border border-slate-200/80 bg-white/80 px-4 py-1.5 shadow-xs backdrop-blur-xl',
+          verticalAlign === 'top' ? 'mb-3' : 'mt-3',
           className,
         )}
       >
@@ -293,20 +293,20 @@ const ChartLegendContent = React.forwardRef<
             <div
               key={item.value}
               className={cn(
-                'flex items-center gap-1.5 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-muted-foreground',
+                'flex items-center gap-1.5 text-xs font-bold text-slate-600 [&>svg]:h-3 [&>svg]:w-3 [&>svg]:text-slate-400',
               )}
             >
               {itemConfig?.icon && !hideIcon ? (
                 <itemConfig.icon />
               ) : (
                 <div
-                  className="h-2 w-2 shrink-0 rounded-[2px]"
+                  className="h-2 w-2 shrink-0 rounded-full shadow-2xs"
                   style={{
                     backgroundColor: item.color,
                   }}
                 />
               )}
-              {itemConfig?.label}
+              <span>{itemConfig?.label}</span>
             </div>
           )
         })}

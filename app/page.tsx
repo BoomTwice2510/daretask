@@ -13,15 +13,33 @@ const dareMiniAppEmbed = {
       name: "Dare Protocol",
       url: appUrl,
       splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#0d1117",
+      splashBackgroundColor: "#FFFFFF",
     },
   },
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: "Dare Protocol - Stake. Dare. Win.",
   description:
-    "Dare platform on Base. Stake. Dare. Win. Create and accept dares, stake crypto, and earn XP badges.",
+    "Decentralized peer-to-peer challenge settlement layer on Base. Turn commitments into matched-stake challenges with verifiable proof paths.",
+  openGraph: {
+    title: "Dare Protocol - Stake. Dare. Win.",
+    description:
+      "Decentralized peer-to-peer challenge settlement layer on Base. Turn commitments into matched-stake challenges with verifiable proof paths.",
+    url: appUrl,
+    siteName: "Dare Protocol",
+    images: [
+      {
+        url: `${appUrl}/images/hero.png`,
+        width: 1200,
+        height: 630,
+        alt: "Dare Protocol",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
   other: {
     "fc:miniapp": JSON.stringify(dareMiniAppEmbed),
     "fc:frame": JSON.stringify(dareMiniAppEmbed),
