@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
-import { verifyMessage, type Address } from "viem";
+import { createPublicClient, http, type Address } from "viem";
+import { baseSepolia } from "viem/chains";
 
 export const runtime = "nodejs";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AVATARS_BUCKET = "avatars";
+
+const publicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(
+    process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
+  ),
+});
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -136,7 +144,10 @@ export async function POST(request: Request) {
       return jsonError("Profile signature expired. Please sign again.");
     }
 
-    const valid = await verifyMessage({
+    // Use the public-client action instead of the standalone verifyMessage
+    // utility. This supports normal EOAs as well as smart-account signatures
+    // (ERC-1271 / ERC-6492) while keeping the same signed message.
+    const valid = await publicClient.verifyMessage({
       address: wallet,
       message,
       signature: signature as `0x${string}`,
