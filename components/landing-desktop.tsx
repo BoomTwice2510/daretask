@@ -4,11 +4,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle2, Globe2, LockKeyhole, Plus, ShieldCheck, Trophy, Zap } from "lucide-react";
 
-const featured = [
-  { tone: "cyan", category: "Fitness", title: "Run 5km in one go", meta: "5h left", stake: "0.005 ETH", people: "alice vs bob" },
-  { tone: "violet", category: "Build", title: "Close a GitHub issue", meta: "1d left", stake: "10 USDC", people: "dev vs sam" },
-  { tone: "rose", category: "Creator", title: "Publish 3 Farcaster casts", meta: "2d left", stake: "5 USDC", people: "jake vs lena" },
-];
 
 export function LandingDesktop() {
   return (
@@ -35,20 +30,6 @@ export function LandingDesktop() {
         {[["1,284","Dares Created"],["342","Active"],["$24.8k","Total Staked"],["98%","Completed"]].map(([value,label]) => (
           <div key={label} className="dare-stat"><strong>{value}</strong><span>{label}</span></div>
         ))}
-      </section>
-
-      <section className="dare-section-block">
-        <div className="dare-section-heading"><h2>Featured Dares</h2><Link href="/explore">View all <ArrowRight className="h-3.5 w-3.5" /></Link></div>
-        <div className="dare-featured-grid">
-          {featured.map((item) => (
-            <Link href="/explore" key={item.title} className={`dare-featured-card tone-${item.tone}`}>
-              <div className="dare-featured-top"><span>{item.category}</span><small>{item.meta}</small></div>
-              <strong>{item.title}</strong>
-              <div className="dare-featured-stake">◉ {item.stake}</div>
-              <small>{item.people}</small>
-            </Link>
-          ))}
-        </div>
       </section>
 
       <section className="dare-home-info-grid">

@@ -14,6 +14,12 @@ import {
   ExternalLink,
   Sparkles,
   Trophy,
+  Target,
+  Swords,
+  Activity,
+  Coins,
+  ShieldCheck,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,7 +34,34 @@ type FarcasterUser = {
 const INITIAL_LIMIT = 20;
 const SECOND_LIMIT = 30;
 const MAX_LIMIT = 50;
-const SCAN_WINDOW = 200; // last N dares to scan for this user
+const SCAN_WINDOW = 200;
+
+const BADGES = [
+  "None",
+  "Rookie",
+  "Challenger",
+  "Contender",
+  "Gladiator",
+  "Champion",
+  "Legend",
+  "Mythic",
+] as const;
+
+const BADGE_MIN_XP = [0, 1, 500, 1000, 2000, 3000, 5000, 7500];
+
+function badgeFromXp(xp: number) {
+  for (let i = BADGE_MIN_XP.length - 1; i >= 0; i--) {
+    if (xp >= BADGE_MIN_XP[i]) return i;
+  }
+  return 0;
+}
+
+function xpProgress(xp: number, badge: number) {
+  if (badge >= 7) return 100;
+  const current = BADGE_MIN_XP[badge];
+  const next = BADGE_MIN_XP[badge + 1];
+  return Math.min(100, Math.max(0, ((xp - current) / (next - current)) * 100));
+}
 
 export default function ProfilePage({
   params,
@@ -53,7 +86,6 @@ export default function ProfilePage({
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     try {
-      // Badge is derived from XP returned by the deployed contract.
       const [statsResult, dareCount] = await Promise.all([
         readContract("getUserStats", [profileAddress]),
         readContract("dareCount"),
@@ -68,6 +100,7 @@ export default function ProfilePage({
         bigint,
         bigint
       ];
+
       setStats({
         activeCountCreator: s[0],
         activeCountAccepter: s[1],
@@ -77,21 +110,12 @@ export default function ProfilePage({
         totalVolume: s[5],
         totalDisputeWins: s[6],
       });
-      const xpNumber = Number(s[2]);
-      setBadge(
-        xpNumber >= 7500 ? 7 :
-        xpNumber >= 5000 ? 6 :
-        xpNumber >= 3000 ? 5 :
-        xpNumber >= 2000 ? 4 :
-        xpNumber >= 1000 ? 3 :
-        xpNumber >= 500 ? 2 :
-        xpNumber >= 1 ? 1 : 0
-      );
 
-      // Scan last SCAN_WINDOW dares, but stop when we collected MAX_LIMIT for this user
+      const xpNumber = Number(s[2]);
+      setBadge(badgeFromXp(xpNumber));
+
       const total = Number(dareCount as bigint);
       const start = Math.max(0, total - SCAN_WINDOW);
-
       const found: DareData[] = [];
 
       for (let i = total - 1; i >= start; i--) {
@@ -136,7 +160,7 @@ export default function ProfilePage({
             });
           }
         } catch {
-          // ignore bad dare
+          // Ignore an unreadable dare and continue the scan.
         }
       }
 
@@ -154,43 +178,33 @@ export default function ProfilePage({
     fetchProfile();
   }, [fetchProfile]);
 
-  // TODO: yahan apna real FID set karo (testing ke liye hard-coded)
-  const fid = 0; // e.g. 1234
+  const fid = 0;
 
   useEffect(() => {
     async function fetchFarcasterProfile() {
       try {
         if (!fid) return;
-
         const res = await fetch(
           `https://api.neynar.com/v2/farcaster/user/by_id?fid=${fid}`,
           {
             headers: {
-              "x-api-key": process.env
-                .NEXT_PUBLIC_NEYNAR_API_KEY as string,
+              "x-api-key": process.env.NEXT_PUBLIC_NEYNAR_API_KEY as string,
             },
           },
         );
-
-        if (!res.ok) {
-          console.error("Failed to fetch Farcaster user", await res.text());
-          return;
-        }
-
+        if (!res.ok) return;
         const data = await res.json();
         const user = data.user;
-
         setFcUser({
           fid: user.fid,
           username: user.username,
           display_name: user.display_name,
           pfp_url: user.pfp_url || user.profile?.pfp_url,
         });
-      } catch (err) {
-        console.error("Error fetching Farcaster user", err);
+      } catch {
+        // Farcaster identity is optional for an on-chain profile.
       }
     }
-
     fetchFarcasterProfile();
   }, [fid]);
 
@@ -202,10 +216,8 @@ export default function ProfilePage({
 
   const activeDaresAll = userDares.filter((d) => d.status <= 3);
   const pastDaresAll = userDares.filter((d) => d.status >= 4);
-
   const activeDares = activeDaresAll.slice(0, displayLimit);
   const pastDares = pastDaresAll.slice(0, displayLimit);
-
   const canExpand =
     !loading && totalFound > displayLimit && displayLimit < MAX_LIMIT;
 
@@ -217,226 +229,222 @@ export default function ProfilePage({
     });
   };
 
+  const xp = stats ? Number(stats.xpPoints) : 0;
+  const progress = xpProgress(xp, badge);
+  const nextBadge = badge < 7 ? BADGES[badge + 1] : "Max rank";
+  const nextXp = badge < 7 ? BADGE_MIN_XP[badge + 1] : BADGE_MIN_XP[7];
+
   return (
-    <div className="dare-light-shell dare-profile-page">
+    <div className="dare-light-shell min-h-screen bg-[#f5f8fc] text-[#173154]">
       <Header />
 
-      <main className="dare-page-wide">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-6">
+      <main className="dare-page-wide pb-16 pt-5 sm:pt-7">
+        <div className="mb-5 flex items-center justify-between gap-3">
           <Link
-            href="/"
-            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
+            href="/explore"
+            className="group inline-flex items-center gap-2 text-xs font-semibold text-[#60718c] transition-colors hover:text-[#1268f3]"
           >
-            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            <span className="relative">
-              Back to feed
-              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
-            </span>
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to explore
           </Link>
-
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.25)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
-            </span>
-            On‑chain profile
-          </div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-[#dce5f1] bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#60718c] shadow-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            On-chain profile
+          </span>
         </div>
 
-        {/* Profile Header */}
-        <div className="mb-6 rounded-2xl border border-[#dce5f1] bg-white px-4 py-4 flex items-center justify-between gap-4 shadow-[0_12px_35px_rgba(35,65,110,0.07)]">
-          <div className="flex items-center gap-3">
-            {/* Farcaster avatar (fallback to blocky if missing) */}
-            <div className="relative h-12 w-12">
-              {fcUser?.pfp_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={fcUser.pfp_url}
-                  alt={
-                    fcUser.display_name ||
-                    fcUser.username ||
-                    "Farcaster profile"
-                  }
-                  className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)] object-cover"
-                />
-              ) : (
-                <div className="h-12 w-12 rounded-2xl border border-[rgba(212,175,55,0.6)] bg-gradient-to-br from-slate-800 to-slate-900" />
-              )}
-            </div>
-
-            <div className="flex flex-col min-w-0">
-              {fcUser && (
-                <span className="text-xs text-[#60718c]">
-                  @{fcUser.username}
-                </span>
-              )}
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-medium text-[#173154] truncate">
-                  {shortenAddress(profileAddress)}
-                </span>
-                <button
-                  onClick={handleCopy}
-                  className="shrink-0 rounded-full border border-[#dce5f1] bg-[#f8fafc] p-1 hover:bg-[#eef5ff] transition-colors"
-                  aria-label="Copy address"
-                >
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5 text-[#7b8aa1] hover:text-[#1268f3]" />
-                  )}
-                </button>
-                <a
-                  href={`https://basescan.org/address/${profileAddress}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 rounded-full border border-[#dce5f1] bg-[#f8fafc] p-1 hover:bg-[#eef5ff] transition-colors"
-                  aria-label="View on BaseScan"
-                >
-                  <ExternalLink className="h-3.5 w-3.5 text-[#7b8aa1] hover:text-[#1268f3]" />
-                </a>
+        <section className="overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_18px_55px_rgba(35,65,110,0.08)]">
+          <div className="h-1.5 bg-gradient-to-r from-[#1268f3] via-[#f5d566] to-[#1268f3]" />
+          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6 lg:p-7">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className="relative shrink-0">
+                <div className="absolute -inset-1 rounded-[20px] bg-[#f5d566]/20 blur-md" />
+                {fcUser?.pfp_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={fcUser.pfp_url}
+                    alt={fcUser.display_name || fcUser.username || "Profile"}
+                    className="relative h-16 w-16 rounded-[20px] border border-[#d8b93f] object-cover sm:h-[72px] sm:w-[72px]"
+                  />
+                ) : (
+                  <div className="relative flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#dce5f1] bg-[#f5f8fc] text-[#1268f3] sm:h-[72px] sm:w-[72px]">
+                    <span className="text-lg font-black">D</span>
+                  </div>
+                )}
               </div>
-              <span className="text-xs text-[#7b8aa1]">
-                {isOwnProfile
-                  ? "Your on‑chain dare history"
-                  : "Public dare profile"}
-              </span>
+
+              <div className="min-w-0">
+                <div className="mb-1 flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-[#eef5ff] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-[#1268f3]">
+                    Dare reputation
+                  </span>
+                  {isOwnProfile && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#fff8df] px-2 py-0.5 text-[9px] font-bold text-[#9a7610]">
+                      <Sparkles className="h-3 w-3" /> Your profile
+                    </span>
+                  )}
+                </div>
+                {fcUser && (
+                  <div className="text-xs font-semibold text-[#60718c]">@{fcUser.username}</div>
+                )}
+                <div className="mt-1 flex min-w-0 items-center gap-2">
+                  <span className="truncate font-mono text-sm font-bold text-[#173154] sm:text-base">
+                    {shortenAddress(profileAddress)}
+                  </span>
+                  <button
+                    onClick={handleCopy}
+                    className="shrink-0 rounded-lg border border-[#dce5f1] bg-[#f8fafc] p-1.5 text-[#7b8aa1] transition hover:border-[#b9cde8] hover:bg-[#eef5ff] hover:text-[#1268f3]"
+                    aria-label="Copy address"
+                  >
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                  </button>
+                  <a
+                    href={`https://basescan.org/address/${profileAddress}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="shrink-0 rounded-lg border border-[#dce5f1] bg-[#f8fafc] p-1.5 text-[#7b8aa1] transition hover:border-[#b9cde8] hover:bg-[#eef5ff] hover:text-[#1268f3]"
+                    aria-label="View on BaseScan"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </a>
+                </div>
+                <p className="mt-1 text-[11px] text-[#7b8aa1]">
+                  {isOwnProfile ? "Your on-chain dare history" : "Public dare profile"}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:min-w-[250px]">
+              <div className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-4 py-3">
+                <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">Wins</div>
+                <div className="mt-1 flex items-center gap-1.5 text-lg font-black text-[#173154]">
+                  <Trophy className="h-4 w-4 text-[#d8ad25]" />
+                  {stats ? Number(stats.totalWins) : 0}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-4 py-3">
+                <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">XP</div>
+                <div className="mt-1 text-lg font-black text-[#1268f3]">{xp}</div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div className="hidden sm:flex flex-col items-end text-xs text-[#60718c]">
-            <div className="inline-flex items-center gap-1 rounded-full bg-[#f8fafc] px-2 py-1 border border-[#dce5f1]">
-              <Trophy className="h-3.5 w-3.5 text-[#f5d566]" />
-              <span className="font-mono">
-                Wins: {stats ? Number(stats.totalWins) : 0}
-              </span>
-            </div>
-            {isOwnProfile && (
-              <span className="mt-1 inline-flex items-center text-[11px] text-[#1268f3] gap-1">
-                <Sparkles className="h-3 w-3" />
-                Your Profile
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
-            <p className="text-xs text-[#7b8aa1]">Fetching profile data…</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-[#1268f3]" />
+            <p className="text-xs font-medium text-[#7b8aa1]">Reading on-chain profile data…</p>
           </div>
         )}
 
-        {/* Content */}
         {!loading && stats && (
           <>
-            <section className="rounded-3xl border border-[#dce5f1] bg-white p-5 shadow-[0_16px_45px_rgba(35,65,110,0.08)] sm:p-6">
-              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#dce5f1] bg-[#f5f8fc] text-[#1268f3]">
-                    <Trophy className="h-6 w-6" />
+            <section className="mt-5 overflow-hidden rounded-[28px] border border-[#dce5f1] bg-white shadow-[0_16px_45px_rgba(35,65,110,0.07)]">
+              <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:p-7">
+                <div className="flex min-w-0 items-center gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[22px] border border-[#e4d17a] bg-gradient-to-br from-[#fffdf2] to-[#fff6c9] text-[#b18a16] shadow-[0_8px_25px_rgba(216,173,37,0.16)]">
+                    <Trophy className="h-7 w-7" />
                   </div>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8aa1]">Dare reputation</div>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-xl font-extrabold text-[#173154]">
-                        {["None", "Rookie", "Challenger", "Contender", "Gladiator", "Champion", "Legend", "Mythic"][badge]}
-                      </span>
-                      <span className="rounded-full border border-[#cfe0f8] bg-[#f1f7ff] px-2.5 py-1 text-[10px] font-bold text-[#1268f3]">
-                        {Number(stats.xpPoints)} XP
-                      </span>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#7b8aa1]">Current rank</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <h1 className="text-2xl font-black tracking-tight text-[#173154] sm:text-3xl">{BADGES[badge]}</h1>
+                      <span className="rounded-full border border-[#f0df91] bg-[#fff9df] px-2.5 py-1 text-[10px] font-black text-[#9a7610]">{xp} XP</span>
                     </div>
+                    <p className="mt-1 text-xs text-[#7b8aa1]">
+                      {badge >= 7 ? "Maximum reputation tier reached." : `${Math.max(0, nextXp - xp)} XP to ${nextBadge}.`}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
-                  {[
-                    ["Wins", Number(stats.totalWins)],
-                    ["Losses", Number(stats.totalLosses)],
-                    ["Dispute wins", Number(stats.totalDisputeWins)],
-                    ["Active", Number(stats.activeCountCreator) + Number(stats.activeCountAccepter)],
-                  ].map(([label, value]) => (
-                    <div key={String(label)} className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-3 py-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">{label}</div>
-                      <div className="mt-1 text-lg font-extrabold text-[#173154]">{value}</div>
-                    </div>
-                  ))}
+                <div className="w-full lg:max-w-[520px]">
+                  <div className="mb-2 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.1em] text-[#7b8aa1]">
+                    <span>{BADGES[badge]}</span>
+                    <span>{badge >= 7 ? "MAX" : nextBadge}</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-[#edf2f7]">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-[#1268f3] via-[#5d8ff0] to-[#f5d566] transition-all duration-700"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 text-right text-[10px] font-semibold text-[#9aa7b8]">{progress.toFixed(0)}% complete</div>
                 </div>
               </div>
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">XP progress</div>
-                  <div className="mt-1 text-sm font-bold text-[#173154]">{Number(stats.xpPoints)} points</div>
-                </div>
-                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">On-chain volume</div>
-                  <div className="mt-1 text-sm font-bold text-[#173154]">${(Number(stats.totalVolume) / 1_000_000).toFixed(2)}</div>
-                </div>
-                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">Profile status</div>
-                  <div className="mt-1 text-sm font-bold text-emerald-600">{isOwnProfile ? "Your profile" : "Public profile"}</div>
-                </div>
+              <div className="grid border-t border-[#edf1f6] sm:grid-cols-2 lg:grid-cols-4">
+                {[
+                  ["Wins", Number(stats.totalWins), Trophy, "text-emerald-600"],
+                  ["Losses", Number(stats.totalLosses), Target, "text-rose-500"],
+                  ["Dispute wins", Number(stats.totalDisputeWins), Swords, "text-amber-600"],
+                  ["Active dares", Number(stats.activeCountCreator) + Number(stats.activeCountAccepter), Activity, "text-[#1268f3]"],
+                ].map(([label, value, Icon, color], index) => {
+                  const StatIcon = Icon as typeof Trophy;
+                  return (
+                    <div key={String(label)} className={`px-5 py-4 ${index > 0 ? "border-t border-[#edf1f6] sm:border-l sm:border-t-0" : ""} ${index === 2 ? "lg:border-l" : ""}`}>
+                      <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] ${String(color)}`}>
+                        <StatIcon className="h-3.5 w-3.5" />
+                        {label}
+                      </div>
+                      <div className="mt-1 text-xl font-black text-[#173154]">{String(value)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><Coins className="h-3.5 w-3.5 text-[#1268f3]" /> On-chain volume</div>
+                <div className="mt-2 text-lg font-black text-[#173154]">${(Number(stats.totalVolume) / 1_000_000).toFixed(2)}</div>
+                <div className="mt-1 text-[10px] text-[#9aa7b8]">Tracked by the protocol in USD 6 decimals</div>
+              </div>
+              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><ShieldCheck className="h-3.5 w-3.5 text-emerald-600" /> Creator activity</div>
+                <div className="mt-2 text-lg font-black text-[#173154]">{Number(stats.activeCountCreator)}</div>
+                <div className="mt-1 text-[10px] text-[#9aa7b8]">Currently active as dare creator</div>
+              </div>
+              <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_8px_25px_rgba(35,65,110,0.04)]">
+                <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]"><Activity className="h-3.5 w-3.5 text-[#1268f3]" /> Accepter activity</div>
+                <div className="mt-2 text-lg font-black text-[#173154]">{Number(stats.activeCountAccepter)}</div>
+                <div className="mt-1 text-[10px] text-[#9aa7b8]">Currently active as dare accepter</div>
               </div>
             </section>
 
             <Tabs defaultValue="active" className="mt-7">
-              <TabsList className="grid w-full grid-cols-2 rounded-2xl border border-[#dce5f1] bg-white p-1 shadow-[0_8px_25px_rgba(35,65,110,0.05)]">
-                <TabsTrigger
-                  value="active"
-                  className="rounded-xl text-sm font-semibold text-[#60718c] data-[state=active]:bg-[#1268f3] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_rgba(18,104,243,0.18)]"
-                >
-                  Active ({activeDaresAll.length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="history"
-                  className="rounded-xl text-sm font-semibold text-[#60718c] data-[state=active]:bg-[#eef5ff] data-[state=active]:text-[#1268f3]"
-                >
-                  History ({pastDaresAll.length})
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8aa1]">Dare activity</div>
+                  <h2 className="mt-1 text-xl font-black text-[#173154]">On-chain history</h2>
+                </div>
+                <TabsList className="grid h-11 w-full grid-cols-2 rounded-2xl border border-[#dce5f1] bg-white p-1 shadow-[0_8px_25px_rgba(35,65,110,0.05)] sm:w-[330px]">
+                  <TabsTrigger value="active" className="rounded-xl text-xs font-bold text-[#60718c] data-[state=active]:bg-[#1268f3] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_rgba(18,104,243,0.18)]">Active ({activeDaresAll.length})</TabsTrigger>
+                  <TabsTrigger value="history" className="rounded-xl text-xs font-bold text-[#60718c] data-[state=active]:bg-[#eef5ff] data-[state=active]:text-[#1268f3]">History ({pastDaresAll.length})</TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="active" className="mt-4">
                 {activeDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-[#7b8aa1]">
-                    No active dares
-                  </div>
+                  <div className="rounded-3xl border border-dashed border-[#cfdbea] bg-white py-14 text-center text-sm text-[#7b8aa1]">No active dares</div>
                 ) : (
-                  <div className="flex flex-col gap-3">
-                    {activeDares.map((d) => (
-                      <DareCard key={d.id} dare={d} />
-                    ))}
-                  </div>
+                  <div className="flex flex-col gap-3">{activeDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
                 )}
               </TabsContent>
 
               <TabsContent value="history" className="mt-4">
                 {pastDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-[#7b8aa1]">
-                    No past dares
-                  </div>
+                  <div className="rounded-3xl border border-dashed border-[#cfdbea] bg-white py-14 text-center text-sm text-[#7b8aa1]">No past dares</div>
                 ) : (
-                  <div className="flex flex-col gap-3">
-                    {pastDares.map((d) => (
-                      <DareCard key={d.id} dare={d} />
-                    ))}
-                  </div>
+                  <div className="flex flex-col gap-3">{pastDares.map((d) => <DareCard key={d.id} dare={d} />)}</div>
                 )}
               </TabsContent>
             </Tabs>
 
             {canExpand && (
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleExpand}
-                  className="text-xs font-semibold px-4 py-2 rounded-full border border-[#cfe0f8] text-[#1268f3] bg-white hover:bg-[#f1f7ff] transition-colors"
-                >
-                  Show more dares ({displayLimit} →{" "}
-                  {displayLimit < SECOND_LIMIT
-                    ? SECOND_LIMIT
-                    : MAX_LIMIT}
-                  )
+                <button onClick={handleExpand} className="inline-flex items-center gap-1 rounded-full border border-[#cfe0f8] bg-white px-4 py-2 text-xs font-bold text-[#1268f3] shadow-sm transition hover:bg-[#eef5ff]">
+                  Show more dares
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}

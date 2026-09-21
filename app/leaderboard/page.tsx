@@ -4,15 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useWeb3 } from "@/lib/web3-provider";
 import { Header } from "@/components/header";
 import { BadgeDisplay } from "@/components/badge-display";
-import { shortenAddress, formatStake } from "@/lib/helpers";
+import { shortenAddress } from "@/lib/helpers";
 import {
   ArrowLeft,
   Loader2,
   Trophy,
-  Flame,
-  Coins,
-  Crown,
   Sparkles,
+  Users,
+  Target,
+  BarChart3,
+  Zap,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -21,29 +23,51 @@ interface LeaderEntry {
   wins: bigint;
   losses: bigint;
   xp: bigint;
-  volume: bigint;
+  volumeUsd6: bigint;
   badge: number;
 }
 
 const INITIAL_LIMIT = 20;
 const SECOND_LIMIT = 30;
 const MAX_LIMIT = 50;
-const SCAN_WINDOW = 200; // last N dares to scan for addresses
+const SCAN_WINDOW = 200;
+
+function formatUsd6(value: bigint) {
+  const dollars = Number(value) / 1_000_000;
+  if (!Number.isFinite(dollars)) return "$0.00";
+  return `$${dollars.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function getBadgeFromXp(xp: bigint) {
+  const value = Number(xp);
+  if (value >= 7500) return 7;
+  if (value >= 5000) return 6;
+  if (value >= 3000) return 5;
+  if (value >= 2000) return 4;
+  if (value >= 1000) return 3;
+  if (value >= 500) return 2;
+  if (value >= 1) return 1;
+  return 0;
+}
 
 export default function LeaderboardPage() {
   const { readContract } = useWeb3();
   const [entries, setEntries] = useState<LeaderEntry[]>([]);
+  const [totalDares, setTotalDares] = useState(0);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<"xp" | "wins" | "volume">("xp");
-  const [displayLimit, setDisplayLimit] = useState<number>(INITIAL_LIMIT);
+  const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
 
   const fetchLeaderboard = useCallback(async () => {
     setLoading(true);
     try {
       const count = (await readContract("dareCount")) as bigint;
       const total = Number(count);
+      setTotalDares(total);
 
-      // Collect unique addresses from recent dares
       const addressSet = new Set<string>();
       const start = Math.max(0, total - SCAN_WINDOW);
 
@@ -63,30 +87,25 @@ export default function LeaderboardPage() {
             bigint,
             number
           ];
+
           addressSet.add(result[0]);
           if (result[1] !== "0x0000000000000000000000000000000000000000") {
             addressSet.add(result[1]);
           }
         } catch {
-          // ignore broken dare reads
+          // Ignore an individual dare that cannot be read.
         }
       }
 
-      // Limit addresses to MAX_LIMIT players
       const addresses = Array.from(addressSet).slice(0, MAX_LIMIT);
-
       const leaderEntries: LeaderEntry[] = [];
-      const CHUNK = 10;
 
-      // Fetch stats for each address in small chunks for better responsiveness
-      for (let i = 0; i < addresses.length; i += CHUNK) {
-        const chunk = addresses.slice(i, i + CHUNK);
+      for (let i = 0; i < addresses.length; i += 10) {
+        const chunk = addresses.slice(i, i + 10);
         // eslint-disable-next-line no-await-in-loop
         await Promise.all(
           chunk.map(async (addr) => {
             try {
-              // Badge is derived from the on-chain XP returned by getUserStats.
-              // The deployed contract does not expose getUserBadge().
               const statsResult = await readContract("getUserStats", [addr]);
               const s = statsResult as [
                 bigint,
@@ -97,23 +116,17 @@ export default function LeaderboardPage() {
                 bigint,
                 bigint
               ];
+
               leaderEntries.push({
                 address: addr,
                 wins: s[3],
                 losses: s[4],
                 xp: s[2],
-                volume: s[5],
-                badge:
-                  Number(s[2]) >= 7500 ? 7 :
-                  Number(s[2]) >= 5000 ? 6 :
-                  Number(s[2]) >= 3000 ? 5 :
-                  Number(s[2]) >= 2000 ? 4 :
-                  Number(s[2]) >= 1000 ? 3 :
-                  Number(s[2]) >= 500 ? 2 :
-                  Number(s[2]) >= 1 ? 1 : 0,
+                volumeUsd6: s[5],
+                badge: getBadgeFromXp(s[2]),
               });
             } catch {
-              // ignore this user
+              // Ignore a player whose stats are unavailable.
             }
           }),
         );
@@ -123,6 +136,7 @@ export default function LeaderboardPage() {
       setDisplayLimit(INITIAL_LIMIT);
     } catch (err) {
       console.error("Failed to fetch leaderboard:", err);
+      setEntries([]);
     } finally {
       setLoading(false);
     }
@@ -133,114 +147,74 @@ export default function LeaderboardPage() {
   }, [fetchLeaderboard]);
 
   const sortedEntriesAll = [...entries].sort((a, b) => {
-    if (sortBy === "xp") return Number(b.xp) - Number(a.xp);
-    if (sortBy === "wins") return Number(b.wins) - Number(a.wins);
-    return Number(b.volume) - Number(a.volume);
+    if (sortBy === "xp") return b.xp > a.xp ? 1 : b.xp < a.xp ? -1 : 0;
+    if (sortBy === "wins") return b.wins > a.wins ? 1 : b.wins < a.wins ? -1 : 0;
+    return b.volumeUsd6 > a.volumeUsd6 ? 1 : b.volumeUsd6 < a.volumeUsd6 ? -1 : 0;
   });
 
   const sortedEntries = sortedEntriesAll.slice(0, displayLimit);
+  const canExpand = !loading && sortedEntriesAll.length > displayLimit && displayLimit < MAX_LIMIT;
 
   const sortTabs = [
-    { key: "xp" as const, label: "XP", icon: <Flame className="h-3.5 w-3.5" /> },
-    {
-      key: "wins" as const,
-      label: "Wins",
-      icon: <Trophy className="h-3.5 w-3.5" />,
-    },
-    {
-      key: "volume" as const,
-      label: "Volume",
-      icon: <Coins className="h-3.5 w-3.5" />,
-    },
+    { key: "xp" as const, label: "XP", icon: <Zap className="h-4 w-4" /> },
+    { key: "wins" as const, label: "Wins", icon: <Trophy className="h-4 w-4" /> },
+    { key: "volume" as const, label: "Volume", icon: <BarChart3 className="h-4 w-4" /> },
   ];
 
-  const canExpand =
-    !loading &&
-    sortedEntriesAll.length > displayLimit &&
-    displayLimit < MAX_LIMIT;
-
   const handleExpand = () => {
-    setDisplayLimit((prev) => {
-      if (prev < SECOND_LIMIT) return SECOND_LIMIT;
-      if (prev < MAX_LIMIT) return MAX_LIMIT;
-      return prev;
-    });
+    setDisplayLimit((prev) => (prev < SECOND_LIMIT ? SECOND_LIMIT : MAX_LIMIT));
   };
 
   return (
     <div className="dare-light-shell">
       <Header />
 
-      <main className="dare-page-wide dare-leaderboard-page">
-        {/* Top bar */}
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/"
-            className="group inline-flex items-center gap-1 text-sm text-white/60 transition-colors hover:text-[#f5d566]"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
-            <span className="relative">
-              Back to feed
-              <span className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-transparent via-[#f5d566] to-transparent transition-transform duration-200 group-hover:scale-x-100" />
-            </span>
+      <main className="dare-page-wide dare-leaderboard-page pb-20">
+        <div className="mb-8 flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-medium text-[#71819a] hover:text-[#1268f3]">
+            <ArrowLeft className="h-4 w-4" />
+            Back to feed
           </Link>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(212,175,55,0.45)] bg-[rgba(10,10,10,0.9)] px-3 py-1 text-[11px] text-[#f5d566] backdrop-blur-md shadow-[0_0_25px_rgba(212,175,55,0.25)]">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4af37] opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#d4af37]" />
-            </span>
-            Live leaderboard
+          <div className="hidden items-center gap-2 rounded-full border border-[#dce5f1] bg-white px-3 py-1.5 text-xs font-semibold text-[#60718c] shadow-sm sm:inline-flex">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            On-chain data
           </div>
         </div>
 
-        {/* Hero */}
-        <section className="mb-6 flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(245,213,102,0.15)] border border-[rgba(212,175,55,0.45)] shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
-              <span className="absolute inset-0 rounded-2xl bg-[rgba(245,213,102,0.25)] blur-md opacity-0 md:opacity-100" />
-              <Crown className="relative h-6 w-6 text-[#f5d566] animate-bounce" />
+        <section className="mb-7 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#dbe7ff] bg-[#eef5ff] text-[#1268f3] shadow-sm">
+              <Trophy className="h-6 w-6" />
             </div>
-            <div>
-              <h1
-                className="text-2xl md:text-3xl font-bold tracking-tight"
-                style={{
-                  background:
-                    "linear-gradient(to right,#f5d566,#e6c547,#d4af37,#f97316)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                }}
-              >
-                Leaderboard
-              </h1>
-              <p className="text-xs md:text-sm text-white/70">
-                Ranked by XP, wins, or total on‑chain volume across all dares.
-              </p>
-            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#10213f] sm:text-4xl">Leaderboard</h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[#71819a] sm:text-base">
+              Rank challengers by XP, wins, or total matched stake volume recorded by the protocol.
+            </p>
           </div>
 
-          {sortedEntriesAll.length > 0 && (
-            <div className="hidden md:flex flex-col items-end text-xs text-white/60">
-              <div className="inline-flex items-center gap-1 rounded-full bg-[rgba(10,10,10,0.95)] px-2 py-1 border border-white/10">
-                <Sparkles className="h-3 w-3 text-[#f5d566]" />
-                <span className="font-mono">
-                  Total players: {sortedEntriesAll.length}
-                </span>
-              </div>
+          <div className="grid grid-cols-2 gap-3 sm:min-w-[360px]">
+            <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_12px_35px_rgba(35,65,110,0.06)]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#8190a7]"><Users className="h-4 w-4 text-[#1268f3]" /> Players indexed</div>
+              <div className="mt-2 text-2xl font-extrabold text-[#10213f]">{loading ? "..." : sortedEntriesAll.length}</div>
             </div>
-          )}
+            <div className="rounded-2xl border border-[#dce5f1] bg-white p-4 shadow-[0_12px_35px_rgba(35,65,110,0.06)]">
+              <div className="flex items-center gap-2 text-xs font-semibold text-[#8190a7]"><Target className="h-4 w-4 text-violet-500" /> Total dares</div>
+              <div className="mt-2 text-2xl font-extrabold text-[#10213f]">{loading ? "..." : totalDares.toLocaleString()}</div>
+            </div>
+          </div>
         </section>
 
-        {/* Sort Tabs */}
-        <div className="flex items-center gap-1.5 mb-6">
+        <div className="mb-5 flex flex-wrap gap-2">
           {sortTabs.map((tab) => (
             <button
               key={tab.key}
+              type="button"
               onClick={() => setSortBy(tab.key)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-bold transition ${
                 sortBy === tab.key
-                  ? "bg-[#f5d566] text-black shadow-[0_0_25px_rgba(245,213,102,0.6)]"
-                  : "bg-[rgba(15,15,15,0.95)] text-white/60 hover:text-white hover:bg-black border border-white/10"
+                  ? "border-[#1268f3] bg-[#1268f3] text-white shadow-[0_8px_22px_rgba(18,104,243,0.20)]"
+                  : "border-[#dce5f1] bg-white text-[#60718c] hover:border-[#b9cbe4] hover:text-[#173154]"
               }`}
             >
               {tab.icon}
@@ -249,81 +223,56 @@ export default function LeaderboardPage() {
           ))}
         </div>
 
-        {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
-            <p className="text-xs text-white/60">
-              Fetching on‑chain leaderboard…
-            </p>
+          <div className="rounded-3xl border border-[#dce5f1] bg-white py-20 text-center shadow-[0_15px_45px_rgba(35,65,110,0.05)]">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin text-[#1268f3]" />
+            <p className="mt-3 text-sm text-[#71819a]">Reading live leaderboard data from Base...</p>
           </div>
         )}
 
-        {/* Empty state */}
         {!loading && sortedEntriesAll.length === 0 && (
-          <p className="text-center text-sm text-white/60 py-16">
-            No players found yet. Be the first to create a dare.
-          </p>
+          <div className="rounded-3xl border border-[#dce5f1] bg-white px-6 py-20 text-center shadow-[0_15px_45px_rgba(35,65,110,0.05)]">
+            <Sparkles className="mx-auto h-8 w-8 text-[#1268f3]" />
+            <h2 className="mt-4 text-xl font-extrabold text-[#10213f]">No ranked challengers yet</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#71819a]">Create or accept a dare to start building your on-chain record.</p>
+            <Link href="/explore" className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1268f3] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(18,104,243,0.20)]">
+              Explore Dares <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         )}
 
-        {/* List */}
         {!loading && sortedEntries.length > 0 && (
           <>
-            <div className="flex flex-col gap-2">
+            <div className="overflow-hidden rounded-3xl border border-[#dce5f1] bg-white shadow-[0_15px_45px_rgba(35,65,110,0.06)]">
+              <div className="hidden grid-cols-[70px_minmax(0,1fr)_150px_150px_180px] border-b border-[#e7edf5] px-5 py-3 text-xs font-bold uppercase tracking-wide text-[#8190a7] sm:grid">
+                <div>#</div><div>Player</div><div className="text-right">XP</div><div className="text-right">Wins</div><div className="text-right">Volume</div>
+              </div>
+
               {sortedEntries.map((entry, index) => (
                 <Link
                   key={entry.address}
                   href={`/profile/${entry.address}`}
-                  className="group flex items-center gap-3 rounded-xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] p-3 transition-all duration-200 hover:border-[rgba(245,213,102,0.9)] hover:bg-black hover:shadow-[0_18px_60px_rgba(0,0,0,0.9)] hover:-translate-y-0.5"
+                  className="grid grid-cols-[42px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#edf1f6] px-4 py-4 transition last:border-b-0 hover:bg-[#f8fbff] sm:grid-cols-[70px_minmax(0,1fr)_150px_150px_180px] sm:px-5"
                 >
-                  {/* Rank */}
-                  <div
-                    className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                      index === 0
-                        ? "bg-[rgba(245,213,102,0.18)] text-[#f5d566]"
-                        : index === 1
-                        ? "bg-white/10 text-white"
-                        : index === 2
-                        ? "bg-white/5 text-white/80"
-                        : "bg-black text-white/60"
-                    }`}
-                  >
-                    {index === 0 && (
-                      <span className="absolute inset-0 rounded-full border border-[#f5d566] animate-pulse" />
-                    )}
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-extrabold ${index === 0 ? "bg-[#fff5c9] text-[#b68a00]" : "bg-[#f1f5fa] text-[#71819a]"}`}>
                     {index + 1}
                   </div>
 
-                  {/* Avatar: avoid OnchainKit ENS resolution / merkle.io dependency */}
-                  <div
-                    className="h-8 w-8 rounded-full shrink-0 border border-white/10 bg-gradient-to-br from-[#f5d566]/30 via-[#1b2435] to-[#050505]"
-                    title={entry.address}
-                    aria-label={`Avatar for ${shortenAddress(entry.address)}`}
-                  />
-
-                  {/* Address + Badge */}
-                  <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                    <span className="font-mono text-xs text-white truncate">
-                      {shortenAddress(entry.address)}
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <BadgeDisplay badge={entry.badge} size="sm" />
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-10 w-10 shrink-0 rounded-full border border-[#dce5f1] bg-gradient-to-br from-[#eaf2ff] to-[#cbd7e8]" />
+                    <div className="min-w-0">
+                      <div className="truncate font-mono text-sm font-bold text-[#173154]">{shortenAddress(entry.address)}</div>
+                      <div className="mt-1 flex items-center gap-2"><BadgeDisplay badge={entry.badge} size="sm" /></div>
                     </div>
                   </div>
 
-                  {/* Stat value */}
-                  <div className="text-right shrink-0">
-                    <div className="font-mono text-sm font-bold text-white">
-                      {sortBy === "xp" && `${Number(entry.xp)} XP`}
-                      {sortBy === "wins" &&
-                        `${Number(entry.wins)}W / ${Number(entry.losses)}L`}
-                      {sortBy === "volume" &&
-                        `${formatStake(entry.volume)} ETH`}
-                    </div>
-                    <div className="text-[11px] text-white/55">
-                      Wins: {Number(entry.wins)} • Vol:{" "}
-                      {formatStake(entry.volume)} ETH
-                    </div>
+                  <div className="text-right text-sm font-bold text-[#1268f3]">{Number(entry.xp)} XP</div>
+                  <div className="hidden text-right text-sm font-bold text-[#173154] sm:block">{Number(entry.wins)} <span className="font-normal text-[#9aa8bb]">/ {Number(entry.losses)} L</span></div>
+                  <div className="hidden text-right text-sm font-bold text-[#7c3aed] sm:block">{formatUsd6(entry.volumeUsd6)}</div>
+
+                  <div className="col-span-full flex justify-between border-t border-[#f0f3f7] pt-2 text-xs sm:hidden">
+                    <span className="text-[#71819a]">Wins {Number(entry.wins)} · Losses {Number(entry.losses)}</span>
+                    <span className="font-bold text-[#7c3aed]">{formatUsd6(entry.volumeUsd6)}</span>
                   </div>
                 </Link>
               ))}
@@ -331,18 +280,20 @@ export default function LeaderboardPage() {
 
             {canExpand && (
               <div className="mt-6 flex justify-center">
-                <button
-                  onClick={handleExpand}
-                  className="text-xs px-4 py-1.5 rounded-full border border-[rgba(212,175,55,0.5)] text-[#f5d566] hover:bg-black/60 transition-colors"
-                >
-                  Show more players ({displayLimit} →{" "}
-                  {displayLimit < SECOND_LIMIT
-                    ? SECOND_LIMIT
-                    : MAX_LIMIT}
-                  )
+                <button type="button" onClick={handleExpand} className="rounded-xl border border-[#dce5f1] bg-white px-5 py-2.5 text-sm font-bold text-[#60718c] hover:border-[#1268f3] hover:text-[#1268f3]">
+                  Show more players
                 </button>
               </div>
             )}
+
+            <div className="mt-8 rounded-3xl border border-[#dce5f1] bg-white p-8 text-center shadow-[0_15px_45px_rgba(35,65,110,0.04)]">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#1268f3]"><BarChart3 className="h-6 w-6" /></div>
+              <h2 className="mt-4 text-xl font-extrabold text-[#10213f]">Keep challenging. Keep climbing.</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#71819a]">Complete dares, earn XP, and build a verifiable on-chain reputation.</p>
+              <Link href="/explore" className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#1268f3] px-5 py-3 text-sm font-bold text-white shadow-[0_10px_25px_rgba(18,104,243,0.20)]">
+                Explore Dares <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </>
         )}
       </main>

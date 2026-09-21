@@ -365,58 +365,6 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
 
   const primaryAcceptLabel = `Accept Dare (${stakeFormatted} ${tokenMeta.symbol})`;
 
-  // choose primary CTA for mobile bar
-  let mobilePrimaryCTA:
-    | null
-    | {
-        label: string;
-        onClick: () => void;
-        disabled?: boolean;
-        tone?: "primary" | "danger" | "neutral";
-      } = null;
-
-  if (dare.status === DareStatus.Open) {
-    if (isConnected && !isCreator) {
-      mobilePrimaryCTA = {
-        label: primaryAcceptLabel,
-        onClick: handleAcceptDare,
-        disabled: isLoading,
-        tone: "primary",
-      };
-    } else if (!isConnected) {
-      mobilePrimaryCTA = {
-        label: "Connect Wallet to Accept",
-        onClick: connect,
-        tone: "primary",
-      };
-    }
-  } else if (
-    dare.status === DareStatus.Running &&
-    isConnected &&
-    isAccepter &&
-    isDeadlinePassed(dare.deadline) &&
-    isInProofWindow(dare.deadline)
-  ) {
-    mobilePrimaryCTA = {
-      label: "Submit Proof",
-      onClick: handleSubmitProof,
-      disabled: isLoading || !proofURI.trim() || !!proofError,
-      tone: "primary",
-    };
-  } else if (
-    dare.status === DareStatus.ProofSubmitted &&
-    isConnected &&
-    isCreator &&
-    isInConfirmWindow(dare.proofTime)
-  ) {
-    mobilePrimaryCTA = {
-      label: "Confirm Success",
-      onClick: handleConfirmSuccess,
-      disabled: isLoading,
-      tone: "primary",
-    };
-  }
-
   return (
     <div className="flex flex-col gap-6 text-slate-900">
       {/* Timeline */}
@@ -629,7 +577,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               <Button
                 onClick={handleAcceptDare}
                 disabled={isLoading}
-                className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547] text-base font-semibold shadow-[0_0_25px_rgba(245,213,102,0.6)]"
+                className="w-full h-12 min-h-[48px] bg-[#1268f3] text-white hover:bg-[#0757d8] text-base font-semibold shadow-[0_10px_25px_rgba(18,104,243,0.22)]"
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -687,7 +635,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             {!isConnected && (
               <Button
                 onClick={connect}
-                className="w-full h-12 min-h-[48px] bg-[#f5d566] text-black hover:bg-[#e6c547]"
+                className="w-full h-12 min-h-[48px] bg-[#1268f3] text-white hover:bg-[#0757d8]"
               >
                 Connect Wallet to Accept
               </Button>
@@ -996,30 +944,6 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         </div>
       )}
 
-      {/* Mobile sticky CTA */}
-      {mobilePrimaryCTA && (
-        <div className="fixed inset-x-0 bottom-0 z-30 md:hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl px-3 py-2 flex items-center justify-between gap-2 shadow-[0_-8px_25px_rgba(15,23,42,0.08)]">
-          <span className="text-[11px] text-slate-500">
-            Primary action for this dare.
-          </span>
-          <Button
-            size="sm"
-            disabled={mobilePrimaryCTA.disabled}
-            onClick={mobilePrimaryCTA.onClick}
-            className={cn(
-              "h-11 min-h-[44px] px-4 text-[11px] font-semibold",
-              mobilePrimaryCTA.tone === "primary" &&
-                "bg-[#f5d566] text-black hover:bg-[#e6c547]",
-              mobilePrimaryCTA.tone === "danger" &&
-                "bg-red-500 text-black hover:bg-red-400",
-              (!mobilePrimaryCTA.tone || mobilePrimaryCTA.tone === "neutral") &&
-                "bg-white/10 text-slate-900 hover:bg-white/15"
-            )}
-          >
-            {mobilePrimaryCTA.label}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
