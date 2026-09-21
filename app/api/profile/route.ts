@@ -86,15 +86,28 @@ export async function POST(request: Request) {
     const lines = message.split("\n");
     const walletLine = `Wallet: ${wallet.toLowerCase()}`;
     const timestampLine = lines.find((line) => line.startsWith("Timestamp:"));
-    const timestamp = timestampLine ? Number(timestampLine.slice("Timestamp:".length).trim()) : NaN;
+    const rawTimestamp = timestampLine
+      ? Number(timestampLine.slice("Timestamp:".length).trim())
+      : NaN;
+
+    // Accept both milliseconds and seconds in the signed message.
+    const timestampMs =
+      Number.isFinite(rawTimestamp) && rawTimestamp < 1_000_000_000_000
+        ? rawTimestamp * 1000
+        : rawTimestamp;
 
     if (
+      lines.length < 3 ||
       lines[0] !== "Dare Profile Update" ||
       walletLine !== lines[1] ||
-      !Number.isFinite(timestamp) ||
-      Math.abs(Date.now() - timestamp) > 5 * 60 * 1000
+      !Number.isFinite(timestampMs)
     ) {
-      return jsonError("Profile signature expired or invalid.");
+      return jsonError("Invalid profile signature message.");
+    }
+
+    // Allow a small clock skew between the user's device and Vercel.
+    if (Math.abs(Date.now() - timestampMs) > 10 * 60 * 1000) {
+      return jsonError("Profile signature expired. Please sign again.");
     }
 
     const valid = await verifyMessage({

@@ -145,7 +145,7 @@ export default function ProfilePage({
     setProfileSaveError("");
 
     try {
-      const timestamp = Date.now();
+      const timestamp = Math.floor(Date.now() / 1000);
       const message = [
         "Dare Profile Update",
         `Wallet: ${connectedAddress.toLowerCase()}`,
