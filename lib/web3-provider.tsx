@@ -59,6 +59,7 @@ interface Web3ContextType {
   ) => Promise<`0x${string}`>;
   approveToken: (token: Address, amount: bigint) => Promise<`0x${string}`>;
   getAllowance: (token: Address, owner: Address) => Promise<bigint>;
+  signMessage: (message: string) => Promise<`0x${string}`>;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -318,6 +319,30 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     []
   );
 
+  // ---- wallet signature helper ----
+  const signMessage = useCallback(
+    async (message: string): Promise<`0x${string}`> => {
+      if (!walletClient || !address) {
+        throw new Error("Wallet not connected");
+      }
+
+      try {
+        const signature = await walletClient.signMessage({
+          account: address,
+          message,
+        });
+        return signature as `0x${string}`;
+      } catch (error: any) {
+        console.error("signMessage error:", error);
+        if (error?.shortMessage) {
+          throw new Error(error.shortMessage);
+        }
+        throw error;
+      }
+    },
+    [walletClient, address]
+  );
+
   // ---- effects ----
   useEffect(() => {
     syncConnection();
@@ -363,6 +388,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         writeContract,
         approveToken,
         getAllowance,
+        signMessage,
       }}
     >
       {children}

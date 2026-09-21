@@ -20,6 +20,10 @@ import {
   Coins,
   ShieldCheck,
   ChevronRight,
+  Pencil,
+  Camera,
+  X,
+  Save,
 } from "lucide-react";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -69,7 +73,7 @@ export default function ProfilePage({
   params: Promise<{ address: string }>;
 }) {
   const { address: paramAddress } = use(params);
-  const { readContract, address: connectedAddress } = useWeb3();
+  const { readContract, address: connectedAddress, signMessage } = useWeb3();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [badge, setBadge] = useState<number>(0);
   const [userDares, setUserDares] = useState<DareData[]>([]);
@@ -78,10 +82,108 @@ export default function ProfilePage({
   const [fcUser, setFcUser] = useState<FarcasterUser | null>(null);
   const [displayLimit, setDisplayLimit] = useState<number>(INITIAL_LIMIT);
   const [totalFound, setTotalFound] = useState<number>(0);
+  const [profileMeta, setProfileMeta] = useState<{
+    username: string | null;
+    avatar_url: string | null;
+  }>({ username: null, avatar_url: null });
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaveError, setProfileSaveError] = useState("");
 
   const profileAddress = paramAddress;
   const isOwnProfile =
     connectedAddress?.toLowerCase() === profileAddress.toLowerCase();
+
+  const fetchProfileMeta = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/profile?address=${encodeURIComponent(profileAddress)}`, {
+        cache: "no-store",
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setProfileMeta({
+        username: data.profile?.username ?? null,
+        avatar_url: data.profile?.avatar_url ?? null,
+      });
+    } catch {
+      // Supabase profile metadata is optional; on-chain profile remains usable.
+    }
+  }, [profileAddress]);
+
+  useEffect(() => {
+    fetchProfileMeta();
+  }, [fetchProfileMeta]);
+
+  const handleAvatarChange = (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setProfileSaveError("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileSaveError("Avatar must be 5 MB or smaller.");
+      return;
+    }
+    setProfileSaveError("");
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleSaveProfile = async () => {
+    if (!connectedAddress || !isOwnProfile) return;
+
+    const username = usernameInput.trim();
+    if (username && !/^[a-zA-Z0-9_]{3,24}$/.test(username)) {
+      setProfileSaveError("Username must be 3-24 characters: letters, numbers or underscore.");
+      return;
+    }
+
+    setSavingProfile(true);
+    setProfileSaveError("");
+
+    try {
+      const timestamp = Date.now();
+      const message = [
+        "Dare Profile Update",
+        `Wallet: ${connectedAddress.toLowerCase()}`,
+        `Timestamp: ${timestamp}`,
+      ].join("\n");
+
+      const signature = await signMessage(message);
+      const form = new FormData();
+      form.append("wallet", connectedAddress);
+      form.append("message", message);
+      form.append("signature", signature);
+      form.append("username", username);
+      form.append("badge", String(badge));
+      if (avatarFile) form.append("avatar", avatarFile);
+
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Could not save profile.");
+      }
+
+      setProfileMeta({
+        username: data.profile?.username ?? null,
+        avatar_url: data.profile?.avatar_url ?? null,
+      });
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      setEditingProfile(false);
+    } catch (error: any) {
+      setProfileSaveError(error?.message || "Could not save profile.");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);
@@ -259,17 +361,31 @@ export default function ProfilePage({
             <div className="flex min-w-0 items-center gap-4">
               <div className="relative shrink-0">
                 <div className="absolute -inset-1 rounded-[20px] bg-[#f5d566]/20 blur-md" />
-                {fcUser?.pfp_url ? (
+                {profileMeta.avatar_url || fcUser?.pfp_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={fcUser.pfp_url}
-                    alt={fcUser.display_name || fcUser.username || "Profile"}
+                    src={profileMeta.avatar_url || fcUser?.pfp_url || ""}
+                    alt={profileMeta.username || fcUser?.display_name || fcUser?.username || "Profile"}
                     className="relative h-16 w-16 rounded-[20px] border border-[#d8b93f] object-cover sm:h-[72px] sm:w-[72px]"
                   />
                 ) : (
                   <div className="relative flex h-16 w-16 items-center justify-center rounded-[20px] border border-[#dce5f1] bg-[#f5f8fc] text-[#1268f3] sm:h-[72px] sm:w-[72px]">
                     <span className="text-lg font-black">D</span>
                   </div>
+                )}
+                {isOwnProfile && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUsernameInput(profileMeta.username || "");
+                      setEditingProfile((value) => !value);
+                      setProfileSaveError("");
+                    }}
+                    className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-[#1268f3] text-white shadow-lg transition hover:bg-[#0d58d1]"
+                    aria-label="Edit profile"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
                 )}
               </div>
 
@@ -284,8 +400,10 @@ export default function ProfilePage({
                     </span>
                   )}
                 </div>
-                {fcUser && (
-                  <div className="text-xs font-semibold text-[#60718c]">@{fcUser.username}</div>
+                {(profileMeta.username || fcUser?.username) && (
+                  <div className="text-xs font-semibold text-[#60718c]">
+                    @{profileMeta.username || fcUser?.username}
+                  </div>
                 )}
                 <div className="mt-1 flex min-w-0 items-center gap-2">
                   <span className="truncate font-mono text-sm font-bold text-[#173154] sm:text-base">
@@ -329,6 +447,85 @@ export default function ProfilePage({
             </div>
           </div>
         </section>
+
+        {isOwnProfile && editingProfile && (
+          <section className="mt-4 rounded-[24px] border border-[#cfe0f8] bg-white p-5 shadow-[0_14px_40px_rgba(35,65,110,0.07)] sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1268f3]">Profile settings</div>
+                <h2 className="mt-1 text-lg font-black text-[#173154]">Customize your Dare identity</h2>
+                <p className="mt-1 text-xs text-[#7b8aa1]">Username and avatar are stored off-chain. Your wallet and reputation remain on-chain.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingProfile(false);
+                  setAvatarFile(null);
+                  setAvatarPreview(null);
+                  setProfileSaveError("");
+                }}
+                className="rounded-xl border border-[#dce5f1] p-2 text-[#7b8aa1] hover:bg-[#f5f8fc]"
+                aria-label="Close profile editor"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-5 sm:grid-cols-[auto_1fr] sm:items-center">
+              <label className="group relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-[24px] border border-[#dce5f1] bg-[#f5f8fc]">
+                {avatarPreview || profileMeta.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarPreview || profileMeta.avatar_url || ""}
+                    alt="Avatar preview"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-1 text-[#1268f3]">
+                    <Camera className="h-5 w-5" />
+                    <span className="text-[9px] font-bold uppercase">Add DP</span>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  className="sr-only"
+                  onChange={(event) => handleAvatarChange(event.target.files?.[0] || null)}
+                />
+              </label>
+
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#7b8aa1]">
+                  Username
+                </label>
+                <div className="mt-2 flex gap-2">
+                  <div className="flex min-w-0 flex-1 items-center rounded-xl border border-[#dce5f1] bg-[#f8fafc] px-3">
+                    <span className="text-sm font-bold text-[#9aa7b8]">@</span>
+                    <input
+                      value={usernameInput}
+                      onChange={(event) => setUsernameInput(event.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 24))}
+                      placeholder="your_username"
+                      className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm font-semibold text-[#173154] outline-none placeholder:text-[#aeb9c7]"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={savingProfile}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#1268f3] px-4 py-2.5 text-xs font-bold text-white shadow-[0_8px_20px_rgba(18,104,243,0.18)] transition hover:bg-[#0d58d1] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {savingProfile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    Save
+                  </button>
+                </div>
+                <p className="mt-2 text-[10px] text-[#9aa7b8]">3-24 characters. Letters, numbers and underscore only. Max avatar size: 5 MB.</p>
+                {profileSaveError && (
+                  <p className="mt-2 text-xs font-semibold text-rose-600">{profileSaveError}</p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {loading && (
           <div className="flex flex-col items-center justify-center gap-3 py-24">
