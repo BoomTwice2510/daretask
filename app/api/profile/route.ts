@@ -97,7 +97,15 @@ export async function POST(request: Request) {
       return jsonError("Invalid badge.");
     }
 
-    const lines = message.split("\n");
+    // Normalize line endings only for validation. Keep the original message
+    // unchanged for signature verification because the wallet signed that exact
+    // string.
+    const lines = message
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .split("\n")
+      .map((line) => line.trim());
+
     const walletLine = `Wallet: ${wallet.toLowerCase()}`;
     const timestampLine = lines.find((line) => line.startsWith("Timestamp:"));
 
@@ -112,13 +120,20 @@ export async function POST(request: Request) {
         ? rawTimestamp * 1000
         : rawTimestamp;
 
-    if (
-      lines[0] !== "Dare Profile Update" ||
-      lines[1] !== walletLine ||
-      !Number.isFinite(timestampMs) ||
-      Math.abs(Date.now() - timestampMs) > 5 * 60 * 1000
-    ) {
-      return jsonError("Profile signature expired or invalid.");
+    if (lines[0] !== "Dare Profile Update") {
+      return jsonError("Invalid profile signature message.");
+    }
+
+    if (lines[1] !== walletLine) {
+      return jsonError("Profile wallet does not match connected wallet.");
+    }
+
+    if (!Number.isFinite(timestampMs)) {
+      return jsonError("Profile signature timestamp is missing or invalid.");
+    }
+
+    if (Math.abs(Date.now() - timestampMs) > 10 * 60 * 1000) {
+      return jsonError("Profile signature expired. Please sign again.");
     }
 
     const valid = await verifyMessage({
