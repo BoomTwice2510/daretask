@@ -373,13 +373,12 @@ export default function ProfilePage({
               </div>
 
               <div className="grid border-t border-[#edf1f6] sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  ["Wins", Number(stats.totalWins), Trophy, "text-emerald-600"],
-                  ["Losses", Number(stats.totalLosses), Target, "text-rose-500"],
-                  ["Dispute wins", Number(stats.totalDisputeWins), Swords, "text-amber-600"],
-                  ["Active dares", Number(stats.activeCountCreator) + Number(stats.activeCountAccepter), Activity, "text-[#1268f3]"],
-                ].map(([label, value, Icon, color], index) => {
-                  const StatIcon = Icon as typeof Trophy;
+                {([
+                  { label: "Wins", value: Number(stats.totalWins), Icon: Trophy, color: "text-emerald-600" },
+                  { label: "Losses", value: Number(stats.totalLosses), Icon: Target, color: "text-rose-500" },
+                  { label: "Dispute wins", value: Number(stats.totalDisputeWins), Icon: Swords, color: "text-amber-600" },
+                  { label: "Active dares", value: Number(stats.activeCountCreator) + Number(stats.activeCountAccepter), Icon: Activity, color: "text-[#1268f3]" },
+                ] as const).map(({ label, value, Icon: StatIcon, color }, index) => {
                   return (
                     <div key={String(label)} className={`px-5 py-4 ${index > 0 ? "border-t border-[#edf1f6] sm:border-l sm:border-t-0" : ""} ${index === 2 ? "lg:border-l" : ""}`}>
                       <div className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] ${String(color)}`}>
