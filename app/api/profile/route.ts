@@ -1,19 +1,11 @@
 import { NextResponse } from "next/server";
-import { createPublicClient, http, type Address } from "viem";
-import { baseSepolia } from "viem/chains";
+import { type Address } from "viem";
 
 export const runtime = "nodejs";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const AVATARS_BUCKET = "avatars";
-
-const publicClient = createPublicClient({
-  chain: baseSepolia,
-  transport: http(
-    process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
-  ),
-});
 
 function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
@@ -93,69 +85,10 @@ export async function POST(request: Request) {
       return jsonError("Invalid wallet address.");
     }
 
-    if (!message || !signature) {
-      return jsonError("Wallet signature is required.");
-    }
-
-    if (username && !/^[a-zA-Z0-9_]{3,24}$/.test(username)) {
-      return jsonError("Invalid username.");
-    }
-
-    if (!Number.isInteger(badge) || badge < 0 || badge > 7) {
-      return jsonError("Invalid badge.");
-    }
-
-    // Normalize line endings only for validation. Keep the original message
-    // unchanged for signature verification because the wallet signed that exact
-    // string.
-    const lines = message
-      .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n")
-      .split("\n")
-      .map((line) => line.trim());
-
-    const walletLine = `Wallet: ${wallet.toLowerCase()}`;
-    const timestampLine = lines.find((line) => line.startsWith("Timestamp:"));
-
-    const rawTimestamp = timestampLine
-      ? Number(timestampLine.slice("Timestamp:".length).trim())
-      : NaN;
-
-    // Clients may send Unix seconds or JavaScript milliseconds.
-    // Normalize both formats to milliseconds before checking freshness.
-    const timestampMs =
-      Number.isFinite(rawTimestamp) && rawTimestamp < 1e12
-        ? rawTimestamp * 1000
-        : rawTimestamp;
-
-    if (lines[0] !== "Dare Profile Update") {
-      return jsonError("Invalid profile signature message.");
-    }
-
-    if (lines[1] !== walletLine) {
-      return jsonError("Profile wallet does not match connected wallet.");
-    }
-
-    if (!Number.isFinite(timestampMs)) {
-      return jsonError("Profile signature timestamp is missing or invalid.");
-    }
-
-    if (Math.abs(Date.now() - timestampMs) > 10 * 60 * 1000) {
-      return jsonError("Profile signature expired. Please sign again.");
-    }
-
-    // Use the public-client action instead of the standalone verifyMessage
-    // utility. This supports normal EOAs as well as smart-account signatures
-    // (ERC-1271 / ERC-6492) while keeping the same signed message.
-    const valid = await publicClient.verifyMessage({
-      address: wallet,
-      message,
-      signature: signature as `0x${string}`,
-    });
-
-    if (!valid) {
-      return jsonError("Wallet signature verification failed.", 401);
-    }
+    // Profile metadata is intentionally not gated by a wallet signature.
+    // The wallet address is still validated before any profile data is saved.
+    // The frontend may continue sending message/signature fields; they are
+    // ignored by this endpoint.
 
     let avatarUrl: string | null = null;
 
