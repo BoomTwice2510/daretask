@@ -19,6 +19,7 @@ function supabaseHeaders() {
   if (!SUPABASE_SERVICE_ROLE_KEY) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured.");
   }
+
   return {
     apikey: SUPABASE_SERVICE_ROLE_KEY,
     Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -26,7 +27,10 @@ function supabaseHeaders() {
 }
 
 async function supabaseFetch(path: string, init?: RequestInit) {
-  if (!SUPABASE_URL) throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+  if (!SUPABASE_URL) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not configured.");
+  }
+
   return fetch(`${SUPABASE_URL}${path}`, {
     ...init,
     headers: {
@@ -40,10 +44,13 @@ async function supabaseFetch(path: string, init?: RequestInit) {
 export async function GET(request: Request) {
   try {
     const address = new URL(request.url).searchParams.get("address")?.trim();
-    if (!address || !isAddress(address)) return jsonError("Invalid wallet address.");
+
+    if (!address || !isAddress(address)) {
+      return jsonError("Invalid wallet address.");
+    }
 
     const res = await supabaseFetch(
-      `/rest/v1/profiles?wallet_address=eq.${address.toLowerCase()}&select=wallet_address,username,avatar_url,badge&limit=1`
+      `/rest/v1/profiles?wallet_address=eq.${address.toLowerCase()}&select=wallet_address,username,avatar_url,badge&limit=1`,
     );
 
     if (!res.ok) {
@@ -74,11 +81,18 @@ export async function POST(request: Request) {
     const badge = Number(form.get("badge") || 0);
     const avatar = form.get("avatar");
 
-    if (!isAddress(wallet)) return jsonError("Invalid wallet address.");
-    if (!message || !signature) return jsonError("Wallet signature is required.");
+    if (!isAddress(wallet)) {
+      return jsonError("Invalid wallet address.");
+    }
+
+    if (!message || !signature) {
+      return jsonError("Wallet signature is required.");
+    }
+
     if (username && !/^[a-zA-Z0-9_]{3,24}$/.test(username)) {
       return jsonError("Invalid username.");
     }
+
     if (!Number.isInteger(badge) || badge < 0 || badge > 7) {
       return jsonError("Invalid badge.");
     }
@@ -86,13 +100,13 @@ export async function POST(request: Request) {
     const lines = message.split("\n");
     const walletLine = `Wallet: ${wallet.toLowerCase()}`;
     const timestampLine = lines.find((line) => line.startsWith("Timestamp:"));
+
     const rawTimestamp = timestampLine
       ? Number(timestampLine.slice("Timestamp:".length).trim())
       : NaN;
 
-    // Accept both millisecond timestamps (Date.now()) and Unix-second
-    // timestamps so an older/client-cached build cannot invalidate a fresh
-    // wallet signature. Normalize to milliseconds before checking freshness.
+    // Clients may send Unix seconds or JavaScript milliseconds.
+    // Normalize both formats to milliseconds before checking freshness.
     const timestampMs =
       Number.isFinite(rawTimestamp) && rawTimestamp < 1e12
         ? rawTimestamp * 1000
@@ -100,7 +114,7 @@ export async function POST(request: Request) {
 
     if (
       lines[0] !== "Dare Profile Update" ||
-      walletLine !== lines[1] ||
+      lines[1] !== walletLine ||
       !Number.isFinite(timestampMs) ||
       Math.abs(Date.now() - timestampMs) > 5 * 60 * 1000
     ) {
@@ -112,12 +126,21 @@ export async function POST(request: Request) {
       message,
       signature: signature as `0x${string}`,
     });
-    if (!valid) return jsonError("Wallet signature verification failed.", 401);
+
+    if (!valid) {
+      return jsonError("Wallet signature verification failed.", 401);
+    }
 
     let avatarUrl: string | null = null;
+
     if (avatar instanceof File && avatar.size > 0) {
-      if (!avatar.type.startsWith("image/")) return jsonError("Avatar must be an image.");
-      if (avatar.size > 5 * 1024 * 1024) return jsonError("Avatar must be 5 MB or smaller.");
+      if (!avatar.type.startsWith("image/")) {
+        return jsonError("Avatar must be an image.");
+      }
+
+      if (avatar.size > 5 * 1024 * 1024) {
+        return jsonError("Avatar must be 5 MB or smaller.");
+      }
 
       const allowedExt = new Map([
         ["image/jpeg", "jpg"],
@@ -125,8 +148,14 @@ export async function POST(request: Request) {
         ["image/webp", "webp"],
         ["image/gif", "gif"],
       ]);
+
       const extension = allowedExt.get(avatar.type);
-      if (!extension) return jsonError("Only JPG, PNG, WEBP and GIF avatars are supported.");
+
+      if (!extension) {
+        return jsonError(
+          "Only JPG, PNG, WEBP and GIF avatars are supported.",
+        );
+      }
 
       const path = `${wallet.toLowerCase()}/${crypto.randomUUID()}.${extension}`;
       const bytes = new Uint8Array(await avatar.arrayBuffer());
@@ -140,7 +169,7 @@ export async function POST(request: Request) {
             "x-upsert": "true",
           },
           body: bytes,
-        }
+        },
       );
 
       if (!uploadRes.ok) {
@@ -158,16 +187,22 @@ export async function POST(request: Request) {
       badge,
       updated_at: new Date().toISOString(),
     };
-    if (avatarUrl) row.avatar_url = avatarUrl;
 
-    const upsertRes = await supabaseFetch("/rest/v1/profiles?on_conflict=wallet_address", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=representation",
+    if (avatarUrl) {
+      row.avatar_url = avatarUrl;
+    }
+
+    const upsertRes = await supabaseFetch(
+      "/rest/v1/profiles?on_conflict=wallet_address",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Prefer: "resolution=merge-duplicates,return=representation",
+        },
+        body: JSON.stringify([row]),
       },
-      body: JSON.stringify([row]),
-    });
+    );
 
     if (!upsertRes.ok) {
       const detail = await upsertRes.text();
