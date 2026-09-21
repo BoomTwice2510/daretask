@@ -27,7 +27,7 @@ export default function HomePageClient() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="min-h-screen bg-[#f7f9fc] text-slate-900">
       <Header />
 
       {/* Desktop landing */}

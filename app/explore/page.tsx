@@ -6,9 +6,9 @@ import { DareFeed } from "@/components/dare-feed";
 
 export default function ExplorePage() {
   return (
-    <div className="min-h-screen bg-black text-foreground">
+    <div className="dare-light-shell">
       <Header />
-      <main className="mx-auto max-w-4xl px-4 pb-24 pt-6">
+      <main className="dare-page-wide dare-explore-page">
         <DareFeed />
       </main>
     </div>

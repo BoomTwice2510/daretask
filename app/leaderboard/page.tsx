@@ -15,8 +15,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { Avatar } from "@coinbase/onchainkit/identity";
-import { base } from "viem/chains";
 
 interface LeaderEntry {
   address: string;
@@ -87,10 +85,9 @@ export default function LeaderboardPage() {
         await Promise.all(
           chunk.map(async (addr) => {
             try {
-              const [statsResult, badgeResult] = await Promise.all([
-                readContract("getUserStats", [addr]),
-                readContract("getUserBadge", [addr]),
-              ]);
+              // Badge is derived from the on-chain XP returned by getUserStats.
+              // The deployed contract does not expose getUserBadge().
+              const statsResult = await readContract("getUserStats", [addr]);
               const s = statsResult as [
                 bigint,
                 bigint,
@@ -106,7 +103,14 @@ export default function LeaderboardPage() {
                 losses: s[4],
                 xp: s[2],
                 volume: s[5],
-                badge: badgeResult as number,
+                badge:
+                  Number(s[2]) >= 7500 ? 7 :
+                  Number(s[2]) >= 5000 ? 6 :
+                  Number(s[2]) >= 3000 ? 5 :
+                  Number(s[2]) >= 2000 ? 4 :
+                  Number(s[2]) >= 1000 ? 3 :
+                  Number(s[2]) >= 500 ? 2 :
+                  Number(s[2]) >= 1 ? 1 : 0,
               });
             } catch {
               // ignore this user
@@ -164,10 +168,10 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="dare-light-shell">
       <Header />
 
-      <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
+      <main className="dare-page-wide dare-leaderboard-page">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -290,11 +294,11 @@ export default function LeaderboardPage() {
                     {index + 1}
                   </div>
 
-                  {/* Avatar */}
-                  <Avatar
-                    address={entry.address as `0x${string}`}
-                    chain={base}
-                    className="h-8 w-8 rounded-full shrink-0"
+                  {/* Avatar: avoid OnchainKit ENS resolution / merkle.io dependency */}
+                  <div
+                    className="h-8 w-8 rounded-full shrink-0 border border-white/10 bg-gradient-to-br from-[#f5d566]/30 via-[#1b2435] to-[#050505]"
+                    title={entry.address}
+                    aria-label={`Avatar for ${shortenAddress(entry.address)}`}
                   />
 
                   {/* Address + Badge */}

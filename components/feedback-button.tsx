@@ -22,9 +22,9 @@ export function FeedbackButton() {
         px-3.5 py-2
         text-xs font-semibold
         text-black
-        shadow-[0_0_22px_rgba(250,204,21,0.8)]
-        bg-gradient-to-r from-[#facc15] via-[#f5d566] to-[#d4af37]
-        border border-[#facc15]/70
+        shadow-[0_0_22px_rgba(21,204,21,0.8)]
+        bg-gradient-to-r from-[#60718c] via-[#60718c] to-[#60718c]
+        border border-[#60718c]/70
         hover:brightness-110
         transition
       "

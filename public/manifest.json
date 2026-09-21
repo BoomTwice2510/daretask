@@ -1,16 +1,19 @@
 {
   "name": "Dare Protocol",
   "short_name": "Dare",
-  "description": "Dare platform on Base. Stake. Dare. Win.",
+  "description": "Measurable challenges with real stakes and clear proof on Base.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#0d1117",
+  "background_color": "#ffffff",
+  "theme_color": "#0052ff",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/images/logo-gold.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

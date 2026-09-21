@@ -12,9 +12,7 @@ export function AppGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { isConnected, connect, isConnecting } = useWeb3();
 
-  const isPublic = PUBLIC_PATHS.some((p) =>
-    pathname === p || pathname.startsWith(p),
-  );
+  const isPublic = PUBLIC_PATHS.includes(pathname);
 
   if (isPublic) {
     // landing/home hamesha allowed
@@ -32,7 +30,7 @@ export function AppGuard({ children }: { children: React.ReactNode }) {
           <h1 className="text-lg font-semibold">Connect wallet first</h1>
           <p className="text-xs text-white/65">
             To browse dares, create challenges or view profiles, please connect
-            your wallet on Base Sepolia from the top bar.
+            your wallet on Base from the top bar.
           </p>
           <Button
             onClick={connect}

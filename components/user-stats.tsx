@@ -83,13 +83,13 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
       label: "Active (Creator)",
       value: Number(stats.activeCountCreator),
       icon: <Shield className="h-4 w-4" />,
-      color: "text-white/80",
+      color: "text-slate-600",
     },
     {
       label: "Active (Accepter)",
       value: Number(stats.activeCountAccepter),
       icon: <TrendingUp className="h-4 w-4" />,
-      color: "text-white/80",
+      color: "text-slate-600",
     },
   ];
 
@@ -101,12 +101,12 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="absolute -inset-2 rounded-2xl bg-[conic-gradient(from_0deg,_rgba(245,213,102,0.25),_transparent_40%,_rgba(56,189,248,0.25),_transparent_80%)] opacity-60 blur-md" />
-              <div className="relative rounded-2xl bg-black/60 p-1.5 border border-[rgba(212,175,55,0.6)]">
+              <div className="relative rounded-2xl bg-slate-50 p-1.5 border border-[rgba(212,175,55,0.6)]">
                 <BadgeDisplay badge={badge} size="lg" />
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xs uppercase tracking-[0.16em] text-white/55">
+              <span className="text-xs uppercase tracking-[0.16em] text-slate-950/55">
                 Badge
               </span>
               <span className="text-sm font-semibold text-[#f5d566]">
@@ -115,7 +115,7 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
             </div>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-xs text-white/55">Total XP</span>
+            <span className="text-xs text-slate-950/55">Total XP</span>
             <span className="font-mono text-lg font-bold text-[#f5d566]">
               {xp}
             </span>
@@ -124,15 +124,15 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
 
         {badge < 7 && nextBadge && (
           <div className="flex flex-col gap-1.5 mt-2">
-            <div className="flex justify-between text-[11px] text-white/60">
+            <div className="flex justify-between text-[11px] text-slate-500">
               <span>{badgeLabel}</span>
               <span>Next: {nextBadge}</span>
             </div>
             <Progress
               value={progressPercent}
-              className="h-2 bg-black/70 [&>div]:bg-gradient-to-r [&>div]:from-[#f5d566] [&>div]:via-amber-400 [&>div]:to-emerald-400"
+              className="h-2 bg-white [&>div]:bg-gradient-to-r [&>div]:from-[#f5d566] [&>div]:via-amber-400 [&>div]:to-emerald-400"
             />
-            <span className="text-[11px] text-white/45">
+            <span className="text-[11px] text-slate-950/45">
               {progressPercent.toFixed(0)}% of the way to {nextBadge}.
             </span>
           </div>
@@ -149,13 +149,13 @@ export function UserStatsCard({ stats, badge }: UserStatsCardProps) {
         {statItems.map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-white/10 bg-[rgba(10,10,10,0.95)] p-3 flex flex-col gap-1.5 transition-all duration-200 hover:-translate-y-[1px] hover:border-[rgba(245,213,102,0.7)] hover:shadow-[0_0_26px_rgba(245,213,102,0.25)]"
+            className="rounded-xl border border-slate-200 bg-[rgba(10,10,10,0.95)] p-3 flex flex-col gap-1.5 transition-all duration-200 hover:-translate-y-[1px] hover:border-[rgba(245,213,102,0.7)] hover:shadow-[0_0_26px_rgba(245,213,102,0.25)]"
           >
             <div className={`flex items-center gap-1.5 ${item.color}`}>
               {item.icon}
-              <span className="text-xs text-white/60">{item.label}</span>
+              <span className="text-xs text-slate-500">{item.label}</span>
             </div>
-            <span className="font-mono text-lg font-bold text-white">
+            <span className="font-mono text-lg font-bold text-slate-950">
               {item.value}
             </span>
           </div>

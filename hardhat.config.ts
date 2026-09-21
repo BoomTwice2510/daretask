@@ -9,11 +9,18 @@ export default defineConfig({
 
   solidity: {
     profiles: {
-      default: { version: "0.8.28" },
+      default: {
+        version: "0.8.28",
+        settings: {
+          optimizer: { enabled: true, runs: 200 },
+          viaIR: true,
+        },
+      },
       production: {
         version: "0.8.28",
         settings: {
           optimizer: { enabled: true, runs: 200 },
+          viaIR: true,
         },
       },
     },
@@ -33,6 +40,12 @@ export default defineConfig({
       chainType: "generic",
       url: configVariable("SEPOLIA_RPC_URL"),
       accounts: [configVariable("SEPOLIA_PRIVATE_KEY")],
+    },
+    baseMainnet: {
+      type: "http",
+      chainType: "generic",
+      url: configVariable("BASE_RPC_URL"),
+      accounts: [configVariable("BASE_PRIVATE_KEY")],
     },
   },
 

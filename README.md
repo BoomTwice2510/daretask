@@ -1,57 +1,51 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# Dare Protocol
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
+Dare Protocol is an on-chain escrow challenge protocol for Base.
 
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+## V1 assets
 
-## Project Overview
+- Base ETH
+- Base USDC
+- Base Sepolia ETH
+- Base Sepolia USDC
 
-This example project includes:
+No other ERC20 is supported.
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+## V1 lifecycle
 
-## Usage
+1. Creator creates a dare with a 1h to 7d task duration and chooses whether proof is required.
+2. Anyone except the creator can accept within 24h by matching the exact stake.
+3. The task timer starts at acceptance.
+4. If proof is disabled, the accepter can be resolved as winner after the deadline.
+5. If proof is enabled, the accepter has 24h after the deadline to submit immutable proof reference data.
+6. The creator has 24h to confirm or dispute.
+7. A dispute opens a public 24h evidence window and a 48h total judge window.
+8. Only the judge can resolve a disputed dare.
 
-### Running Tests
+The contract is non-upgradeable. Railway services are indexing/notification/keeper infrastructure only and are not required for custody or protocol correctness.
 
-To run all the tests in the project, execute the following command:
+## Development
 
-```shell
-npx hardhat test
+```bash
+npm install
+npm run typecheck
+npm run contract:compile
+npm run contract:test
+npm run build
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
+## Deployment
 
-```shell
-npx hardhat test solidity
-npx hardhat test nodejs
-```
+Deployment requires constructor values for:
 
-### Make a deployment to Sepolia
+- protocol admin multisig
+- judge multisig
+- treasury multisig
+- USDC contract
+- Chainlink ETH/USD feed
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
+See `.env.example` and `MAINNET_READINESS.md`.
 
-To run the deployment to a local chain:
+## Mainnet rule
 
-```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
-```
-
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
-```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
-```
-
-After setting the variable, you can run the deployment with the Sepolia network:
-
-```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
-```
+Do not deploy the immutable mainnet contract until the complete test matrix in `MAINNET_READINESS.md` is green and the constructor addresses have been independently verified.

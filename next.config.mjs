@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
-  }
-}
+    // Production builds must fail on type errors. Never ship a DApp while hiding them.
+    ignoreBuildErrors: false,
+  },
+};
 
-export default nextConfig
+export default nextConfig;

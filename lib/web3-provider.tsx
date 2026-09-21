@@ -214,6 +214,22 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         } as any);
         return data;
       } catch (error) {
+        // Newer Dare deployments expose the public `badge(address)` mapping
+        // instead of the older `getUserBadge(address)` helper. Keep legacy
+        // pages working without changing the deployed contract.
+        if (functionName === "getUserBadge") {
+          try {
+            return await publicClient.readContract({
+              address: CONTRACT_ADDRESS,
+              abi: DARE_ABI as any,
+              functionName: "badge",
+              args,
+            } as any);
+          } catch {
+            // Fall through to the original error so real ABI/address problems
+            // are still visible.
+          }
+        }
         console.error("readContract error:", error);
         throw error;
       }

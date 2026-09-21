@@ -1,8 +1,5 @@
-// app/api/feedback/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,13 +13,19 @@ export async function POST(req: NextRequest) {
     }
 
     const toEmail = process.env.FEEDBACK_TO_EMAIL;
-    if (!toEmail) {
-      console.error("FEEDBACK_TO_EMAIL not set");
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (!toEmail || !resendApiKey) {
+      console.error(
+        "Feedback email configuration is missing (FEEDBACK_TO_EMAIL or RESEND_API_KEY)"
+      );
       return NextResponse.json(
-        { error: "Config error" },
-        { status: 500 }
+        { error: "Feedback service is not configured" },
+        { status: 503 }
       );
     }
+
+    const resend = new Resend(resendApiKey);
 
     const textParts = [
       `Feedback:\n${message}`,
@@ -37,8 +40,8 @@ export async function POST(req: NextRequest) {
       text: textParts.join("\n"),
     });
 
-    if ((result as any).error) {
-      console.error("Resend error:", (result as any).error);
+    if (result.error) {
+      console.error("Resend error:", result.error);
       return NextResponse.json(
         { error: "Email send failed" },
         { status: 500 }

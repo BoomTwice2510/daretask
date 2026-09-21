@@ -1,36 +1,9 @@
 "use client";
-
 import { Avatar } from "@coinbase/onchainkit/identity";
 import { base } from "viem/chains";
 import type { Address } from "viem";
-
-type Props = {
-  address: Address | null;
-  size?: "sm" | "md" | "lg";
-  className?: string;
-};
-
-const sizeMap = {
-  sm: "h-8 w-8",
-  md: "h-10 w-10",
-  lg: "h-12 w-12",
-};
-
-export function UserAvatar({ address, size = "md", className = "" }: Props) {
-  if (!address) {
-    // wallet disconnected – placeholder
-    return (
-      <div
-        className={`${sizeMap[size]} rounded-full bg-white/5 border border-white/10 ${className}`}
-      />
-    );
-  }
-
-  return (
-    <Avatar
-      address={address}
-      chain={base}
-      className={`${sizeMap[size]} rounded-full ${className}`}
-    />
-  );
+export function UserAvatar({ address, size="md", className="" }: { address: Address|null; size?:"sm"|"md"|"lg"; className?:string }) {
+  const sizes={sm:"h-9 w-9",md:"h-14 w-14",lg:"h-24 w-24"};
+  if(!address) return <div className={`${sizes[size]} rounded-full bg-slate-100 ring-1 ring-slate-200 ${className}`} />;
+  return <div className={`${sizes[size]} overflow-hidden rounded-full bg-[#eef4ff] ring-4 ring-white shadow-lg shadow-blue-100 ${className}`}><Avatar address={address} chain={base} className="h-full w-full" /></div>;
 }

@@ -24,15 +24,23 @@ const dareMiniAppEmbed = {
       name: "Dare Protocol",
       url: appUrl,
       splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#0d1117",
+      splashBackgroundColor: "#f6f8fb",
     },
   },
+};
+
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0052ff",
 };
 
 export const metadata: Metadata = {
   title: "Dare Protocol - Stake. Dare. Win.",
   description:
-    "Dare platform on Base. Stake. Dare. Win. Create and accept dares, stake crypto, and earn XP badges.",
+    "Dare Protocol turns measurable commitments into matched-stake challenges with clear proof paths on Base.",
   other: {
     "fc:miniapp": JSON.stringify(dareMiniAppEmbed),
     "fc:frame": JSON.stringify(dareMiniAppEmbed),

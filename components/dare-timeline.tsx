@@ -53,7 +53,7 @@ export function DareTimeline({ status }: DareTimelineProps) {
                   !isComplete &&
                     !isActive &&
                     !isDisputed &&
-                    "bg-black border-white/10 text-white/50"
+                    "bg-slate-50 border-slate-200 text-slate-400"
                 )}
               >
                 {isComplete ? (
@@ -71,7 +71,7 @@ export function DareTimeline({ status }: DareTimelineProps) {
                   !isComplete &&
                     !isActive &&
                     !isDisputed &&
-                    "text-white/45"
+                    "text-slate-400"
                 )}
               >
                 {isDisputed ? "Disputed" : step.label}

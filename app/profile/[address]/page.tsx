@@ -3,7 +3,6 @@
 import { use, useState, useEffect, useCallback } from "react";
 import { useWeb3 } from "@/lib/web3-provider";
 import { Header } from "@/components/header";
-import { UserStatsCard } from "@/components/user-stats";
 import { DareCard } from "@/components/dare-card";
 import type { DareData, UserStats } from "@/lib/types";
 import { shortenAddress } from "@/lib/helpers";
@@ -54,10 +53,9 @@ export default function ProfilePage({
   const fetchProfile = useCallback(async () => {
     setLoading(true);
     try {
-      // Fetch stats and badge in parallel
-      const [statsResult, badgeResult, dareCount] = await Promise.all([
+      // Badge is derived from XP returned by the deployed contract.
+      const [statsResult, dareCount] = await Promise.all([
         readContract("getUserStats", [profileAddress]),
-        readContract("getUserBadge", [profileAddress]),
         readContract("dareCount"),
       ]);
 
@@ -79,7 +77,16 @@ export default function ProfilePage({
         totalVolume: s[5],
         totalDisputeWins: s[6],
       });
-      setBadge(badgeResult as number);
+      const xpNumber = Number(s[2]);
+      setBadge(
+        xpNumber >= 7500 ? 7 :
+        xpNumber >= 5000 ? 6 :
+        xpNumber >= 3000 ? 5 :
+        xpNumber >= 2000 ? 4 :
+        xpNumber >= 1000 ? 3 :
+        xpNumber >= 500 ? 2 :
+        xpNumber >= 1 ? 1 : 0
+      );
 
       // Scan last SCAN_WINDOW dares, but stop when we collected MAX_LIMIT for this user
       const total = Number(dareCount as bigint);
@@ -211,10 +218,10 @@ export default function ProfilePage({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="dare-light-shell dare-profile-page">
       <Header />
 
-      <main className="mx-auto max-w-3xl px-4 py-8 pb-24">
+      <main className="dare-page-wide">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link
@@ -238,7 +245,7 @@ export default function ProfilePage({
         </div>
 
         {/* Profile Header */}
-        <div className="mb-6 rounded-2xl border border-[rgba(212,175,55,0.35)] bg-[rgba(5,5,5,0.96)] px-4 py-4 flex items-center justify-between gap-4 shadow-[0_18px_60px_rgba(0,0,0,0.9)]">
+        <div className="mb-6 rounded-2xl border border-[#dce5f1] bg-white px-4 py-4 flex items-center justify-between gap-4 shadow-[0_12px_35px_rgba(35,65,110,0.07)]">
           <div className="flex items-center gap-3">
             {/* Farcaster avatar (fallback to blocky if missing) */}
             <div className="relative h-12 w-12">
@@ -260,36 +267,36 @@ export default function ProfilePage({
 
             <div className="flex flex-col min-w-0">
               {fcUser && (
-                <span className="text-xs text-white/70">
+                <span className="text-xs text-[#60718c]">
                   @{fcUser.username}
                 </span>
               )}
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm font-medium text-white truncate">
+                <span className="font-mono text-sm font-medium text-[#173154] truncate">
                   {shortenAddress(profileAddress)}
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="shrink-0 rounded-full border border-white/10 bg-black/40 p-1 hover:bg-black/80 transition-colors"
+                  className="shrink-0 rounded-full border border-[#dce5f1] bg-[#f8fafc] p-1 hover:bg-[#eef5ff] transition-colors"
                   aria-label="Copy address"
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-400" />
                   ) : (
-                    <Copy className="h-3.5 w-3.5 text-white/50 hover:text-white" />
+                    <Copy className="h-3.5 w-3.5 text-[#7b8aa1] hover:text-[#1268f3]" />
                   )}
                 </button>
                 <a
                   href={`https://basescan.org/address/${profileAddress}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="shrink-0 rounded-full border border-white/10 bg-black/40 p-1 hover:bg-black/80 transition-colors"
+                  className="shrink-0 rounded-full border border-[#dce5f1] bg-[#f8fafc] p-1 hover:bg-[#eef5ff] transition-colors"
                   aria-label="View on BaseScan"
                 >
-                  <ExternalLink className="h-3.5 w-3.5 text-white/50 hover:text-white" />
+                  <ExternalLink className="h-3.5 w-3.5 text-[#7b8aa1] hover:text-[#1268f3]" />
                 </a>
               </div>
-              <span className="text-xs text-white/55">
+              <span className="text-xs text-[#7b8aa1]">
                 {isOwnProfile
                   ? "Your on‑chain dare history"
                   : "Public dare profile"}
@@ -297,15 +304,15 @@ export default function ProfilePage({
             </div>
           </div>
 
-          <div className="hidden sm:flex flex-col items-end text-xs text-white/60">
-            <div className="inline-flex items-center gap-1 rounded-full bg-[rgba(10,10,10,0.95)] px-2 py-1 border border-white/10">
+          <div className="hidden sm:flex flex-col items-end text-xs text-[#60718c]">
+            <div className="inline-flex items-center gap-1 rounded-full bg-[#f8fafc] px-2 py-1 border border-[#dce5f1]">
               <Trophy className="h-3.5 w-3.5 text-[#f5d566]" />
               <span className="font-mono">
                 Wins: {stats ? Number(stats.totalWins) : 0}
               </span>
             </div>
             {isOwnProfile && (
-              <span className="mt-1 inline-flex items-center text-[11px] text-[#f5d566] gap-1">
+              <span className="mt-1 inline-flex items-center text-[11px] text-[#1268f3] gap-1">
                 <Sparkles className="h-3 w-3" />
                 Your Profile
               </span>
@@ -317,30 +324,74 @@ export default function ProfilePage({
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-[#f5d566]" />
-            <p className="text-xs text-white/60">Fetching profile data…</p>
+            <p className="text-xs text-[#7b8aa1]">Fetching profile data…</p>
           </div>
         )}
 
         {/* Content */}
         {!loading && stats && (
           <>
-            <UserStatsCard
-              stats={stats}
-              badge={badge}
-              address={profileAddress}
-            />
+            <section className="rounded-3xl border border-[#dce5f1] bg-white p-5 shadow-[0_16px_45px_rgba(35,65,110,0.08)] sm:p-6">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-[#dce5f1] bg-[#f5f8fc] text-[#1268f3]">
+                    <Trophy className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#7b8aa1]">Dare reputation</div>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-xl font-extrabold text-[#173154]">
+                        {["None", "Rookie", "Challenger", "Contender", "Gladiator", "Champion", "Legend", "Mythic"][badge]}
+                      </span>
+                      <span className="rounded-full border border-[#cfe0f8] bg-[#f1f7ff] px-2.5 py-1 text-[10px] font-bold text-[#1268f3]">
+                        {Number(stats.xpPoints)} XP
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            <Tabs defaultValue="active" className="mt-8">
-              <TabsList className="grid w-full grid-cols-2 bg-[rgba(10,10,10,0.95)] rounded-full p-1 border border-white/10">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[520px]">
+                  {[
+                    ["Wins", Number(stats.totalWins)],
+                    ["Losses", Number(stats.totalLosses)],
+                    ["Dispute wins", Number(stats.totalDisputeWins)],
+                    ["Active", Number(stats.activeCountCreator) + Number(stats.activeCountAccepter)],
+                  ].map(([label, value]) => (
+                    <div key={String(label)} className="rounded-2xl border border-[#e4eaf2] bg-[#f8fafc] px-3 py-3">
+                      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">{label}</div>
+                      <div className="mt-1 text-lg font-extrabold text-[#173154]">{value}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">XP progress</div>
+                  <div className="mt-1 text-sm font-bold text-[#173154]">{Number(stats.xpPoints)} points</div>
+                </div>
+                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">On-chain volume</div>
+                  <div className="mt-1 text-sm font-bold text-[#173154]">${(Number(stats.totalVolume) / 1_000_000).toFixed(2)}</div>
+                </div>
+                <div className="rounded-2xl border border-[#e4eaf2] bg-[#fbfcfe] px-4 py-3">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#7b8aa1]">Profile status</div>
+                  <div className="mt-1 text-sm font-bold text-emerald-600">{isOwnProfile ? "Your profile" : "Public profile"}</div>
+                </div>
+              </div>
+            </section>
+
+            <Tabs defaultValue="active" className="mt-7">
+              <TabsList className="grid w-full grid-cols-2 rounded-2xl border border-[#dce5f1] bg-white p-1 shadow-[0_8px_25px_rgba(35,65,110,0.05)]">
                 <TabsTrigger
                   value="active"
-                  className="text-white/70 data-[state=active]:bg-[#f5d566] data-[state=active]:text-black rounded-full text-sm transition-all data-[state=active]:shadow-[0_0_20px_rgba(245,213,102,0.6)]"
+                  className="rounded-xl text-sm font-semibold text-[#60718c] data-[state=active]:bg-[#1268f3] data-[state=active]:text-white data-[state=active]:shadow-[0_6px_18px_rgba(18,104,243,0.18)]"
                 >
                   Active ({activeDaresAll.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="history"
-                  className="text-white/70 data-[state=active]:bg-black data-[state=active]:text-white data-[state=active]:border data-[state=active]:border-white/15 rounded-full text-sm transition-all"
+                  className="rounded-xl text-sm font-semibold text-[#60718c] data-[state=active]:bg-[#eef5ff] data-[state=active]:text-[#1268f3]"
                 >
                   History ({pastDaresAll.length})
                 </TabsTrigger>
@@ -348,7 +399,7 @@ export default function ProfilePage({
 
               <TabsContent value="active" className="mt-4">
                 {activeDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-white/60">
+                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-[#7b8aa1]">
                     No active dares
                   </div>
                 ) : (
@@ -362,7 +413,7 @@ export default function ProfilePage({
 
               <TabsContent value="history" className="mt-4">
                 {pastDares.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-white/60">
+                  <div className="flex flex-col items-center justify-center py-10 text-center text-sm text-[#7b8aa1]">
                     No past dares
                   </div>
                 ) : (
@@ -379,7 +430,7 @@ export default function ProfilePage({
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={handleExpand}
-                  className="text-xs px-4 py-1.5 rounded-full border border-[rgba(212,175,55,0.5)] text-[#f5d566] hover:bg-black/60 transition-colors"
+                  className="text-xs font-semibold px-4 py-2 rounded-full border border-[#cfe0f8] text-[#1268f3] bg-white hover:bg-[#f1f7ff] transition-colors"
                 >
                   Show more dares ({displayLimit} →{" "}
                   {displayLimit < SECOND_LIMIT

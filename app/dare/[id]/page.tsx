@@ -91,11 +91,11 @@ export default function DareDetailPage({
   }, [fetchDare]);
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="dare-light-shell dare-detail-page">
       <Header />
 
       {/* yahan core fix: pb-32 md:pb-24 */}
-      <main className="mx-auto max-w-3xl px-4 py-8 pb-32 md:pb-24">
+      <main className="dare-page-wide">
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <Link

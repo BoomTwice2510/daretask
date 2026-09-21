@@ -178,3 +178,238 @@
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(to bottom, #e6c547, #f5d566);
 }
+
+/* Dare Protocol product shell */
+:root {
+  --dare-blue: #146ef5;
+  --dare-blue-dark: #0755d9;
+  --dare-ink: #0b1730;
+  --dare-muted: #64748b;
+  --dare-bg: #f7f9fc;
+  --dare-border: #dbe4ef;
+  --dare-yellow: #f4c92f;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--dare-bg);
+  color: var(--dare-ink);
+}
+
+.dare-header {
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid #e7edf5;
+  box-shadow: 0 1px 0 rgba(15,23,42,.02);
+  backdrop-filter: blur(16px);
+}
+
+.dare-header-inner {
+  width: min(100%, 1480px);
+  height: 70px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.dare-brand { display:flex; align-items:center; gap:10px; min-width:180px; color:var(--dare-ink); text-decoration:none; }
+.dare-brand-mark { width:30px; height:30px; border-radius:8px; display:grid; place-items:center; background:var(--dare-blue); color:#fff; font-size:17px; font-weight:800; box-shadow:0 6px 16px rgba(20,110,245,.25); }
+.dare-brand-copy { display:flex; flex-direction:column; line-height:1; }
+.dare-brand-copy strong { font-size:16px; letter-spacing:-.02em; }
+.dare-brand-copy small { margin-top:4px; color:#8b99ad; font-size:8px; letter-spacing:.16em; font-weight:700; }
+
+.dare-desktop-nav { display:flex; align-items:center; justify-content:center; gap:3px; flex:1; }
+.dare-nav-link { color:#617087; font-size:12px; font-weight:600; text-decoration:none; padding:9px 11px; border-radius:9px; white-space:nowrap; }
+.dare-nav-link:hover { color:var(--dare-ink); background:#f3f6fa; }
+.dare-nav-link.is-active { color:var(--dare-blue); background:#eef5ff; }
+
+.dare-header-actions { display:flex; align-items:center; gap:7px; margin-left:auto; }
+.dare-network-pill, .dare-address-pill { display:inline-flex; align-items:center; border:1px solid #dce5ef; background:#fff; color:#5f7087; border-radius:999px; height:34px; padding:0 11px; font-size:10px; font-weight:700; white-space:nowrap; }
+.dare-network-pill { color:#60738a; }
+.dare-network-dot { width:6px; height:6px; border-radius:50%; background:#21c783; margin-right:6px; }
+.dare-network-pill.is-warning .dare-network-dot { background:#f0ad2e; }
+.dare-address-pill { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#31425a; }
+.dare-connect-button { height:34px; border-radius:9px; background:var(--dare-blue); color:#fff; font-size:11px; font-weight:700; box-shadow:none; }
+.dare-connect-button:hover { background:var(--dare-blue-dark); }
+.dare-icon-button, .dare-menu-button { width:34px; height:34px; border:1px solid #dce5ef; background:#fff; color:#63748a; border-radius:9px; display:grid; place-items:center; }
+.dare-menu-button { display:none; }
+.dare-mobile-menu, .dare-mobile-bottom-nav { display:none; }
+
+@media (min-width: 900px) {
+  main { width: min(100% - 56px, 1180px); }
+  .dare-wide { width:min(100% - 56px, 1320px) !important; }
+}
+
+@media (max-width: 899px) {
+  body { padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .dare-header-inner { height:58px; padding:0 14px; gap:8px; }
+  .dare-brand { min-width:auto; gap:8px; }
+  .dare-brand-copy small { display:none; }
+  .dare-brand-copy strong { font-size:14px; }
+  .dare-brand-mark { width:27px; height:27px; font-size:15px; border-radius:7px; }
+  .dare-desktop-nav { display:none; }
+  .dare-header-actions { gap:5px; }
+  .dare-network-pill { height:30px; padding:0 8px; font-size:9px; }
+  .dare-address-pill { height:30px; padding:0 8px; max-width:82px; overflow:hidden; }
+  .dare-connect-button { height:30px; padding:0 9px; font-size:10px; }
+  .desktop-only { display:none; }
+  .dare-menu-button { display:grid; width:30px; height:30px; }
+  .dare-mobile-menu { display:block; padding:10px 14px 14px; background:#fff; border-top:1px solid #edf1f6; }
+  .dare-mobile-menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+  .dare-mobile-menu-link { padding:11px 12px; border:1px solid #e6edf5; border-radius:10px; color:#506078; font-size:11px; font-weight:700; text-decoration:none; background:#fbfcfe; }
+  .dare-mobile-menu-link.is-active { color:var(--dare-blue); background:#eef5ff; border-color:#cfe0ff; }
+  .dare-mobile-logout { margin-top:8px; width:100%; border:0; background:#fff1f1; color:#d84a4a; border-radius:10px; padding:10px; display:flex; align-items:center; justify-content:center; gap:6px; font-size:11px; font-weight:700; }
+  .dare-mobile-bottom-nav { position:fixed; left:0; right:0; bottom:0; z-index:80; height:74px; padding:7px 12px calc(7px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.98); border-top:1px solid #e5ebf3; box-shadow:0 -10px 28px rgba(15,23,42,.06); display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; align-items:end; }
+  .dare-bottom-item { min-width:0; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#8391a5; text-decoration:none; font-size:9px; font-weight:700; }
+  .dare-bottom-item svg { width:19px; height:19px; stroke-width:1.9; }
+  .dare-bottom-item.is-active { color:var(--dare-blue); }
+  .dare-bottom-create { width:45px; height:45px; margin:auto; border-radius:50%; background:var(--dare-blue); color:#fff; display:grid; place-items:center; box-shadow:0 8px 20px rgba(20,110,245,.32); text-decoration:none; transform:translateY(-5px); border:4px solid #fff; }
+  .dare-bottom-create svg { width:21px; height:21px; }
+  main { width:100%; }
+}
+
+/* Light product pages. Existing dark form/detail cards keep their own contrast. */
+.dare-light-shell { min-height:100vh; background:var(--dare-bg); color:var(--dare-ink); }
+.dare-page { width:min(100% - 56px, 1180px); margin:0 auto; padding:34px 0 80px; }
+.dare-page-wide { width:min(100% - 56px, 1320px); margin:0 auto; padding:28px 0 80px; }
+.dare-eyebrow { color:var(--dare-blue); font-size:10px; font-weight:800; letter-spacing:.15em; text-transform:uppercase; }
+.dare-title { color:var(--dare-ink); font-size:clamp(28px,3.2vw,42px); line-height:1.05; letter-spacing:-.045em; font-weight:800; }
+.dare-subtitle { color:#66778d; font-size:13px; line-height:1.6; }
+.dare-soft-card { background:#fff; border:1px solid #dfe7f0; border-radius:18px; box-shadow:0 12px 32px rgba(30,54,84,.05); }
+
+@media (max-width:899px) {
+  .dare-page, .dare-page-wide { width:100%; padding:18px 14px 28px; }
+  .dare-title { font-size:27px; }
+  .dare-subtitle { font-size:11px; }
+}
+
+/* Home */
+.dare-home-desktop { padding-top:46px; }
+.dare-home-hero { display:grid; grid-template-columns:1.45fr .7fr; gap:56px; align-items:center; padding:44px 20px 30px; }
+.dare-home-hero-copy { max-width:650px; }
+.dare-home-hero h1 { margin:13px 0 14px; color:var(--dare-ink); font-size:clamp(48px,5.5vw,76px); line-height:.96; letter-spacing:-.06em; font-weight:850; }
+.dare-home-hero h1 span { color:var(--dare-blue); }
+.dare-home-hero p { max-width:570px; color:#66778d; font-size:14px; line-height:1.7; }
+.dare-home-actions { display:flex; align-items:center; gap:12px; margin-top:24px; }
+.dare-primary-button { height:46px; padding:0 21px; border-radius:9px; background:var(--dare-blue); color:#fff; font-weight:800; box-shadow:0 10px 24px rgba(20,110,245,.2); }
+.dare-primary-button:hover { background:var(--dare-blue-dark); }
+.dare-secondary-button { height:46px; padding:0 18px; border:1px solid #dbe4ef; background:#fff; color:#2e4058; border-radius:9px; display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:700; text-decoration:none; }
+.dare-home-points { display:grid; gap:10px; }
+.dare-home-points div { min-height:60px; padding:0 18px; border:1px solid #e1e8f0; border-radius:12px; background:#fff; display:flex; align-items:center; gap:13px; box-shadow:0 7px 18px rgba(30,54,84,.035); }
+.dare-home-points span { width:32px; height:32px; display:grid; place-items:center; border-radius:9px; background:#eef5ff; color:var(--dare-blue); font-weight:900; }
+.dare-home-points strong { font-size:12px; color:#33445b; }
+.dare-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:10px 20px 28px; }
+.dare-stat { background:#fff; border:1px solid #e1e8f0; border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:4px; }
+.dare-stat strong { font-size:22px; letter-spacing:-.03em; color:#10213a; }
+.dare-stat span { color:#7b8aa0; font-size:10px; }
+.dare-section-block { padding:0 20px 28px; }
+.dare-section-heading, .dare-mobile-section-title { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.dare-section-heading h2, .dare-mobile-section-title h2 { margin:0; color:#162842; font-size:18px; letter-spacing:-.025em; }
+.dare-section-heading a, .dare-mobile-section-title a { color:var(--dare-blue); font-size:10px; font-weight:800; display:flex; gap:4px; align-items:center; text-decoration:none; }
+.dare-featured-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.dare-featured-card { min-height:190px; padding:18px; border:1px solid #dfe7f0; border-radius:14px; color:#14243b; text-decoration:none; display:flex; flex-direction:column; gap:12px; }
+.dare-featured-card.tone-cyan { background:#eefbfa; }.dare-featured-card.tone-violet { background:#f5f0ff; }.dare-featured-card.tone-rose { background:#fff0f4; }
+.dare-featured-top, .dare-mobile-dare>div:first-child { display:flex; justify-content:space-between; align-items:center; }
+.dare-featured-top span, .dare-mobile-dare>div:first-child span { font-size:10px; font-weight:800; color:#187e83; }.tone-violet .dare-featured-top span, .tone-violet .dare-mobile-dare>div:first-child span { color:#7256c7; }.tone-rose .dare-featured-top span, .tone-rose .dare-mobile-dare>div:first-child span { color:#cf5d7a; }
+.dare-featured-top small, .dare-mobile-dare small { color:#7b8a9e; font-size:9px; }
+.dare-featured-card>strong { font-size:13px; line-height:1.35; }.dare-featured-stake { margin-top:auto; font-size:11px; font-weight:800; color:#32445d; }
+.dare-featured-card>small { color:#66778d; font-size:9px; }
+.dare-home-info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:0 20px 50px; }
+.dare-info-card { padding:20px; border-radius:14px; background:#fff; border:1px solid #dfe7f0; min-height:185px; }.dare-info-card svg { width:18px; height:18px; color:var(--dare-blue); margin-bottom:10px; }.dare-info-card h3 { margin:0 0 9px; font-size:12px; }.dare-info-card ol,.dare-info-card ul { margin:0; padding-left:17px; color:#687990; font-size:10px; line-height:1.7; }
+
+.dare-mobile-home { padding:18px 14px 28px; background:#f7f9fc; }
+.dare-mobile-hero { background:#fff; border:1px solid #dfe7f0; border-radius:16px; padding:18px; box-shadow:0 10px 28px rgba(30,54,84,.05); }
+.dare-mobile-hero h1 { margin:10px 0 8px; font-size:30px; line-height:.98; letter-spacing:-.055em; color:#12233c; }.dare-mobile-hero h1 span { color:var(--dare-blue); }.dare-mobile-hero p { margin:0; color:#6d7e93; font-size:11px; line-height:1.55; }
+.dare-mobile-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:15px; }.dare-mobile-actions button { width:100%; height:39px; border:0; border-radius:9px; background:var(--dare-blue); color:#fff; display:flex; align-items:center; justify-content:center; gap:5px; font-size:11px; font-weight:800; }.dare-mobile-actions button.secondary { border:1px solid #dbe4ef; background:#fff; color:#3c4e65; }.dare-mobile-actions svg { width:14px; height:14px; }
+.dare-mobile-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }.dare-mobile-stats div { background:#fff; border:1px solid #e0e7ef; border-radius:10px; padding:11px 8px; }.dare-mobile-stats strong { display:block; font-size:14px; }.dare-mobile-stats span { color:#8794a7; font-size:8px; }
+.dare-mobile-section { margin-top:14px; }.dare-mobile-list { display:flex; flex-direction:column; gap:8px; }.dare-mobile-dare { min-height:118px; padding:13px; border:1px solid #dfe7f0; border-radius:12px; text-decoration:none; color:#17283f; display:flex; flex-direction:column; gap:8px; }.dare-mobile-dare.tone-cyan { background:#eefbfa; }.dare-mobile-dare.tone-violet { background:#f5f0ff; }.dare-mobile-dare.tone-rose { background:#fff0f4; }.dare-mobile-dare>strong { font-size:12px; }.dare-mobile-dare-bottom { margin-top:auto; display:flex; justify-content:space-between; align-items:center; }.dare-mobile-dare-bottom b { font-size:10px; }.dare-mobile-info { display:grid; gap:8px; margin-top:14px; }.dare-mobile-info>div { background:#fff; border:1px solid #dfe7f0; border-radius:12px; padding:13px; }.dare-mobile-info svg { width:15px; height:15px; color:var(--dare-blue); vertical-align:middle; margin-right:6px; }.dare-mobile-info b { font-size:11px; }.dare-mobile-info p { margin:7px 0 0; color:#74849a; font-size:9px; line-height:1.5; }
+
+@media (max-width:899px) { .dare-home-desktop { display:none; } }
+@media (min-width:900px) { .dare-mobile-home { display:none; } }
+
+/* Explore */
+.dare-explore-page { padding-top:28px; }
+.dare-explore-page .dare-feed-heading { margin-bottom:18px; }
+.dare-explore-page .dare-feed-heading h1 { margin:5px 0; font-size:32px; letter-spacing:-.045em; color:#11233d; }
+.dare-explore-page .dare-feed-heading p { margin:0; color:#718198; font-size:12px; }
+.dare-explore-page .dare-feed-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:15px; }
+.dare-explore-page .dare-filter-row { display:flex; gap:6px; overflow:auto; scrollbar-width:none; }
+.dare-explore-page .dare-filter { border:1px solid #dce5ef; background:#fff; color:#697a90; border-radius:999px; padding:8px 12px; font-size:10px; font-weight:800; white-space:nowrap; }
+.dare-explore-page .dare-filter.is-active { background:#146ef5; color:#fff; border-color:#146ef5; }
+.dare-explore-page .dare-feed-refresh { width:34px; height:34px; border:1px solid #dce5ef; border-radius:9px; background:#fff; color:#728299; display:grid; place-items:center; }
+.dare-explore-page .dare-feed-list { display:flex; flex-direction:column; gap:8px; }
+.dare-explore-page .dare-feed-card { background:#fff; border:1px solid #dce5ef; border-radius:14px; padding:14px 16px; text-decoration:none; color:#172a43; box-shadow:0 7px 20px rgba(30,54,84,.035); }
+.dare-explore-page .dare-feed-card:hover { border-color:#b8cbe2; box-shadow:0 12px 28px rgba(30,54,84,.07); transform:translateY(-1px); }
+.dare-explore-page .dare-feed-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.dare-explore-page .dare-feed-status { border-radius:999px; padding:4px 8px; font-size:9px; font-weight:800; background:#eef5ff; color:#146ef5; }
+.dare-explore-page .dare-feed-time { color:#7b8ca1; font-size:9px; }
+.dare-explore-page .dare-feed-title { font-size:13px; line-height:1.45; font-weight:800; color:#14243c; margin-bottom:10px; }
+.dare-explore-page .dare-feed-stake { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border:1px solid #e3eaf2; background:#f8fafc; border-radius:9px; font-size:10px; color:#52647a; }
+.dare-explore-page .dare-feed-bottom { margin-top:9px; display:flex; align-items:center; justify-content:space-between; color:#8290a2; font-size:9px; }
+.dare-explore-page .dare-feed-share { display:flex; gap:5px; }
+.dare-explore-page .dare-feed-share button { width:24px; height:24px; border-radius:50%; border:1px solid #dfe7ef; background:#fff; display:grid; place-items:center; }
+.dare-explore-page .dare-feed-share img { width:12px; height:12px; }
+
+@media (max-width:899px) { .dare-explore-page { padding-top:16px; }.dare-explore-page .dare-feed-heading h1 { font-size:26px; }.dare-explore-page .dare-feed-card { padding:12px; }.dare-explore-page .dare-feed-toolbar { align-items:flex-start; } }
+
+/* Create / information pages / leaderboard */
+.dare-create-page main > div:first-child a { color:#7a8aa0 !important; }
+.dare-create-page main > section h1, .dare-create-page main h1 { color:#11233d; }
+.dare-create-page main > section p, .dare-create-page main > p { color:#6d7d92; }
+.dare-create-page .group.rounded-2xl.p-5 { border-color:#dfe7f0 !important; box-shadow:0 14px 34px rgba(30,54,84,.05) !important; }
+.dare-leaderboard-page { color:#17283f; }
+.dare-leaderboard-page h1 { color:#11233d !important; }
+.dare-leaderboard-page p { color:#708096 !important; }
+
+@media (max-width:899px) {
+  .dare-create-page main { padding-top:16px; }
+  .dare-create-page main > section { gap:12px; }
+  .dare-create-page h1 { font-size:27px !important; }
+}
+
+.dare-info-steps { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:26px; }
+.dare-info-steps article { display:flex; gap:14px; align-items:flex-start; padding:20px; border:1px solid #dfe7f0; border-radius:16px; background:#fff; }
+.dare-step-icon { width:36px; height:36px; flex:0 0 36px; border-radius:11px; display:grid; place-items:center; background:#eef5ff; color:var(--dare-blue); }.dare-step-icon svg{width:17px;height:17px}.dare-info-steps small{color:#93a0b1;font-size:9px;font-weight:800;letter-spacing:.16em}.dare-info-steps h2{margin:3px 0 5px;color:#17283f;font-size:13px}.dare-info-steps p{margin:0;color:#708096;font-size:10px;line-height:1.55}
+.dare-faq-list { margin-top:24px; background:#fff; border:1px solid #dfe7f0; border-radius:16px; overflow:hidden; }.dare-faq-item + .dare-faq-item{border-top:1px solid #e9eef4}.dare-faq-item button{width:100%;min-height:54px;padding:0 16px;border:0;background:#fff;display:flex;align-items:center;justify-content:space-between;color:#162842;font-size:11px;font-weight:800;text-align:left}.dare-faq-item button span{display:flex;align-items:center;gap:9px}.dare-faq-item button span svg{width:15px;height:15px;color:#8ca1ba}.dare-faq-item button>svg{width:15px;color:#8493a6;transition:transform .2s}.dare-faq-item p{margin:0;padding:0 48px 16px;color:#6d7e93;font-size:10px;line-height:1.65}.dare-note{margin-top:12px;border:1px solid #cdeedc;background:#f0fbf5;color:#3e7e5d;border-radius:12px;padding:11px 13px;font-size:10px}
+.dare-legal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.dare-legal-grid article{padding:20px;border:1px solid #dfe7f0;border-radius:16px;background:#fff}.dare-legal-grid article>div{width:32px;height:32px;border-radius:9px;background:#eef5ff;color:var(--dare-blue);display:grid;place-items:center}.dare-legal-grid article>div svg{width:16px;height:16px}.dare-legal-grid h2{margin:12px 0 6px;font-size:12px;color:#162842}.dare-legal-grid p{margin:0;color:#6d7e93;font-size:10px;line-height:1.65}
+@media(max-width:899px){.dare-info-steps,.dare-legal-grid{grid-template-columns:1fr}.dare-info-steps{margin-top:18px}.dare-info-steps article,.dare-legal-grid article{padding:15px}.dare-faq-list{margin-top:18px}.dare-faq-item button{min-height:50px;padding:0 13px}.dare-faq-item p{padding:0 38px 13px}}
+
+/* Profile and dare detail: normalize the legacy dark surfaces without changing data/actions. */
+.dare-profile-page, .dare-detail-page { color:#17283f; }
+.dare-profile-page [class*="bg-black"], .dare-detail-page [class*="bg-black"] { background:#fff !important; }
+.dare-profile-page [class*="text-white"], .dare-detail-page [class*="text-white"] { color:#17283f !important; }
+.dare-profile-page [class*="text-white/"], .dare-detail-page [class*="text-white/"] { color:#718198 !important; }
+.dare-profile-page [class*="border-white"], .dare-detail-page [class*="border-white"] { border-color:#dfe7f0 !important; }
+.dare-profile-page [class*="bg-[rgba(5,5,5"], .dare-detail-page [class*="bg-[rgba(5,5,5"] { background:#fff !important; }
+.dare-profile-page [class*="bg-[rgba(10,10,10"], .dare-detail-page [class*="bg-[rgba(10,10,10"] { background:#f8fafc !important; }
+.dare-profile-page [class*="shadow-[0_18px"], .dare-detail-page [class*="shadow-[0_18px"] { box-shadow:0 10px 28px rgba(30,54,84,.05) !important; }
+.dare-profile-page h1, .dare-detail-page h1 { color:#11233d !important; }
+.dare-profile-page a, .dare-detail-page a { color:#526a86; }
+
+@media (max-width:899px) {
+  .dare-profile-page, .dare-detail-page { overflow-x:hidden; }
+  .dare-profile-page main, .dare-detail-page main { padding-left:14px; padding-right:14px; }
+}
+
+/* Profile and dare detail: normalize the legacy dark surfaces without changing data/actions. */
+.dare-profile-page, .dare-detail-page { color:#17283f; }
+.dare-profile-page [class*="bg-black"], .dare-detail-page [class*="bg-black"] { background:#fff !important; }
+.dare-profile-page [class*="text-white"], .dare-detail-page [class*="text-white"] { color:#17283f !important; }
+.dare-profile-page [class*="text-white/"] , .dare-detail-page [class*="text-white/"] { color:#718198 !important; }
+.dare-profile-page [class*="border-white"], .dare-detail-page [class*="border-white"] { border-color:#dfe7f0 !important; }
+.dare-profile-page [class*="bg-[rgba(5,5,5"], .dare-detail-page [class*="bg-[rgba(5,5,5"] { background:#fff !important; }
+.dare-profile-page [class*="bg-[rgba(10,10,10"], .dare-detail-page [class*="bg-[rgba(10,10,10"] { background:#f8fafc !important; }
+.dare-profile-page [class*="shadow-[0_18px"], .dare-detail-page [class*="shadow-[0_18px"] { box-shadow:0 10px 28px rgba(30,54,84,.05) !important; }
+.dare-profile-page h1, .dare-detail-page h1 { color:#11233d !important; }
+.dare-profile-page a, .dare-detail-page a { color:#526a86; }
+@media (max-width:899px) { .dare-profile-page, .dare-detail-page { overflow-x:hidden; } .dare-profile-page main, .dare-detail-page main { padding-left:14px; padding-right:14px; } }
+.dare-leaderboard-page [class*="bg-black"], .dare-leaderboard-page [class*="bg-[rgba"] { background:#fff !important; }
+.dare-leaderboard-page [class*="text-white"] { color:#17283f !important; }
+.dare-leaderboard-page [class*="text-white/"] { color:#718198 !important; }
+.dare-leaderboard-page [class*="border-white"] { border-color:#dfe7f0 !important; }
+.dare-leaderboard-page button[class*="bg-[#f5d566]"] { background:var(--dare-blue) !important; color:#fff !important; box-shadow:none !important; }

@@ -1,11 +1,9 @@
 // app/api/webhook/route.ts
 import { NextRequest, NextResponse } from "next/server";
-
-// TEMP: in-memory store (server restart pe reset ho jayega)
-const notificationStore = new Map<
-  number,
-  { url: string; token: string; appFid?: number }
->();
+import {
+  removeNotificationDetails,
+  saveNotificationDetails,
+} from "@/lib/notification-store";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,8 +28,7 @@ export async function POST(req: NextRequest) {
       notificationDetails?.url &&
       notificationDetails?.token
     ) {
-      // user ne Dare Protocol mini app ke liye notifications ON ki
-      notificationStore.set(fid, {
+      saveNotificationDetails(fid, {
         url: notificationDetails.url,
         token: notificationDetails.token,
         appFid,
@@ -44,20 +41,13 @@ export async function POST(req: NextRequest) {
       event === "miniapp_removed" ||
       event === "notifications_disabled"
     ) {
-      // user ne notifications OFF ki
-      notificationStore.delete(fid);
+      removeNotificationDetails(fid);
       console.log("Removed notification token for fid", fid);
     }
 
-    // hamesha jaldi 200 do, warna Base app error dikha sakta hai
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Error in webhook:", error);
     return NextResponse.json({ ok: false }, { status: 500 });
   }
-}
-
-// isko export karenge taaki doosri API routes se use kar sako
-export function getNotificationDetails(fid: number) {
-  return notificationStore.get(fid);
 }

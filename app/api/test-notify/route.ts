@@ -1,10 +1,10 @@
 // app/api/test-notify/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { sendMiniAppNotification } from "@/lib/sendMiniAppNotification";
-import { getNotificationDetails } from "../webhook/route";
+import { getNotificationDetails } from "@/lib/notification-store";
 
 export async function POST(req: NextRequest) {
-  const { fid } = await req.json(); // jisko notify karna hai
+  const { fid } = await req.json();
 
   const details = getNotificationDetails(fid);
   if (!details) {

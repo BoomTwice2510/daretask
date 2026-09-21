@@ -15,7 +15,7 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -31,7 +31,7 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
             {/* close button */}
             <button
               onClick={onClose}
-              className="absolute right-3 top-3 rounded-full bg-black/70 p-1 text-white/60 hover:text-white"
+              className="absolute right-3 top-3 rounded-full bg-white p-1 text-slate-500 hover:text-slate-950"
             >
               <X className="h-4 w-4" />
             </button>
@@ -40,7 +40,7 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(212,175,55,0.18)] relative">
               <div className="absolute inset-0 rounded-full bg-[rgba(212,175,55,0.5)] blur-xl opacity-60" />
               <motion.div
-                className="relative flex h-12 w-12 items-center justify-center rounded-full bg-black"
+                className="relative flex h-12 w-12 items-center justify-center rounded-full bg-white"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 260, damping: 18, delay: 0.05 }}
@@ -54,10 +54,10 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
                 <Zap className="h-3 w-3" />
                 Dare created
               </p>
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-slate-950">
                 You’re officially live
               </h2>
-              <p className="text-sm text-white/70">
+              <p className="text-sm text-slate-500">
                 Your dare is on‑chain on Base Sepolia. Share it or wait for someone
                 to match your stake.
               </p>
@@ -68,7 +68,7 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
                 href={`https://sepolia.basescan.org/tx/${txHash}`}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-4 block rounded-xl border border-white/10 bg-black/80 px-3 py-2 text-xs text-white/65 hover:border-[rgba(245,213,102,0.7)] hover:text-[#fefce8] transition-colors"
+                className="mt-4 block rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-500 hover:border-[rgba(245,213,102,0.7)] hover:text-[#fefce8] transition-colors"
               >
                 View transaction on BaseScan
               </a>
@@ -88,7 +88,7 @@ export function DareSuccessModal({ open, onClose, txHash }: DareSuccessModalProp
               </Button>
               <Button
                 variant="outline"
-                className="h-10 border-white/15 bg-black/80 text-xs text-white/70 hover:border-[rgba(245,213,102,0.7)]"
+                className="h-10 border-slate-200 bg-white text-xs text-slate-500 hover:border-[rgba(245,213,102,0.7)]"
                 onClick={onClose}
               >
                 Stay here
