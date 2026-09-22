@@ -20,7 +20,7 @@ import {
   X,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const BASE_SEPOLIA_PARAMS = {
   chainIdHex: "0x14a34",
@@ -54,12 +54,24 @@ export function Header() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [walletPickerOpen, setWalletPickerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const isBaseSepolia = chainId === BASE_SEPOLIA_PARAMS.chainIdDec;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Keep the server render and the first client render identical.
+  // Wallet state is browser-only and can change during hydration.
+  const renderAddress = mounted ? address : undefined;
+  const renderIsConnected = mounted ? isConnected : false;
+  const renderIsConnecting = mounted ? isConnecting : false;
+  const renderChainId = mounted ? chainId : undefined;
+
+  const isBaseSepolia = renderChainId === BASE_SEPOLIA_PARAMS.chainIdDec;
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const currentChain = !isConnected
+  const currentChain = !renderIsConnected
     ? "Connect wallet"
     : isBaseSepolia
       ? "Base Sepolia"
@@ -130,14 +142,14 @@ export function Header() {
             className="group flex items-center gap-2.5 transition-transform active:scale-95 cursor-pointer"
             aria-label="Dare Protocol Home"
           >
-            <div className="relative flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/60 to-blue-100/50 p-1 shadow-[0_4px_14px_rgba(0,82,255,0.08)] ring-1 ring-black/5 group-hover:scale-105 group-hover:shadow-[0_6px_18px_rgba(0,82,255,0.16)] transition-all duration-300">
+            <div className="relative flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/60 to-blue-100/50 p-0.5 shadow-[0_4px_14px_rgba(0,82,255,0.08)] ring-1 ring-black/5 group-hover:scale-105 group-hover:shadow-[0_6px_18px_rgba(0,82,255,0.16)] transition-all duration-300">
               <Image
                 src="/images/logo-gold.png"
                 alt="Dare"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 priority
-                className="h-7 w-7 md:h-8 md:w-8 object-contain transition-transform group-hover:rotate-6 duration-300"
+                className="h-8 w-8 md:h-9 md:w-9 object-contain transition-transform group-hover:rotate-6 duration-300"
               />
             </div>
             <div className="flex flex-col leading-none">
@@ -175,13 +187,13 @@ export function Header() {
               </Link>
             ))}
             <Link
-              href={`/profile/${address || ""}`}
+              href={`/profile/${renderAddress || ""}`}
               className={cn(
                 "px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer",
                 isActive("/profile")
                   ? "bg-white text-[#0052FF] shadow-[0_2px_10px_rgba(0,82,255,0.12)] font-bold ring-1 ring-blue-100/70 scale-[1.02]"
                   : "text-slate-600 hover:text-slate-900 hover:bg-white/60",
-                !address && "pointer-events-none opacity-40"
+                !renderAddress && "pointer-events-none opacity-40"
               )}
             >
               Profile
@@ -215,12 +227,12 @@ export function Header() {
             {/* Live On-Chain Radar Status Pill */}
             <button
               type="button"
-              onClick={isConnected && !isBaseSepolia ? handleSwitchToBaseSepolia : undefined}
-              disabled={!isConnected || isBaseSepolia}
-              title={isConnected && !isBaseSepolia ? "Switch to Base Sepolia" : undefined}
+              onClick={renderIsConnected && !isBaseSepolia ? handleSwitchToBaseSepolia : undefined}
+              disabled={!renderIsConnected || isBaseSepolia}
+              title={renderIsConnected && !isBaseSepolia ? "Switch to Base Sepolia" : undefined}
               className={cn(
                 "inline-flex h-8 md:h-9 items-center gap-1.5 rounded-full px-2.5 md:px-3 text-[10.5px] md:text-xs font-semibold border backdrop-blur-md transition-all shadow-xs",
-                !isConnected
+                !renderIsConnected
                   ? "border-slate-200/70 bg-white/80 text-slate-500"
                   : isBaseSepolia
                   ? "border-emerald-200/80 bg-emerald-50/70 text-emerald-800 shadow-[0_2px_8px_rgba(16,185,129,0.08)]"
@@ -228,7 +240,7 @@ export function Header() {
               )}
             >
               <span className="relative flex h-2 w-2">
-                {isConnected && (
+                {renderIsConnected && (
                   <span
                     className={cn(
                       "absolute inline-flex h-full w-full animate-ping rounded-full opacity-75",
@@ -239,7 +251,7 @@ export function Header() {
                 <span
                   className={cn(
                     "relative inline-flex h-2 w-2 rounded-full",
-                    !isConnected
+                    !renderIsConnected
                       ? "bg-slate-300"
                       : isBaseSepolia
                       ? "bg-emerald-500"
@@ -253,13 +265,13 @@ export function Header() {
             </button>
 
             {/* Wallet Address & Disconnect */}
-            {isConnected && address ? (
+            {renderIsConnected && renderAddress ? (
               <div className="flex items-center gap-1.5">
                 <Link
-                  href={`/profile/${address}`}
+                  href={`/profile/${renderAddress}`}
                   className="inline-flex h-8 md:h-9 items-center rounded-full bg-white/90 border border-slate-200/80 px-3 font-mono text-[11px] md:text-xs font-bold text-slate-800 shadow-xs hover:border-[#0052FF]/40 hover:text-[#0052FF] hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  {shortenAddress(address)}
+                  {shortenAddress(renderAddress)}
                 </Link>
                 <button
                   type="button"
@@ -274,13 +286,13 @@ export function Header() {
             ) : (
               <Button
                 onClick={handleConnect}
-                disabled={isConnecting}
+                disabled={renderIsConnecting}
                 className="relative overflow-hidden h-8 md:h-9 rounded-full bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white px-3.5 md:px-4.5 text-xs font-bold shadow-[0_4px_16px_rgba(0,82,255,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,82,255,0.35)] active:scale-95 cursor-pointer"
               >
                 <div className="mr-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20">
                   <Wallet className="h-2.5 w-2.5 stroke-[2.5]" />
                 </div>
-                {isConnecting ? "Connecting..." : "Connect"}
+                {renderIsConnecting ? "Connecting..." : "Connect"}
               </Button>
             )}
 
@@ -310,8 +322,8 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={
-                    item.href === "/profile" && address
-                      ? `/profile/${address}`
+                    item.href === "/profile" && renderAddress
+                      ? `/profile/${renderAddress}`
                       : item.href
                   }
                   onClick={() => setMenuOpen(false)}
@@ -326,7 +338,7 @@ export function Header() {
               ))}
             </div>
 
-            {isConnected && address && (
+            {renderIsConnected && renderAddress && (
               <button
                 type="button"
                 className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50/80 border border-rose-200/70 py-2.5 text-xs font-bold text-rose-600 transition-all active:scale-95 cursor-pointer"
@@ -374,7 +386,7 @@ export function Header() {
                   key={connector.uid}
                   type="button"
                   onClick={() => handleWalletSelect(connector)}
-                  disabled={isConnecting}
+                  disabled={renderIsConnecting}
                   className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3.5 text-left text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50/50 active:scale-[0.99] disabled:opacity-60"
                 >
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-[#0052FF]">
@@ -472,7 +484,7 @@ export function Header() {
         </Link>
 
         <Link
-          href={address ? `/profile/${address}` : "/profile"}
+          href={renderAddress ? `/profile/${renderAddress}` : "/profile"}
           className={cn(
             "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
             isActive("/profile") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
