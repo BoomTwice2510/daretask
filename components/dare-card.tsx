@@ -30,7 +30,37 @@ export function DareCard({ dare }: { dare: DareData }) {
     window.open(target, "_blank", "noopener,noreferrer");
   };
 
-  const isCompleted = dare.status === 2 || dare.status === 3;
+  const statusLabel = getStatusLabel(dare.status);
+  const statusStyle =
+    statusLabel === "Open"
+      ? {
+          pill: "bg-amber-50/95 text-amber-700 border-amber-200/90 shadow-[0_2px_12px_rgba(245,158,11,0.18)] animate-pulse",
+          dot: "bg-amber-500",
+        }
+      : statusLabel === "Running"
+        ? {
+            pill: "bg-emerald-50/95 text-emerald-700 border-emerald-200/90 shadow-[0_2px_12px_rgba(16,185,129,0.18)] animate-pulse",
+            dot: "bg-emerald-500",
+          }
+        : statusLabel === "Proof"
+          ? {
+              pill: "bg-orange-50/95 text-orange-700 border-orange-200/90 shadow-[0_2px_12px_rgba(249,115,22,0.18)] animate-pulse",
+              dot: "bg-orange-500",
+            }
+          : statusLabel === "Disputed"
+            ? {
+                pill: "bg-rose-50/95 text-rose-700 border-rose-200/90 shadow-[0_2px_12px_rgba(244,63,94,0.2)] animate-pulse",
+                dot: "bg-rose-500",
+              }
+            : statusLabel === "Resolved"
+              ? {
+                  pill: "bg-emerald-50/95 text-emerald-700 border-emerald-200/90 shadow-[0_2px_12px_rgba(16,185,129,0.18)] animate-pulse",
+                  dot: "bg-emerald-500",
+                }
+              : {
+                  pill: "bg-slate-50/95 text-slate-600 border-slate-200/70",
+                  dot: "bg-slate-400",
+                };
 
   return (
     <article className="glass-card-interactive group relative flex flex-col overflow-hidden max-md:rounded-2xl rounded-[24px] transition-all duration-300">
@@ -43,21 +73,17 @@ export function DareCard({ dare }: { dare: DareData }) {
         {/* Status Pill & Live Time Counter */}
         <div className="flex items-center justify-between gap-2">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px] font-black tracking-wide border shadow-xs ${
-              dare.status === 0
-                ? "bg-emerald-50/90 text-emerald-700 border-emerald-200/80"
-                : isCompleted
-                ? "bg-blue-50/90 text-[#0052FF] border-blue-200/80"
-                : "bg-slate-50/90 text-slate-600 border-slate-200/70"
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10.5px] font-black tracking-wide border transition-opacity duration-300 ${
+              statusStyle.pill
             }`}
           >
-            {dare.status === 0 && (
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-            )}
-            {getStatusLabel(dare.status)}
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span
+                className={`absolute inline-flex h-full w-full animate-ping rounded-full ${statusStyle.dot} opacity-50`}
+              />
+              <span className={`relative h-2 w-2 rounded-full ${statusStyle.dot}`} />
+            </span>
+            {statusLabel}
           </span>
 
           <span className="inline-flex items-center text-[11.5px] font-semibold text-slate-400">

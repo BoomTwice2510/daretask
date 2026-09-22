@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LiveProtocolStats } from "@/components/live-protocol-stats";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -9,7 +10,6 @@ import {
   Layers,
   Plus,
   ShieldCheck,
-  Sparkles,
   Users,
   Zap,
 } from "lucide-react";
@@ -42,12 +42,6 @@ export function LandingDesktop() {
     },
   ];
 
-  const protocolStats = [
-    { value: "1,284", label: "Dares Created", trend: "+12% this week", icon: Sparkles, iconTone: "text-[#0052FF] bg-blue-50/80 border-blue-100" },
-    { value: "342", label: "Active Now", trend: "Live Escrow", icon: Zap, iconTone: "text-emerald-600 bg-emerald-50/80 border-emerald-100" },
-    { value: "$24.8k", label: "Total Staked", trend: "Secured on-chain", icon: Flame, iconTone: "text-amber-600 bg-amber-50/80 border-amber-100" },
-    { value: "98%", label: "Completed", trend: "Resolution rate", icon: ShieldCheck, iconTone: "text-indigo-600 bg-indigo-50/80 border-indigo-100" },
-  ];
 
   return (
     <main className="relative mx-auto w-full max-w-[1360px] px-6 lg:px-10 pt-8 pb-24 space-y-12 bg-white overflow-hidden">
@@ -131,34 +125,9 @@ export function LandingDesktop() {
       </section>
 
       {/* Protocol Live Stats Cards */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {protocolStats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <div
-              key={stat.label}
-              className="glass-card-interactive group flex flex-col rounded-3xl p-6 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  {stat.label}
-                </span>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-xl border ${stat.iconTone} shadow-xs group-hover:scale-110 transition-transform`}>
-                  <Icon className="h-4 w-4 stroke-[2.2]" />
-                </div>
-              </div>
-              <strong className="mt-3 font-mono text-3xl lg:text-4xl font-black tracking-tight text-slate-900">
-                {stat.value}
-              </strong>
-              <span className="mt-2 text-[11.5px] font-medium text-slate-400">
-                {stat.trend}
-              </span>
-            </div>
-          );
-        })}
-      </section>
+      <LiveProtocolStats />
 
-      {/* Informational 3-Column Grid with 3D Glass Icon Containers */}
+{/* Informational 3-Column Grid with 3D Glass Icon Containers */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1 */}
         <div className="glass-card-interactive group flex flex-col rounded-3xl p-7 transition-all">

@@ -86,6 +86,133 @@ function formatDurationShort(totalSeconds: number) {
   return `${m}m`;
 }
 
+type ProfileMeta = {
+  username: string | null;
+  avatar_url: string | null;
+  badge: number | null;
+};
+
+function useProfileMeta(address: string | null) {
+  const [profile, setProfile] = useState<ProfileMeta>({
+    username: null,
+    avatar_url: null,
+    badge: null,
+  });
+
+  useEffect(() => {
+    if (!address) return;
+
+    let cancelled = false;
+
+    fetch(`/api/profile?address=${encodeURIComponent(address)}`, {
+      cache: "no-store",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.profile) {
+          setProfile({
+            username: data.profile.username ?? null,
+            avatar_url: data.profile.avatar_url ?? null,
+            badge:
+              typeof data.profile.badge === "number"
+                ? data.profile.badge
+                : data.profile.badge != null
+                  ? Number(data.profile.badge)
+                  : null,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address]);
+
+  return profile;
+}
+
+const PROFILE_BADGES = [
+  "None",
+  "Rookie",
+  "Challenger",
+  "Contender",
+  "Gladiator",
+  "Champion",
+  "Legend",
+  "Mythic",
+] as const;
+
+function ProfileIdentity({
+  address,
+  role,
+  accent,
+}: {
+  address: string;
+  role: string;
+  accent: "creator" | "accepter";
+}) {
+  const profile = useProfileMeta(address);
+  const badge =
+    profile.badge != null && PROFILE_BADGES[profile.badge]
+      ? PROFILE_BADGES[profile.badge]
+      : null;
+
+  return (
+    <>
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50">
+        {profile.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt={profile.username || role}
+            className="block h-full w-full object-cover"
+          />
+        ) : (
+          <div className={cn(
+            "flex h-full w-full items-center justify-center",
+            accent === "creator"
+              ? "bg-gradient-to-br from-amber-50 via-white to-amber-100/70 text-amber-600"
+              : "bg-gradient-to-br from-blue-50 via-white to-blue-100/70 text-[#0052FF]"
+          )}>
+            {accent === "creator" ? (
+              <User className="h-6 w-6 stroke-[2.2]" />
+            ) : (
+              <Swords className="h-6 w-6 stroke-[2.2]" />
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="flex min-w-0 flex-col">
+        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+          {role}
+        </span>
+        {profile.username ? (
+          <span className="truncate text-xs sm:text-sm font-black text-slate-900">
+            @{profile.username}
+          </span>
+        ) : (
+          <span className="truncate font-mono text-xs sm:text-sm font-black text-slate-900">
+            {shortenAddress(address)}
+          </span>
+        )}
+        <div className="flex min-w-0 items-center gap-1.5">
+          {badge && badge !== "None" && (
+            <span className="truncate rounded-full border border-indigo-200/80 bg-indigo-50 px-1.5 py-0.5 text-[8.5px] font-black uppercase tracking-wider text-indigo-700">
+              {badge}
+            </span>
+          )}
+          {profile.username && (
+            <span className="truncate font-mono text-[9px] text-slate-400">
+              {shortenAddress(address)}
+            </span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 function SkeletonBlock({ className = "" }: { className?: string }) {
   return (
     <div
@@ -411,19 +538,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
         {/* Creator Card */}
         <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-4 shadow-xs">
-          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-amber-100/70 border border-amber-200/80 text-amber-600 shadow-[0_4px_16px_rgba(245,158,11,0.14)] group-hover:scale-105 transition-transform">
-            <div className="absolute inset-1 rounded-xl bg-amber-400/10 blur-xs" />
-            <User className="relative z-10 h-6 w-6 stroke-[2.2]" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Creator</span>
-            <Link
-              href={`/profile/${dare.creator}`}
-              className="font-mono text-xs sm:text-sm font-black text-slate-900 hover:text-[#0052FF] truncate transition-colors"
-            >
-              {shortenAddress(dare.creator)}
-            </Link>
-          </div>
+          <Link
+            href={`/profile/${dare.creator}`}
+            className="flex min-w-0 flex-1 items-center gap-3.5"
+          >
+            <ProfileIdentity address={dare.creator} role="Creator" accent="creator" />
+          </Link>
           <button
             onClick={() => copyAddress(dare.creator)}
             className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
@@ -440,19 +560,12 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
         {/* Accepter Card */}
         {!noAccepter ? (
           <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-4 shadow-xs">
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50 via-white to-blue-100/70 border border-blue-200/80 text-[#0052FF] shadow-[0_4px_16px_rgba(0,82,255,0.14)] group-hover:scale-105 transition-transform">
-              <div className="absolute inset-1 rounded-xl bg-blue-400/10 blur-xs" />
-              <Swords className="relative z-10 h-6 w-6 stroke-[2.2]" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Accepter</span>
-              <Link
-                href={`/profile/${dare.accepter}`}
-                className="font-mono text-xs sm:text-sm font-black text-slate-900 hover:text-[#0052FF] truncate transition-colors"
-              >
-                {shortenAddress(dare.accepter)}
-              </Link>
-            </div>
+            <Link
+              href={`/profile/${dare.accepter}`}
+              className="flex min-w-0 flex-1 items-center gap-3.5"
+            >
+              <ProfileIdentity address={dare.accepter} role="Accepter" accent="accepter" />
+            </Link>
             <button
               onClick={() => copyAddress(dare.accepter)}
               className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"

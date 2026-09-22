@@ -75,8 +75,6 @@ export async function POST(request: Request) {
 
     const form = await request.formData();
     const wallet = String(form.get("wallet") || "").trim();
-    const message = String(form.get("message") || "");
-    const signature = String(form.get("signature") || "");
     const username = String(form.get("username") || "").trim();
     const badge = Number(form.get("badge") || 0);
     const avatar = form.get("avatar");
@@ -85,10 +83,8 @@ export async function POST(request: Request) {
       return jsonError("Invalid wallet address.");
     }
 
-    // Profile metadata is intentionally not gated by a wallet signature.
-    // The wallet address is still validated before any profile data is saved.
-    // The frontend may continue sending message/signature fields; they are
-    // ignored by this endpoint.
+    // Profile metadata is saved against the validated wallet address.
+    // No wallet signature is required.
 
     let avatarUrl: string | null = null;
 

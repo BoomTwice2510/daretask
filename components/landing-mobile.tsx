@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Plus, ShieldCheck, Trophy, Zap, Flame, Sparkles, Activity } from "lucide-react";
+import { LiveProtocolStats } from "@/components/live-protocol-stats";
+import { ArrowRight, Plus, ShieldCheck, Trophy, Zap } from "lucide-react";
 
 export function LandingMobile() {
   return (
@@ -54,49 +55,10 @@ export function LandingMobile() {
         </div>
       </section>
 
-      {/* Protocol Live Metrics Row with Elevated Frosted Glass Cubes */}
-      <section className="grid grid-cols-3 gap-2">
-        {/* Metric 1 */}
-        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 text-[#0052FF] shadow-xs ">
-            <Sparkles className="h-4 w-4 stroke-[2.2]" />
-          </div>
-          <strong className="block font-mono text-base font-black tracking-tight text-slate-900">
-            1,284
-          </strong>
-          <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-            Dares
-          </span>
-        </div>
+      {/* Protocol Live Metrics */}
+      <LiveProtocolStats />
 
-        {/* Metric 2 */}
-        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 text-emerald-600 shadow-xs ">
-            <Activity className="h-4 w-4 stroke-[2.2] animate-pulse" />
-          </div>
-          <strong className="block font-mono text-base font-black tracking-tight text-emerald-600">
-            342
-          </strong>
-          <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-            Active
-          </span>
-        </div>
-
-        {/* Metric 3 */}
-        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200/70 text-amber-600 shadow-xs ">
-            <Flame className="h-4 w-4 stroke-[2.2]" />
-          </div>
-          <strong className="block font-mono text-base font-black tracking-tight text-[#0052FF]">
-            $24.8k
-          </strong>
-          <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
-            Staked
-          </span>
-        </div>
-      </section>
-
-      {/* Feature Cards with Bigger 3D Glass Icons & Interactive Lift */}
+{/* Feature Cards with Bigger 3D Glass Icons & Interactive Lift */}
       <section className="space-y-2.5">
         {/* Feature 1 */}
         <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3">

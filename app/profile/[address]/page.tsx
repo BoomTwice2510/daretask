@@ -76,7 +76,7 @@ export default function ProfilePage({
   params: Promise<{ address: string }>;
 }) {
   const { address: paramAddress } = use(params);
-  const { readContract, address: connectedAddress, signMessage } = useWeb3();
+  const { readContract, address: connectedAddress } = useWeb3();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [badge, setBadge] = useState<number>(0);
   const [userDares, setUserDares] = useState<DareData[]>([]);
@@ -148,18 +148,8 @@ export default function ProfilePage({
     setProfileSaveError("");
 
     try {
-      const timestamp = Math.floor(Date.now() / 1000);
-      const message = [
-        "Dare Profile Update",
-        `Wallet: ${connectedAddress.toLowerCase()}`,
-        `Timestamp: ${timestamp}`,
-      ].join("\n");
-
-      const signature = await signMessage(message);
       const form = new FormData();
       form.append("wallet", connectedAddress);
-      form.append("message", message);
-      form.append("signature", signature);
       form.append("username", username);
       form.append("badge", String(badge));
       if (avatarFile) form.append("avatar", avatarFile);
@@ -426,6 +416,12 @@ export default function ProfilePage({
                     @{profileMeta.username || fcUser?.username}
                   </div>
                 )}
+
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="inline-flex items-center rounded-full border border-indigo-200/80 bg-indigo-50 px-2 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-indigo-700">
+                    {BADGES[badge]}
+                  </span>
+                </div>
 
                 <div className="mt-1 flex min-w-0 items-center gap-2">
                   <span className="truncate font-mono text-base sm:text-lg font-black text-slate-900">

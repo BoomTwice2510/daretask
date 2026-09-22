@@ -38,13 +38,13 @@ export function CreateDareForm() {
   const searchParams = useSearchParams();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<string>(SAMPLE_TASKS[0].task);
   const [durationValue, setDurationValue] = useState(3);
   const [durationType, setDurationType] = useState<"hours" | "days">("days");
   const [token, setToken] = useState<string>(ZERO_ADDRESS);
   const [stake, setStake] = useState("");
   const [proofMode, setProofMode] = useState<ProofMode>("required");
-  const [proofSample, setProofSample] = useState("");
+  const [proofSample, setProofSample] = useState<string>(SAMPLE_TASKS[0].proof);
   const [samplesExpanded, setSamplesExpanded] = useState(false);
   const [provable, setProvable] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -347,13 +347,71 @@ export function CreateDareForm() {
             {/* Left Configuration Column */}
             <div className="space-y-6">
               
-              {/* Task Description */}
-              <section className="space-y-2">
+              {/* Sample Task Picker + Task Description */}
+              <section className="space-y-3">
+                <div className="relative z-30">
+                  <button
+                    type="button"
+                    onClick={() => setSamplesExpanded((value) => !value)}
+                    className="flex min-h-11 w-full items-center gap-3 rounded-full border border-pink-200 bg-pink-50 px-3.5 py-2 text-left shadow-xs transition-colors hover:bg-pink-100/80 touch-manipulation"
+                    aria-expanded={samplesExpanded}
+                  >
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-100 text-pink-600">
+                      <Sparkles className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-pink-600">
+                        Sample Tasks
+                      </span>
+                      <span className="block truncate text-xs font-black text-slate-900">
+                        {SAMPLE_TASKS.find((sample) => sample.task === description)?.title ?? "Choose a sample task"}
+                      </span>
+                    </span>
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-pink-500 transition-transform duration-200",
+                        samplesExpanded && "rotate-90",
+                      )}
+                    />
+                  </button>
+
+                  {samplesExpanded && (
+                    <div className="absolute left-0 right-0 top-full mt-2 max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-pink-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
+                      <div className="grid gap-1.5 sm:grid-cols-2">
+                        {SAMPLE_TASKS.map((sample) => (
+                          <button
+                            key={sample.title}
+                            type="button"
+                            onClick={() => {
+                              setDescription(sample.task);
+                              setProofMode("required");
+                              setProofSample(sample.proof);
+                              setError("");
+                              setSamplesExpanded(false);
+                            }}
+                            className={cn(
+                              "w-full rounded-xl border p-3 text-left transition-colors touch-manipulation",
+                              description === sample.task
+                                ? "border-pink-300 bg-pink-50"
+                                : "border-slate-100 bg-white hover:border-pink-200 hover:bg-pink-50/60",
+                            )}
+                          >
+                            <div className="text-xs font-black text-slate-900">{sample.title}</div>
+                            <div className="mt-1 text-[11px] leading-snug text-slate-500 font-medium">
+                              {sample.task}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <label htmlFor="description" className="block text-sm font-black text-slate-900">
                   What exactly must happen?
                 </label>
                 <p className="text-xs leading-relaxed text-slate-500 font-medium">
-                  State one clear, objective challenge an accepter can prove without ambiguity.
+                  Start from the sample or write your own clear, objective challenge.
                 </p>
                 <textarea
                   id="description"
@@ -490,51 +548,6 @@ export function CreateDareForm() {
                     Max Allowed: <b className="font-mono text-slate-900">{limitsLoading || !contractLimits ? "Loading..." : "$500 USD equivalent"}</b>
                   </div>
                 </div>
-              </section>
-
-              {/* Sample Task Ideas Accordion with Glass Refraction */}
-              <section>
-                <button
-                  type="button"
-                  onClick={() => setSamplesExpanded((value) => !value)}
-                  className="glass-card-interactive flex w-full items-center justify-between gap-3 rounded-2xl p-3.5 text-left transition-all cursor-pointer"
-                  aria-expanded={samplesExpanded}
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF] shadow-xs">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <span className="block text-xs sm:text-sm font-black text-slate-900">Sample Task Ideas</span>
-                      <span className="block truncate text-[11px] text-slate-400 font-medium">
-                        {samplesExpanded ? "Choose a starting template" : "Browse inspiration templates"}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronRight className={cn("h-4 w-4 text-slate-400 transition-transform duration-200", samplesExpanded && "rotate-90 text-[#0052FF]")} />
-                </button>
-
-                {samplesExpanded && (
-                  <div className="mt-3 grid gap-2.5 rounded-2xl border border-slate-100 bg-slate-50/50 p-3 sm:grid-cols-2">
-                    {SAMPLE_TASKS.map((sample) => (
-                      <button
-                        key={sample.title}
-                        type="button"
-                        onClick={() => {
-                          setDescription(sample.task);
-                          setProofMode("required");
-                          setProofSample(sample.proof);
-                          setError("");
-                          setSamplesExpanded(false);
-                        }}
-                        className="glass-card-interactive rounded-xl p-3 text-left transition-all hover:border-[#0052FF] cursor-pointer"
-                      >
-                        <div className="text-xs font-black text-slate-900">{sample.title}</div>
-                        <div className="mt-1 text-[11px] leading-snug text-slate-500 font-medium line-clamp-2">{sample.task}</div>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </section>
 
               {/* Proof Specification Switch */}

@@ -27,6 +27,11 @@ export default function DareDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [winnerAddress, setWinnerAddress] = useState<string | null>(null);
+  const [winnerProfile, setWinnerProfile] = useState<{
+    username: string | null;
+    avatar_url: string | null;
+    badge: number | null;
+  }>({ username: null, avatar_url: null, badge: null });
 
   const dareId = parseInt(id, 10);
 
@@ -90,6 +95,35 @@ export default function DareDetailPage({
   useEffect(() => {
     fetchDare();
   }, [fetchDare]);
+
+  useEffect(() => {
+    if (!winnerAddress) {
+      setWinnerProfile({ username: null, avatar_url: null, badge: null });
+      return;
+    }
+
+    let cancelled = false;
+
+    fetch(`/api/profile?address=${encodeURIComponent(winnerAddress)}`, {
+      cache: "no-store",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.profile) {
+          setWinnerProfile({
+            username: data.profile.username ?? null,
+            avatar_url: data.profile.avatar_url ?? null,
+            badge:
+              data.profile.badge != null ? Number(data.profile.badge) : null,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [winnerAddress]);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">

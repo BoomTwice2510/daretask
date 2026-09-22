@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { Address } from "viem";
 
 type AvatarSize = "sm" | "md" | "lg";
@@ -36,6 +37,48 @@ export function UserAvatar({
       <div
         className={`${sizes[size]} rounded-full bg-slate-100 ring-1 ring-slate-200 ${className}`}
       />
+    );
+  }
+
+  const [profile, setProfile] = useState<{
+    username: string | null;
+    avatar_url: string | null;
+  }>({ username: null, avatar_url: null });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`/api/profile?address=${encodeURIComponent(address)}`, {
+      cache: "no-store",
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.profile) {
+          setProfile({
+            username: data.profile.username ?? null,
+            avatar_url: data.profile.avatar_url ?? null,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [address]);
+
+  if (profile.avatar_url) {
+    return (
+      <div
+        className={`${sizes[size]} overflow-hidden rounded-full bg-slate-100 ring-4 ring-white shadow-lg shadow-blue-100 ${className}`}
+        aria-label={profile.username ? `Avatar for ${profile.username}` : `Avatar for ${address}`}
+      >
+        <img
+          src={profile.avatar_url}
+          alt={profile.username || "Profile avatar"}
+          className="block h-full w-full object-cover"
+        />
+      </div>
     );
   }
 
