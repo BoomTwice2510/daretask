@@ -39,11 +39,21 @@ const desktopLinks = [
 ];
 
 export function Header() {
-  const { address, isConnected, isConnecting, connect, disconnect, chainId } =
-    useWeb3();
+  const {
+    address,
+    isConnected,
+    isConnecting,
+    connect,
+    connectWallet,
+    connectors,
+    disconnect,
+    chainId,
+    switchToBaseSepolia,
+  } = useWeb3();
   const { toast } = useToast();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [walletPickerOpen, setWalletPickerOpen] = useState(false);
 
   const isBaseSepolia = chainId === BASE_SEPOLIA_PARAMS.chainIdDec;
   const isActive = (href: string) =>
@@ -56,13 +66,43 @@ export function Header() {
       : "Wrong network";
 
   async function handleConnect() {
+    if (connectors.length > 1) {
+      setWalletPickerOpen(true);
+      return;
+    }
+
     try {
       await connect();
-    } catch {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Connection failed",
-        description: "The wallet connection was cancelled or failed.",
+        description: error?.message || "The wallet connection was cancelled or failed.",
+      });
+    }
+  }
+
+  async function handleWalletSelect(connector: (typeof connectors)[number]) {
+    try {
+      setWalletPickerOpen(false);
+      await connectWallet(connector);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Connection failed",
+        description: error?.message || "The wallet connection was cancelled or failed.",
+      });
+    }
+  }
+
+  async function handleSwitchToBaseSepolia() {
+    try {
+      await switchToBaseSepolia();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Network switch failed",
+        description: error?.message || "Please approve Base Sepolia in your wallet.",
       });
     }
   }
@@ -81,13 +121,13 @@ export function Header() {
 
   return (
     <>
-      <header className="mobile-safe-header sticky top-0 z-50 w-full border-b border-white/80 bg-white/80 backdrop-blur-2xl shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] transition-all">
-        <div className="mx-auto flex h-14 md:h-16 w-full max-w-[1440px] min-w-0 items-center justify-between gap-2 px-2.5 sm:px-6 md:px-8">
+      <header className="sticky top-0 z-50 w-full border-b border-white/80 bg-white/80 backdrop-blur-2xl shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] transition-all">
+        <div className="mx-auto flex h-14 md:h-16 w-full max-w-[1440px] items-center justify-between px-3.5 sm:px-6 md:px-8">
           
           {/* Brand Logo with Gentle Float */}
           <Link
             href="/"
-            className="group flex min-w-0 shrink items-center gap-2 transition-transform active:scale-95 cursor-pointer"
+            className="group flex items-center gap-2.5 transition-transform active:scale-95 cursor-pointer"
             aria-label="Dare Protocol Home"
           >
             <div className="relative flex h-9 w-9 md:h-10 md:w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/60 to-blue-100/50 p-1 shadow-[0_4px_14px_rgba(0,82,255,0.08)] ring-1 ring-black/5 group-hover:scale-105 group-hover:shadow-[0_6px_18px_rgba(0,82,255,0.16)] transition-all duration-300">
@@ -100,9 +140,9 @@ export function Header() {
                 className="h-7 w-7 md:h-8 md:w-8 object-contain transition-transform group-hover:rotate-6 duration-300"
               />
             </div>
-            <div className="flex min-w-0 flex-col leading-none">
+            <div className="flex flex-col leading-none">
               <div className="flex items-center gap-1.5">
-                <strong className="truncate text-sm sm:text-base md:text-lg font-black tracking-tight text-slate-900">
+                <strong className="text-base md:text-lg font-black tracking-tight text-slate-900">
                   Dare
                 </strong>
                 <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md bg-blue-50/90 text-[#0052FF] border border-blue-100/60 shadow-xs">
@@ -171,11 +211,15 @@ export function Header() {
           </nav>
 
           {/* Action Header Pills */}
-          <div className="flex min-w-0 shrink-0 items-center gap-1 md:gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             {/* Live On-Chain Radar Status Pill */}
-            <span
+            <button
+              type="button"
+              onClick={isConnected && !isBaseSepolia ? handleSwitchToBaseSepolia : undefined}
+              disabled={!isConnected || isBaseSepolia}
+              title={isConnected && !isBaseSepolia ? "Switch to Base Sepolia" : undefined}
               className={cn(
-                "mobile-chain-status inline-flex h-8 md:h-9 max-w-[86px] sm:max-w-none items-center gap-1.5 rounded-full px-2 md:px-3 text-[10px] md:text-xs font-semibold border backdrop-blur-md transition-all shadow-xs",
+                "inline-flex h-8 md:h-9 items-center gap-1.5 rounded-full px-2.5 md:px-3 text-[10.5px] md:text-xs font-semibold border backdrop-blur-md transition-all shadow-xs",
                 !isConnected
                   ? "border-slate-200/70 bg-white/80 text-slate-500"
                   : isBaseSepolia
@@ -203,17 +247,17 @@ export function Header() {
                   )}
                 />
               </span>
-              <span className="mobile-chain-label truncate max-w-[58px] sm:max-w-[85px]">
+              <span className="truncate max-w-[85px] sm:max-w-none">
                 {currentChain}
               </span>
-            </span>
+            </button>
 
             {/* Wallet Address & Disconnect */}
             {isConnected && address ? (
               <div className="flex items-center gap-1.5">
                 <Link
                   href={`/profile/${address}`}
-                  className="mobile-wallet-link inline-flex h-8 md:h-9 items-center rounded-full bg-white/90 border border-slate-200/80 px-3 font-mono text-[11px] md:text-xs font-bold text-slate-800 shadow-xs hover:border-[#0052FF]/40 hover:text-[#0052FF] hover:scale-[1.02] active:scale-95 transition-all"
+                  className="inline-flex h-8 md:h-9 items-center rounded-full bg-white/90 border border-slate-200/80 px-3 font-mono text-[11px] md:text-xs font-bold text-slate-800 shadow-xs hover:border-[#0052FF]/40 hover:text-[#0052FF] hover:scale-[1.02] active:scale-95 transition-all"
                 >
                   {shortenAddress(address)}
                 </Link>
@@ -231,7 +275,7 @@ export function Header() {
               <Button
                 onClick={handleConnect}
                 disabled={isConnecting}
-                className="mobile-connect-button relative min-w-0 overflow-hidden h-8 md:h-9 rounded-full bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white px-2.5 sm:px-3.5 md:px-4.5 text-[11px] sm:text-xs font-bold shadow-[0_4px_16px_rgba(0,82,255,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,82,255,0.35)] active:scale-95 cursor-pointer"
+                className="relative overflow-hidden h-8 md:h-9 rounded-full bg-gradient-to-b from-[#0052FF] to-[#0045d8] hover:to-[#003bb8] text-white px-3.5 md:px-4.5 text-xs font-bold shadow-[0_4px_16px_rgba(0,82,255,0.25)] transition-all hover:shadow-[0_6px_20px_rgba(0,82,255,0.35)] active:scale-95 cursor-pointer"
               >
                 <div className="mr-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20">
                   <Wallet className="h-2.5 w-2.5 stroke-[2.5]" />
@@ -243,7 +287,7 @@ export function Header() {
             {/* Mobile Menu Trigger */}
             <button
               type="button"
-              className="mobile-menu-trigger grid md:hidden h-11 w-11 shrink-0 place-items-center rounded-xl border border-slate-200/80 bg-white/95 text-slate-700 shadow-xs active:scale-95 transition-all cursor-pointer"
+              className="grid md:hidden h-8 w-8 place-items-center rounded-xl border border-slate-200/80 bg-white/90 text-slate-700 shadow-xs active:scale-90 transition-all cursor-pointer"
               onClick={() => setMenuOpen((value) => !value)}
               aria-label="Open menu"
             >
@@ -272,7 +316,7 @@ export function Header() {
                   }
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "mobile-menu-link flex min-h-11 items-center justify-center rounded-xl border border-slate-100 bg-slate-50/70 py-2.5 px-3 text-xs font-bold text-slate-700 transition-all active:scale-95",
+                    "flex items-center justify-center rounded-xl border border-slate-100 bg-slate-50/70 py-2.5 px-3 text-xs font-bold text-slate-700 transition-all active:scale-95",
                     isActive(item.href) &&
                       "bg-blue-50/90 text-[#0052FF] border-blue-200/80 font-black shadow-xs"
                   )}
@@ -285,7 +329,7 @@ export function Header() {
             {isConnected && address && (
               <button
                 type="button"
-                className="mobile-menu-link mt-2.5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-rose-50/80 border border-rose-200/70 py-2.5 text-xs font-bold text-rose-600 transition-all active:scale-95 cursor-pointer"
+                className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50/80 border border-rose-200/70 py-2.5 text-xs font-bold text-rose-600 transition-all active:scale-95 cursor-pointer"
                 onClick={() => {
                   setMenuOpen(false);
                   handleDisconnect();
@@ -298,15 +342,68 @@ export function Header() {
         )}
       </header>
 
+      {walletPickerOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/35 p-3 backdrop-blur-sm sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Choose a wallet"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setWalletPickerOpen(false);
+          }}
+        >
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl sm:p-5">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-base font-black text-slate-900">Connect wallet</h2>
+                <p className="mt-0.5 text-xs text-slate-500">Choose a wallet available on this device.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWalletPickerOpen(false)}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900"
+                aria-label="Close wallet picker"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="grid gap-2">
+              {connectors.map((connector) => (
+                <button
+                  key={connector.uid}
+                  type="button"
+                  onClick={() => handleWalletSelect(connector)}
+                  disabled={isConnecting}
+                  className="flex min-h-12 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3.5 text-left text-sm font-bold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50/50 active:scale-[0.99] disabled:opacity-60"
+                >
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-blue-50 text-[#0052FF]">
+                    <Wallet className="h-4 w-4" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{connector.name}</span>
+                  <span className="text-[10px] font-semibold text-slate-400">Connect</span>
+                </button>
+              ))}
+            </div>
+
+            {!connectors.length && (
+              <p className="rounded-2xl bg-amber-50 p-3 text-xs font-medium text-amber-800">
+                No compatible wallet connector is available.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Mobile PWA Floating Bottom Navigation Bar with Breathing Pulse Glow on Center FAB */}
       <nav
-        className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-50 grid md:hidden grid-cols-5 items-center bg-white/95 backdrop-blur-xl border-t border-slate-200/80 px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_-6px_24px_rgba(15,23,42,0.06)]"
+        className="fixed bottom-0 left-0 right-0 z-40 grid md:hidden grid-cols-5 items-center bg-white/92 backdrop-blur-2xl border-t border-white/80 px-2 pt-1 pb-[calc(0.4rem+env(safe-area-inset-bottom))] shadow-[0_-8px_30px_rgba(15,23,42,0.04)]"
         aria-label="Mobile navigation"
       >
         <Link
           href="/"
           className={cn(
-            "mobile-nav-item group flex min-w-0 min-h-11 flex-col items-center justify-center gap-0.5 py-1 transition-transform active:scale-95",
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
             isActive("/") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
           )}
         >
@@ -326,7 +423,7 @@ export function Header() {
         <Link
           href="/explore"
           className={cn(
-            "mobile-nav-item group flex min-w-0 min-h-11 flex-col items-center justify-center gap-0.5 py-1 transition-transform active:scale-95",
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
             isActive("/explore") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
           )}
         >
@@ -347,7 +444,7 @@ export function Header() {
         <div className="flex items-center justify-center">
           <Link
             href="/create"
-            className="mobile-nav-create animate-pulse-glow flex h-11 w-11 -translate-y-3 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0052FF] via-[#0048e6] to-[#0038b8] text-white ring-4 ring-white active:scale-90 transition-all duration-200 cursor-pointer"
+            className="animate-pulse-glow flex h-11 w-11 -translate-y-3 items-center justify-center rounded-2xl bg-gradient-to-br from-[#0052FF] via-[#0048e6] to-[#0038b8] text-white ring-4 ring-white active:scale-90 transition-all duration-200 cursor-pointer"
             aria-label="Create a dare"
           >
             <Plus className="h-5 w-5 stroke-[2.8]" />
@@ -357,7 +454,7 @@ export function Header() {
         <Link
           href="/leaderboard"
           className={cn(
-            "mobile-nav-item group flex min-w-0 min-h-11 flex-col items-center justify-center gap-0.5 py-1 transition-transform active:scale-95",
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
             isActive("/leaderboard") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
           )}
         >
@@ -377,7 +474,7 @@ export function Header() {
         <Link
           href={address ? `/profile/${address}` : "/profile"}
           className={cn(
-            "mobile-nav-item group flex min-w-0 min-h-11 flex-col items-center justify-center gap-0.5 py-1 transition-transform active:scale-95",
+            "group flex flex-col items-center justify-center gap-1 py-1 transition-transform active:scale-90",
             isActive("/profile") ? "text-[#0052FF]" : "text-slate-400 hover:text-slate-600"
           )}
         >

@@ -1,54 +1,38 @@
 "use client";
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import React, { createContext, useCallback, useContext, type ReactNode } from "react";
 import {
   createPublicClient,
-  createWalletClient,
-  custom,
   http,
-  type WalletClient,
   type Address,
+  type WalletClient,
 } from "viem";
 import { baseSepolia } from "viem/chains";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+  useWalletClient,
+  type Connector,
+} from "wagmi";
 import {
   CONTRACT_ADDRESS,
   DARE_ABI,
   ERC20_ABI,
   BASE_CHAIN_ID,
-} from "@/lib/contract"; // yahan apna exact path rakhna jahan contract.ts hai
-
-// --------- window.ethereum typing ---------
-declare global {
-  interface EthereumProvider {
-    request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-    on: (event: string, listener: (...args: any[]) => void) => void;
-    removeListener: (
-      event: string,
-      listener: (...args: any[]) => void
-    ) => void;
-  }
-
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
-}
-
-// --------- context types ---------
+} from "@/lib/contract";
 
 interface Web3ContextType {
   address: Address | null;
   isConnected: boolean;
   isConnecting: boolean;
   chainId: number | null;
+  connectors: readonly Connector[];
   connect: () => Promise<void>;
+  connectWallet: (connector: Connector) => Promise<void>;
   disconnect: () => void;
+  switchToBaseSepolia: () => Promise<void>;
   publicClient: any;
   walletClient: WalletClient | null;
   readContract: (functionName: string, args?: any[]) => Promise<any>;
@@ -64,8 +48,6 @@ interface Web3ContextType {
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
 
-// --------- public client ---------
-
 const publicClient: any = createPublicClient({
   chain: baseSepolia,
   transport: http(
@@ -78,146 +60,121 @@ const publicClient: any = createPublicClient({
   ),
 });
 
-// --------- provider ---------
+const BASE_SEPOLIA_ADD_PARAMS = {
+  chainId: "0x14a34",
+  chainName: "Base Sepolia",
+  nativeCurrency: {
+    name: "Ethereum",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: [
+    process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
+  ],
+  blockExplorerUrls: ["https://sepolia.basescan.org"],
+};
+
+function isUnknownChainError(error: any) {
+  return (
+    error?.code === 4902 ||
+    error?.cause?.code === 4902 ||
+    error?.cause?.cause?.code === 4902 ||
+    /chain.+not.+configured|unrecognized chain|unknown chain/i.test(
+      error?.message ?? ""
+    )
+  );
+}
 
 export function Web3Provider({ children }: { children: ReactNode }) {
-  const [address, setAddress] = useState<Address | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [chainId, setChainId] = useState<number | null>(null);
-  const [walletClient, setWalletClient] = useState<WalletClient | null>(null);
+  const { address, isConnected, isConnecting, chainId, connector } = useAccount();
+  const { connectAsync, connectors } = useConnect();
+  const { disconnect: wagmiDisconnect } = useDisconnect();
+  const { switchChainAsync } = useSwitchChain();
+  const { data: walletClient } = useWalletClient();
 
-  // ---- sync existing connection ----
-  const syncConnection = useCallback(async () => {
-    if (typeof window === "undefined" || !window.ethereum) return;
+  const addBaseSepolia = useCallback(async (targetConnector?: Connector | null) => {
+    const activeConnector = targetConnector ?? connector;
+    if (!activeConnector) {
+      throw new Error("No wallet connector is available.");
+    }
+
+    const provider = (await activeConnector.getProvider()) as {
+      request: (args: {
+        method: string;
+        params?: unknown[];
+      }) => Promise<unknown>;
+    } | null;
+
+    if (!provider || typeof provider.request !== "function") {
+      throw new Error("This wallet does not support adding networks from the app.");
+    }
+
+    await provider.request({
+      method: "wallet_addEthereumChain",
+      params: [BASE_SEPOLIA_ADD_PARAMS],
+    });
+  }, [connector]);
+
+  const switchToBaseSepolia = useCallback(async () => {
+    if (!isConnected) {
+      throw new Error("Wallet not connected");
+    }
+
+    if (chainId === BASE_CHAIN_ID) return;
 
     try {
-      const accounts = (await window.ethereum.request({
-        method: "eth_accounts",
-      })) as string[];
-
-      const chainIdHex = (await window.ethereum.request({
-        method: "eth_chainId",
-      })) as string;
-
-      const currentChainId = parseInt(chainIdHex, 16);
-      setChainId(currentChainId);
-
-      if (accounts.length > 0) {
-        const addr = accounts[0] as Address;
-        setAddress(addr);
-        setIsConnected(true);
-
-        const wc = createWalletClient({
-          chain: baseSepolia,
-          transport: custom(window.ethereum),
-        });
-        setWalletClient(wc);
-      } else {
-        setAddress(null);
-        setIsConnected(false);
-        setWalletClient(null);
-      }
+      await switchChainAsync({ chainId: BASE_CHAIN_ID });
     } catch (error) {
-      console.error("Failed to sync connection", error);
+      if (!isUnknownChainError(error)) throw error;
+      await addBaseSepolia();
+      await switchChainAsync({ chainId: BASE_CHAIN_ID });
     }
-  }, []);
+  }, [addBaseSepolia, chainId, isConnected, switchChainAsync]);
 
-  // ---- connect wallet ----
-  const connect = useCallback(async () => {
-    if (typeof window === "undefined" || !window.ethereum) {
-      alert("Please install MetaMask or a compatible wallet.");
-      return;
-    }
+  const connectWallet = useCallback(
+    async (targetConnector: Connector) => {
+      await connectAsync({ connector: targetConnector });
 
-    try {
-      setIsConnecting(true);
-
-      const accounts = (await window.ethereum.request({
-        method: "eth_requestAccounts",
-      })) as string[];
-
-      const chainIdHex = (await window.ethereum.request({
-        method: "eth_chainId",
-      })) as string;
-
-      let currentChainId = parseInt(chainIdHex, 16);
-
-      if (currentChainId !== BASE_CHAIN_ID) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: `0x${BASE_CHAIN_ID.toString(16)}` }],
-          });
-          currentChainId = BASE_CHAIN_ID;
-        } catch (switchError: any) {
-          if (switchError.code === 4902) {
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: `0x${BASE_CHAIN_ID.toString(16)}`,
-                  chainName: "Base Sepolia",
-                  nativeCurrency: {
-                    name: "Ethereum",
-                    symbol: "ETH",
-                    decimals: 18,
-                  },
-                  rpcUrls: [
-                    process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ??
-                      "https://sepolia.base.org",
-                  ],
-                  blockExplorerUrls: ["https://sepolia.basescan.org"],
-                },
-              ],
-            });
-            currentChainId = BASE_CHAIN_ID;
-          } else {
-            throw switchError;
-          }
+      // Connecting and network selection are separate wallet permissions.
+      // If the wallet is already on another chain, ask it to move to Base Sepolia.
+      try {
+        await switchChainAsync({ chainId: BASE_CHAIN_ID });
+      } catch (error) {
+        if (isUnknownChainError(error)) {
+          await addBaseSepolia(targetConnector);
+          await switchChainAsync({ chainId: BASE_CHAIN_ID });
+        } else {
+          // Keep the wallet connected. The header will show Wrong network and
+          // the user can retry the Base Sepolia switch explicitly.
+          console.warn("Base Sepolia switch was not completed", error);
         }
       }
+    }, [addBaseSepolia, connectAsync, switchChainAsync]);
 
-      setChainId(currentChainId);
-
-      const addr = accounts[0] as Address;
-      setAddress(addr);
-      setIsConnected(true);
-
-      const wc = createWalletClient({
-        chain: baseSepolia,
-        transport: custom(window.ethereum),
-      });
-      setWalletClient(wc);
-    } catch (error) {
-      console.error("Failed to connect wallet", error);
-      alert("Failed to connect wallet. Please try again.");
-    } finally {
-      setIsConnecting(false);
+  const connect = useCallback(async () => {
+    if (!connectors.length) {
+      throw new Error("No compatible wallet is available.");
     }
-  }, []);
+
+    // Preserve the old no-argument API used throughout the app. The header
+    // exposes the full connector picker when multiple wallets are available.
+    await connectWallet(connectors[0]);
+  }, [connectWallet, connectors]);
 
   const disconnect = useCallback(() => {
-    setAddress(null);
-    setIsConnected(false);
-    setWalletClient(null);
-  }, []);
+    wagmiDisconnect();
+  }, [wagmiDisconnect]);
 
-  // ---- contract helpers (Dare contract) ----
   const readContract = useCallback(
     async (functionName: string, args: any[] = []) => {
       try {
-        const data = await publicClient.readContract({
+        return await publicClient.readContract({
           address: CONTRACT_ADDRESS,
           abi: DARE_ABI as any,
           functionName,
           args,
         } as any);
-        return data;
       } catch (error) {
-        // Newer Dare deployments expose the public `badge(address)` mapping
-        // instead of the older `getUserBadge(address)` helper. Keep legacy
-        // pages working without changing the deployed contract.
         if (functionName === "getUserBadge") {
           try {
             return await publicClient.readContract({
@@ -227,8 +184,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
               args,
             } as any);
           } catch {
-            // Fall through to the original error so real ABI/address problems
-            // are still visible.
+            // Fall through to the original error.
           }
         }
         console.error("readContract error:", error);
@@ -247,6 +203,9 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       if (!walletClient || !address) {
         throw new Error("Wallet not connected");
       }
+      if (chainId !== BASE_CHAIN_ID) {
+        throw new Error("Please switch to Base Sepolia first.");
+      }
 
       try {
         const hash = await (walletClient as any).writeContract({
@@ -258,24 +217,23 @@ export function Web3Provider({ children }: { children: ReactNode }) {
           account: address,
           chain: baseSepolia,
         } as any);
-
         return hash as `0x${string}`;
       } catch (error: any) {
         console.error("writeContract error:", error);
-        if (error?.shortMessage) {
-          throw new Error(error.shortMessage);
-        }
+        if (error?.shortMessage) throw new Error(error.shortMessage);
         throw error;
       }
     },
-    [walletClient, address]
+    [address, chainId, walletClient]
   );
 
-  // ---- ERC20 helpers ----
   const approveToken = useCallback(
     async (token: Address, amount: bigint): Promise<`0x${string}`> => {
       if (!walletClient || !address) {
         throw new Error("Wallet not connected");
+      }
+      if (chainId !== BASE_CHAIN_ID) {
+        throw new Error("Please switch to Base Sepolia first.");
       }
 
       try {
@@ -287,30 +245,25 @@ export function Web3Provider({ children }: { children: ReactNode }) {
           account: address,
           chain: baseSepolia,
         } as any);
-
         return hash as `0x${string}`;
       } catch (error: any) {
         console.error("approveToken error:", error);
-        if (error?.shortMessage) {
-          throw new Error(error.shortMessage);
-        }
+        if (error?.shortMessage) throw new Error(error.shortMessage);
         throw error;
       }
     },
-    [walletClient, address]
+    [address, chainId, walletClient]
   );
 
   const getAllowance = useCallback(
     async (token: Address, owner: Address): Promise<bigint> => {
       try {
-        const result = await publicClient.readContract({
+        return (await publicClient.readContract({
           address: token,
           abi: ERC20_ABI as any,
           functionName: "allowance",
           args: [owner, CONTRACT_ADDRESS],
-        } as any);
-
-        return result as bigint;
+        } as any)) as bigint;
       } catch (error) {
         console.error("getAllowance error:", error);
         throw error;
@@ -319,7 +272,6 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     []
   );
 
-  // ---- wallet signature helper ----
   const signMessage = useCallback(
     async (message: string): Promise<`0x${string}`> => {
       if (!walletClient || !address) {
@@ -327,63 +279,33 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       }
 
       try {
-        const signature = await walletClient.signMessage({
+        return (await walletClient.signMessage({
           account: address,
           message,
-        });
-        return signature as `0x${string}`;
+        })) as `0x${string}`;
       } catch (error: any) {
         console.error("signMessage error:", error);
-        if (error?.shortMessage) {
-          throw new Error(error.shortMessage);
-        }
+        if (error?.shortMessage) throw new Error(error.shortMessage);
         throw error;
       }
     },
-    [walletClient, address]
+    [address, walletClient]
   );
-
-  // ---- effects ----
-  useEffect(() => {
-    syncConnection();
-
-    if (typeof window === "undefined" || !window.ethereum) return;
-
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnect();
-      } else {
-        setAddress(accounts[0] as Address);
-        setIsConnected(true);
-      }
-    };
-
-    const handleChainChanged = (chainIdHex: string) => {
-      const id = parseInt(chainIdHex, 16);
-      setChainId(id);
-    };
-
-    window.ethereum.on("accountsChanged", handleAccountsChanged);
-    window.ethereum.on("chainChanged", handleChainChanged);
-
-    return () => {
-      if (!window.ethereum) return;
-      window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
-      window.ethereum.removeListener("chainChanged", handleChainChanged);
-    };
-  }, [syncConnection, disconnect]);
 
   return (
     <Web3Context.Provider
       value={{
-        address,
+        address: address ?? null,
         isConnected,
         isConnecting,
-        chainId,
+        chainId: chainId ?? null,
+        connectors,
         connect,
+        connectWallet,
         disconnect,
+        switchToBaseSepolia,
         publicClient,
-        walletClient,
+        walletClient: walletClient ?? null,
         readContract,
         writeContract,
         approveToken,
