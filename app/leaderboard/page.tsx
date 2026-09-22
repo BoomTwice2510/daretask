@@ -173,9 +173,9 @@ export default function LeaderboardPage() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">
       {/* Ambient Moving Light Spheres */}
-      <div className="pointer-events-none absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div className="pointer-events-none max-md:hidden absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
       <div
-        className="pointer-events-none absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-amber-100/15 via-rose-100/15 to-blue-100/15 blur-3xl animate-drift"
+        className="pointer-events-none max-md:hidden absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-amber-100/15 via-rose-100/15 to-blue-100/15 blur-3xl animate-drift"
         style={{ animationDelay: "-6s" }}
       />
 
@@ -222,7 +222,7 @@ export default function LeaderboardPage() {
           {/* Metric Micro Counter Cards */}
           <div className="grid grid-cols-2 gap-3 sm:min-w-[360px]">
             {/* Card 1 */}
-            <div className="glass-card-interactive group flex flex-col rounded-3xl p-4 transition-all">
+            <div className="glass-card-interactive group flex flex-col max-md:rounded-2xl max-md:p-3.5 rounded-3xl p-4 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-500">Players Indexed</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF] shadow-xs group-hover:scale-110 transition-transform">
@@ -235,7 +235,7 @@ export default function LeaderboardPage() {
             </div>
 
             {/* Card 2 */}
-            <div className="glass-card-interactive group flex flex-col rounded-3xl p-4 transition-all">
+            <div className="glass-card-interactive group flex flex-col max-md:rounded-2xl max-md:p-3.5 rounded-3xl p-4 transition-all">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-500">Total Dares</span>
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 shadow-xs group-hover:scale-110 transition-transform">
@@ -308,7 +308,7 @@ export default function LeaderboardPage() {
         {/* Ranked Players Table Sheet */}
         {!loading && sortedEntries.length > 0 && (
           <>
-            <div className="glass-panel overflow-hidden rounded-[30px] shadow-[0_12px_40px_rgba(15,23,42,0.035)]">
+            <div className="glass-panel overflow-hidden max-md:rounded-2xl max-md:shadow-none rounded-[30px] shadow-[0_12px_40px_rgba(15,23,42,0.035)]">
               {/* Desktop Header */}
               <div className="hidden grid-cols-[80px_minmax(0,1fr)_160px_160px_180px] border-b border-slate-100/90 bg-slate-50/50 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-slate-400 sm:grid">
                 <div>Rank</div>

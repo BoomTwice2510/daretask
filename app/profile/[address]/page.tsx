@@ -342,9 +342,9 @@ export default function ProfilePage({
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-white text-slate-900">
       {/* Background Ambient Moving Light Spheres */}
-      <div className="pointer-events-none absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div className="pointer-events-none max-md:hidden absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
       <div
-        className="pointer-events-none absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+        className="pointer-events-none max-md:hidden absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
         style={{ animationDelay: "-6s" }}
       />
 
@@ -561,7 +561,7 @@ export default function ProfilePage({
 
         {/* Loading Skeleton */}
         {loading && (
-          <div className="glass-panel flex flex-col items-center justify-center rounded-[32px] py-24 gap-3 text-center shadow-xs mt-6">
+          <div className="glass-panel flex flex-col items-center justify-center max-md:rounded-2xl max-md:py-16 rounded-[32px] py-24 gap-3 text-center shadow-xs mt-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0052FF] shadow-xs">
               <Loader2 className="h-6 w-6 animate-spin" />
             </div>
@@ -572,7 +572,7 @@ export default function ProfilePage({
         {!loading && stats && (
           <>
             {/* Rank Showcase & Level Up Progression */}
-            <section className="glass-panel mt-6 overflow-hidden rounded-[30px] p-6 sm:p-8 shadow-xs">
+            <section className="glass-panel mt-6 overflow-hidden max-md:rounded-2xl max-md:p-4 rounded-[30px] p-6 sm:p-8 shadow-xs">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4.5">
                   <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50 via-white to-amber-100/80 border border-amber-200/90 text-amber-600 shadow-[0_4px_16px_rgba(245,158,11,0.16)]">
@@ -631,7 +631,7 @@ export default function ProfilePage({
 
             {/* Sub-Metrics Row */}
             <section className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+              <div className="glass-card-interactive flex flex-col max-md:rounded-xl max-md:p-4 rounded-2xl p-4.5">
                 <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
                   <Coins className="h-4 w-4 text-[#0052FF]" /> Matched Volume
                 </div>
@@ -641,7 +641,7 @@ export default function ProfilePage({
                 <div className="mt-1 text-[11px] font-medium text-slate-400">Tracked on Base smart contract escrow</div>
               </div>
 
-              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+              <div className="glass-card-interactive flex flex-col max-md:rounded-xl max-md:p-4 rounded-2xl p-4.5">
                 <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
                   <ShieldCheck className="h-4 w-4 text-emerald-600" /> Creator Activity
                 </div>
@@ -651,7 +651,7 @@ export default function ProfilePage({
                 <div className="mt-1 text-[11px] font-medium text-slate-400">Challenges currently awaiting match or review</div>
               </div>
 
-              <div className="glass-card-interactive flex flex-col rounded-2xl p-4.5">
+              <div className="glass-card-interactive flex flex-col max-md:rounded-xl max-md:p-4 rounded-2xl p-4.5">
                 <div className="flex items-center gap-2 text-[10.5px] font-black uppercase tracking-wider text-slate-400">
                   <Activity className="h-4 w-4 text-[#0052FF]" /> Challenger Activity
                 </div>

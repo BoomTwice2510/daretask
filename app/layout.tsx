@@ -34,8 +34,6 @@ const dareMiniAppEmbed = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#FFFFFF" },
@@ -77,7 +75,7 @@ export default function RootLayout({
           content="2ebf03996d850c884f6183eb2455c2e2f7f2bceb4a541675b8cdfc30d57764b607c5c6cc09ef50b4323e60b45cd654d9ceb67f7157069cdbfe7f5ce46d058db7"
         />
       </head>
-      <body className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-blue-100 selection:text-[#0052FF] overflow-x-clip">
+      <body className="min-h-[100svh] md:min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-blue-100 selection:text-[#0052FF] overflow-x-clip">
         <Providers>{children}</Providers>
         <FeedbackButton />
         <Analytics />

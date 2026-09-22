@@ -1,3 +1,4 @@
+
 // app/AppGuard.tsx
 "use client";
 
@@ -24,9 +25,9 @@ export function AppGuard({ children }: { children: React.ReactNode }) {
     return (
       <main className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900 flex flex-col items-center justify-center px-4 pb-[calc(2rem+env(safe-area-inset-bottom))]">
         {/* Background Ambient Moving Light Spheres */}
-        <div className="pointer-events-none fixed -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+        <div className="pointer-events-none fixed -top-24 -left-20 hidden h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift md:block" />
         <div
-          className="pointer-events-none fixed top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+          className="pointer-events-none fixed top-1/3 -right-24 hidden h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift md:block"
           style={{ animationDelay: "-6s" }}
         />
 

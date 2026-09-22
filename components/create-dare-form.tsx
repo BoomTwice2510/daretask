@@ -266,7 +266,7 @@ export function CreateDareForm() {
   /* Success Confirmation Screen */
   if (successTxHash) {
     return (
-      <div className="glass-card-interactive mx-auto max-w-2xl rounded-[30px] p-6 sm:p-9 shadow-[0_12px_45px_rgba(16,185,129,0.08)]">
+      <div className="glass-card-interactive mx-auto max-w-2xl max-md:rounded-2xl max-md:p-4 rounded-[30px] p-6 sm:p-9 shadow-[0_12px_45px_rgba(16,185,129,0.08)]">
         <div className="flex items-start gap-4 sm:gap-5">
           <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-emerald-100/70 border border-emerald-200/80 shadow-[0_6px_20px_rgba(16,185,129,0.18)]">
             <div className="absolute inset-1 rounded-xl bg-emerald-400/10 blur-xs" />
@@ -309,7 +309,7 @@ export function CreateDareForm() {
   }
 
   return (
-    <div className="glass-panel overflow-hidden rounded-[28px] shadow-[0_8px_35px_rgba(15,23,42,0.035)]">
+    <div className="glass-panel overflow-hidden max-md:rounded-2xl max-md:shadow-none rounded-[28px] shadow-[0_8px_35px_rgba(15,23,42,0.035)]">
       {/* Visual Stepper Bar */}
       <div className="border-b border-slate-100/90 bg-white/70 px-5 py-4 sm:px-8">
         <div className="flex items-center gap-3">
@@ -341,8 +341,8 @@ export function CreateDareForm() {
       </div>
 
       {step === 1 ? (
-        <form onSubmit={(e) => { e.preventDefault(); validateForReview(); }} className="p-5 sm:p-7 md:p-8">
-          <div className="grid gap-7 lg:grid-cols-[1.45fr_0.8fr]">
+        <form onSubmit={(e) => { e.preventDefault(); validateForReview(); }} className="max-md:p-4 p-5 sm:p-7 md:p-8">
+          <div className="grid gap-5 lg:gap-7 lg:grid-cols-[1.45fr_0.8fr]">
             
             {/* Left Configuration Column */}
             <div className="space-y-6">
@@ -627,7 +627,7 @@ export function CreateDareForm() {
         </form>
       ) : (
         /* Step 2: Final Creator Review Screen */
-        <div className="p-5 sm:p-7 md:p-8">
+        <div className="max-md:p-4 p-5 sm:p-7 md:p-8">
           <div className="grid gap-7 lg:grid-cols-[1fr_340px]">
             <div className="space-y-5">
               <div className="flex items-start gap-3.5">

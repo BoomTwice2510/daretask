@@ -6,15 +6,8 @@ import { ArrowRight, Plus, ShieldCheck, Trophy, Zap, Flame, Sparkles, Activity }
 export function LandingMobile() {
   return (
     <main className="relative min-h-[calc(100vh-60px)] w-full overflow-hidden bg-white px-3.5 pt-2 pb-28 space-y-3.5">
-      {/* Ambient Moving Glow Spheres for Living Background Reflex */}
-      <div className="pointer-events-none absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-blue-200/25 to-indigo-100/15 blur-3xl animate-drift" />
-      <div
-        className="pointer-events-none absolute top-52 -right-20 h-72 w-72 rounded-full bg-gradient-to-bl from-rose-100/25 to-amber-100/20 blur-3xl animate-drift"
-        style={{ animationDelay: "-5s" }}
-      />
-
       {/* Hero Glass Card */}
-      <section className="glass-card-interactive relative overflow-hidden rounded-[26px] p-5 shadow-[0_8px_30px_rgba(15,23,42,0.035)]">
+      <section className="glass-card-interactive relative overflow-hidden rounded-2xl p-4 shadow-none">
         {/* Iridescent Live Tag */}
         <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-gradient-to-r from-blue-50/90 to-indigo-50/80 px-3 py-1 shadow-xs">
           <span className="relative flex h-2 w-2">
@@ -40,7 +33,7 @@ export function LandingMobile() {
         </p>
 
         {/* Action Buttons with High Tactile Elevation */}
-        <div className="mt-5 grid grid-cols-2 gap-2.5">
+        <div className="mt-4 grid grid-cols-2 gap-2">
           <Link
             href="/create"
             className="flex h-12 items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-[#0052FF] to-[#0045d8] px-4 text-xs font-black text-white shadow-[0_8px_22px_rgba(0,82,255,0.32)] transition-all active:scale-[0.96] cursor-pointer"
@@ -64,8 +57,8 @@ export function LandingMobile() {
       {/* Protocol Live Metrics Row with Elevated Frosted Glass Cubes */}
       <section className="grid grid-cols-3 gap-2">
         {/* Metric 1 */}
-        <div className="glass-card-interactive group rounded-2xl p-3 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 text-[#0052FF] shadow-xs group-hover:scale-110 transition-transform">
+        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
+          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/70 text-[#0052FF] shadow-xs ">
             <Sparkles className="h-4 w-4 stroke-[2.2]" />
           </div>
           <strong className="block font-mono text-base font-black tracking-tight text-slate-900">
@@ -77,8 +70,8 @@ export function LandingMobile() {
         </div>
 
         {/* Metric 2 */}
-        <div className="glass-card-interactive group rounded-2xl p-3 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 text-emerald-600 shadow-xs group-hover:scale-110 transition-transform">
+        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
+          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/70 text-emerald-600 shadow-xs ">
             <Activity className="h-4 w-4 stroke-[2.2] animate-pulse" />
           </div>
           <strong className="block font-mono text-base font-black tracking-tight text-emerald-600">
@@ -90,8 +83,8 @@ export function LandingMobile() {
         </div>
 
         {/* Metric 3 */}
-        <div className="glass-card-interactive group rounded-2xl p-3 text-center transition-all">
-          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200/70 text-amber-600 shadow-xs group-hover:scale-110 transition-transform">
+        <div className="glass-card-interactive group rounded-xl p-2.5 text-center transition-all">
+          <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200/70 text-amber-600 shadow-xs ">
             <Flame className="h-4 w-4 stroke-[2.2]" />
           </div>
           <strong className="block font-mono text-base font-black tracking-tight text-[#0052FF]">
@@ -106,8 +99,8 @@ export function LandingMobile() {
       {/* Feature Cards with Bigger 3D Glass Icons & Interactive Lift */}
       <section className="space-y-2.5">
         {/* Feature 1 */}
-        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-[22px] p-3.5">
-          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50/90 via-white to-blue-100/60 border border-blue-200/80 shadow-[0_4px_16px_rgba(0,82,255,0.12)] group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-50/90 via-white to-blue-100/60 border border-blue-200/80 shadow-none transition-all duration-300">
             <div className="absolute inset-1 rounded-xl bg-blue-400/10 blur-xs" />
             <Zap className="relative z-10 h-6 w-6 text-[#0052FF] stroke-[2.2]" />
           </div>
@@ -120,8 +113,8 @@ export function LandingMobile() {
         </div>
 
         {/* Feature 2 */}
-        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-[22px] p-3.5">
-          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-emerald-100/60 border border-emerald-200/80 shadow-[0_4px_16px_rgba(16,185,129,0.12)] group-hover:scale-105 group-hover:-rotate-3 transition-all duration-300">
+        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50/90 via-white to-emerald-100/60 border border-emerald-200/80 shadow-none transition-all duration-300">
             <div className="absolute inset-1 rounded-xl bg-emerald-400/10 blur-xs" />
             <ShieldCheck className="relative z-10 h-6 w-6 text-emerald-600 stroke-[2.2]" />
           </div>
@@ -134,8 +127,8 @@ export function LandingMobile() {
         </div>
 
         {/* Feature 3 */}
-        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-[22px] p-3.5">
-          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-amber-100/60 border border-amber-200/80 shadow-[0_4px_16px_rgba(245,158,11,0.14)] group-hover:scale-105 group-hover:rotate-3 transition-all duration-300">
+        <div className="glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3">
+          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-50/90 via-white to-amber-100/60 border border-amber-200/80 shadow-none transition-all duration-300">
             <div className="absolute inset-1 rounded-xl bg-amber-400/10 blur-xs" />
             <Trophy className="relative z-10 h-6 w-6 text-amber-600 stroke-[2.2]" />
           </div>

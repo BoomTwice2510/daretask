@@ -171,6 +171,153 @@
   }
 }
 
+
+/* =========================================================
+   MOBILE VISUAL BASELINE
+   Desktop styles above remain unchanged.
+   ========================================================= */
+@media (max-width: 767px) {
+  /* Mobile viewport and touch hardening. */
+  html {
+    min-height: 100%;
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    min-height: 100svh;
+    max-width: 100%;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
+  }
+
+  /* Prevent iOS input focus from zooming the entire app. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    line-height: 1.35;
+  }
+
+  input,
+  select,
+  textarea,
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  /* Give controls a real touch target without changing their desktop sizing. */
+  .mobile-safe-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-menu-trigger {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .mobile-wallet-link,
+  .mobile-connect-button,
+  .mobile-menu-link {
+    min-height: 44px;
+  }
+
+  .mobile-menu-link {
+    line-height: 1.2;
+  }
+
+  .mobile-nav-item {
+    min-height: 44px;
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+
+  /* Native range controls need a large touch area on wallet/WebView screens. */
+  input[type="range"] {
+    width: 100%;
+    min-height: 44px;
+    height: 44px;
+    cursor: pointer;
+  }
+
+  /* Long wallet addresses, hashes and labels must never force horizontal scroll. */
+  .font-mono {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Keep buttons readable at 320px while allowing labels to wrap. */
+  button,
+  a {
+    min-width: 0;
+  }
+
+  /* Keep small-screen layouts on the real visible viewport. */
+  .min-h-screen {
+    min-height: 100svh;
+  }
+
+  /* One clean surface instead of multiple animated glow layers. */
+  .animate-drift {
+    display: none !important;
+    animation: none !important;
+  }
+
+  /* Mobile does not need desktop-grade frosted-glass compositing. */
+  .glass-panel,
+  .glass-card-interactive {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.035);
+  }
+
+  .glass-card-interactive {
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  }
+
+  /* Touch screens must not inherit hover-lift behavior. */
+  .group:hover .group-hover\:scale-105,
+  .group:hover .group-hover\:scale-110,
+  .group:hover .group-hover\:rotate-3,
+  .group:hover .group-hover\:-rotate-3,
+  .group:hover .group-hover\:translate-x-1,
+  .group:hover .group-hover\:-translate-x-1 {
+    transform: none !important;
+  }
+
+  .glass-card-interactive:hover {
+    transform: none;
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(226, 232, 240, 0.9);
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.035);
+  }
+
+  [class*="group-hover:scale-"]:hover,
+  [class*="group-hover:rotate-"]:hover,
+  [class*="group-hover:-rotate-"]:hover,
+  [class*="group-hover:translate-"]:hover,
+  [class*="group-hover:-translate-"]:hover,
+  [class*="hover:scale-"]:hover,
+  [class*="hover:-translate-"]:hover {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Minimal Matte Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -237,3 +384,47 @@
 .dare-leaderboard-page h1 {
   color: #0f172a !important;
 }
+/* P4: narrow wallet/WebView hardening */
+@media (max-width: 380px) {
+  .mobile-safe-header .mobile-chain-label {
+    display: none;
+  }
+  .mobile-safe-header .mobile-chain-status {
+    width: 32px;
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .mobile-safe-header .mobile-chain-status > span:last-child {
+    display: none;
+  }
+  .mobile-safe-header .mobile-wallet-link {
+    max-width: 74px;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 340px) {
+  .mobile-safe-header .mobile-wallet-link {
+    display: none;
+  }
+  .mobile-safe-header .mobile-connect-button {
+    padding-inline: 8px;
+  }
+  .mobile-safe-header .mobile-connect-button .mr-1\.5 {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .mobile-bottom-nav {
+    padding-inline: 4px;
+  }
+  .mobile-bottom-nav .mobile-nav-item span {
+    font-size: 9px;
+  }
+  .mobile-nav-create {
+    height: 42px;
+    width: 42px;
+  }
+}
+

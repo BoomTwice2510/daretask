@@ -33,12 +33,12 @@ export function DareCard({ dare }: { dare: DareData }) {
   const isCompleted = dare.status === 2 || dare.status === 3;
 
   return (
-    <article className="glass-card-interactive group relative flex flex-col overflow-hidden rounded-[24px] transition-all duration-300">
+    <article className="glass-card-interactive group relative flex flex-col overflow-hidden max-md:rounded-2xl rounded-[24px] transition-all duration-300">
       
       {/* Top Ambient Highlight Gradient Wash on Hover */}
-      <div className="pointer-events-none absolute -top-16 -right-16 h-32 w-32 rounded-full bg-blue-100/30 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="pointer-events-none max-md:hidden absolute -top-16 -right-16 h-32 w-32 rounded-full bg-blue-100/30 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      <Link href={`/dare/${dare.id}`} className="block p-5 sm:p-5.5">
+      <Link href={`/dare/${dare.id}`} className="block max-md:p-4 p-5 sm:p-5.5">
         
         {/* Status Pill & Live Time Counter */}
         <div className="flex items-center justify-between gap-2">

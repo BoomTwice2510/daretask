@@ -26,7 +26,7 @@ export function MotionLayout({ children }: { children: ReactNode }) {
             duration: 0.22,
             ease: [0.16, 1, 0.3, 1], // iOS style smooth fluid ease
           }}
-          className="relative z-10 flex min-h-screen w-full flex-col"
+          className="relative z-10 flex min-h-screen w-full flex-col max-md:!transform-none"
         >
           {children}
         </motion.div>

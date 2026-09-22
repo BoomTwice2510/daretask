@@ -398,7 +398,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
       </div>
 
       {/* Description Glass Card */}
-      <div className="glass-card-interactive rounded-[26px] p-5 sm:p-7 shadow-xs">
+      <div className="glass-card-interactive max-md:rounded-2xl max-md:p-4 rounded-[26px] p-5 sm:p-7 shadow-xs">
         <div className="mb-2 inline-flex items-center gap-1.5 text-[10.5px] font-black uppercase tracking-[0.14em] text-[#0052FF]">
           <Sparkles className="h-3.5 w-3.5" /> Challenge Statement
         </div>
@@ -673,7 +673,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
               isAccepter &&
               isDeadlinePassed(dare.deadline) &&
               isInProofWindow(dare.deadline) && (
-                <div className="glass-card-interactive flex flex-col gap-3.5 rounded-[24px] p-5 sm:p-6 shadow-xs">
+                <div className="glass-card-interactive flex flex-col gap-3.5 max-md:rounded-2xl max-md:p-4 rounded-[24px] p-5 sm:p-6 shadow-xs">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-[#0052FF]">
                       <FileCheck className="h-5 w-5 stroke-[2.2]" />

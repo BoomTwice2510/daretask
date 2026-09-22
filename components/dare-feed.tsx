@@ -101,7 +101,7 @@ export function DareFeed() {
   return (
     <div className="space-y-6">
       {/* Top Banner - Frosted Glass Soft Panel */}
-      <section className="glass-panel relative overflow-hidden rounded-[26px] p-5 sm:p-7 md:p-8 shadow-[0_8px_35px_rgba(15,23,42,0.03)]">
+      <section className="glass-panel relative overflow-hidden max-md:rounded-2xl max-md:p-4 rounded-[26px] p-5 sm:p-7 md:p-8 shadow-[0_8px_35px_rgba(15,23,42,0.03)]">
         {/* Subtle Ambient Glow Orb */}
         <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-blue-100/30 blur-3xl animate-drift" />
 
@@ -124,7 +124,7 @@ export function DareFeed() {
           </div>
 
           {/* Metric Micro-Counters with 3D Layered Glass Icons */}
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
             {([
               {
                 label: "Dares",
@@ -151,7 +151,7 @@ export function DareFeed() {
               ({ label, value, Icon, tone, numColor }) => (
                 <div
                   key={String(label)}
-                  className="glass-card-interactive group flex flex-col rounded-2xl p-3 text-center transition-all"
+                  className="glass-card-interactive group flex flex-col max-md:rounded-xl max-md:p-2.5 rounded-2xl p-3 text-center transition-all"
                 >
                   <div className="flex items-center justify-center">
                     <div className={`flex h-8 w-8 items-center justify-center rounded-xl border ${tone} shadow-xs group-hover:scale-110 transition-transform`}>
@@ -172,7 +172,7 @@ export function DareFeed() {
       </section>
 
       {/* Filter & Toolbar Shell */}
-      <section className="glass-panel rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(15,23,42,0.02)] space-y-3.5">
+      <section className="glass-panel max-md:rounded-xl max-md:p-3 rounded-2xl p-4 sm:p-5 shadow-[0_4px_20px_rgba(15,23,42,0.02)] space-y-3.5">
         <div className="flex flex-col gap-2.5 sm:gap-3 lg:flex-row">
           
           {/* Search Input Box */}
@@ -278,7 +278,7 @@ export function DareFeed() {
 
       {/* Visible Cards Grid */}
       {!loading && !error && visible.length > 0 && (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:gap-4 md:grid-cols-2">
           {visible.map((dare) => (
             <DareCard key={dare.id} dare={dare} />
           ))}

@@ -35,19 +35,19 @@ export function DareTimeline({ status }: DareTimelineProps) {
       : steps.findIndex((s) => s.status === status);
 
   return (
-    <div className="flex items-center gap-1.5 w-full py-1">
+    <div className="flex items-center gap-1.5 w-full min-w-0 py-1">
       {steps.map((step, i) => {
         const isComplete = i < activeIndex || status === DareStatus.Resolved;
         const isActive = i === activeIndex && status !== DareStatus.Resolved;
         const isDisputed = status === DareStatus.Disputed && i === 2;
 
         return (
-          <div key={step.label} className="flex items-center flex-1">
-            <div className="flex flex-col items-center gap-1.5 flex-1">
+          <div key={step.label} className="flex min-w-0 flex-1 items-center">
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5">
               {/* Stepper Glass Node */}
               <div
                 className={cn(
-                  "relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl transition-all duration-300 border shadow-xs",
+                  "relative flex h-9 w-9 shrink-0 sm:h-10 sm:w-10 items-center justify-center rounded-2xl transition-all duration-300 border shadow-xs",
                   isComplete &&
                     "bg-gradient-to-br from-emerald-50 via-white to-emerald-100/70 border-emerald-200/90 text-emerald-600 shadow-[0_4px_14px_rgba(16,185,129,0.18)] scale-105",
                   isActive &&
@@ -83,11 +83,14 @@ export function DareTimeline({ status }: DareTimelineProps) {
               {/* Stage Text Label */}
               <span
                 className={cn(
-                  "text-[10px] sm:text-[11px] font-black tracking-tight",
+                  "whitespace-nowrap text-center text-[10px] sm:text-[11px] font-black tracking-tight",
                   isComplete && "text-emerald-700",
                   isActive && !isDisputed && "text-[#0052FF]",
                   isDisputed && "text-rose-600",
-                  !isComplete && !isActive && !isDisputed && "text-slate-400 font-semibold"
+                  !isComplete &&
+                    !isActive &&
+                    !isDisputed &&
+                    "text-slate-400 font-semibold"
                 )}
               >
                 {isDisputed ? "Disputed" : step.label}
@@ -98,7 +101,7 @@ export function DareTimeline({ status }: DareTimelineProps) {
             {i < steps.length - 1 && (
               <div
                 className={cn(
-                  "h-1 flex-1 -mt-4.5 rounded-full transition-all duration-300",
+                  "h-1 min-w-0 flex-1 -mt-4.5 rounded-full transition-all duration-300",
                   i < activeIndex || status === DareStatus.Resolved
                     ? "bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-[0_1px_6px_rgba(16,185,129,0.2)]"
                     : "bg-slate-100"
