@@ -240,6 +240,41 @@
     min-height: 44px;
     height: 44px;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+  }
+
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #e2e8f0;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: #0052ff;
+    box-shadow: 0 2px 8px rgba(0, 82, 255, 0.24);
+    -webkit-appearance: none;
+  }
+
+  input[type="range"]::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: #e2e8f0;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #ffffff;
+    border-radius: 999px;
+    background: #0052ff;
+    box-shadow: 0 2px 8px rgba(0, 82, 255, 0.24);
   }
 
   /* Long wallet addresses, hashes and labels must never force horizontal scroll. */
@@ -428,3 +463,31 @@
   }
 }
 
+
+/* Requested readable status/utility palette. Scoped additions only. */
+.text-dare-muted { color: #4f6b8a !important; }
+.text-dare-secondary { color: #36506f !important; }
+.text-dare-strong { color: #203b5b !important; }
+
+@keyframes dare-proof-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.14); }
+  50% { box-shadow: 0 0 0 6px rgba(249, 115, 22, 0.08); }
+}
+
+@keyframes dare-claim-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.12); }
+  50% { box-shadow: 0 0 0 6px rgba(244, 63, 94, 0.07); }
+}
+
+@keyframes feedback-breathe {
+  0%, 100% { box-shadow: 0 6px 20px rgba(0, 82, 255, 0.14); }
+  50% { box-shadow: 0 8px 26px rgba(0, 82, 255, 0.28); }
+}
+
+.dare-proof-breathe { animation: dare-proof-breathe 2.4s ease-in-out infinite; }
+.dare-claim-breathe { animation: dare-claim-breathe 2.4s ease-in-out infinite; }
+.feedback-breathe { animation: feedback-breathe 2.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dare-proof-breathe, .dare-claim-breathe, .feedback-breathe { animation: none; }
+}

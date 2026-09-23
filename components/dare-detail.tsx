@@ -546,7 +546,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
           </Link>
           <button
             onClick={() => copyAddress(dare.creator)}
-            className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
+            className="ml-auto shrink-0 flex h-9 w-9 max-md:h-11 max-md:w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
             aria-label="Copy address"
           >
             {copied ? (
@@ -568,7 +568,7 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
             </Link>
             <button
               onClick={() => copyAddress(dare.accepter)}
-              className="ml-auto shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
+              className="ml-auto shrink-0 flex h-9 w-9 max-md:h-11 max-md:w-11 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-400 hover:text-slate-900 hover:bg-slate-50 active:scale-90 transition-all shadow-xs cursor-pointer"
               aria-label="Copy address"
             >
               <Copy className="h-4 w-4" />
@@ -1019,8 +1019,8 @@ export function DareDetail({ dare, onRefresh }: DareDetailProps) {
 
       {/* Confirmation Modal with Frosted Glass Backdrop */}
       {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 backdrop-blur-md p-4 animate-menu-slide">
-          <div className="glass-panel w-full sm:max-w-md rounded-[28px] p-6 space-y-4 shadow-[0_24px_70px_rgba(15,23,42,0.25)]">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/40 max-md:backdrop-blur-none sm:backdrop-blur-md p-4 animate-menu-slide">
+          <div className="glass-panel w-full sm:max-w-md max-md:rounded-2xl max-md:p-4 rounded-[28px] p-6 space-y-4 shadow-[0_24px_70px_rgba(15,23,42,0.25)]">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
                 <ShieldAlert className="h-5 w-5" />

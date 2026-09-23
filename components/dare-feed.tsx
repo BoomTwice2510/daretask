@@ -44,24 +44,31 @@ export function DareFeed() {
         Array.from({ length: total - start }, (_, offset) => {
           const id = total - 1 - offset;
           return (async () => {
-            const result = (await readContract("getDare", [BigInt(id)])) as [
+            const [result, meta] = await Promise.all([
+              readContract("getDare", [BigInt(id)]),
+              readContract("getDareMeta", [BigInt(id)]),
+            ]);
+            const dareResult = result as [
               string, string, string, string, bigint, bigint, bigint, boolean,
               string, bigint, bigint, number
             ];
+            const dareMeta = meta as [boolean, bigint, bigint, bigint, string, string, string, bigint, bigint, bigint];
             return {
               id,
-              creator: result[0],
-              accepter: result[1],
-              description: result[2],
-              token: result[3],
-              stake: result[4],
-              createdAt: result[5],
-              deadline: result[6],
-              proofSubmitted: result[7],
-              proofURI: result[8],
-              proofTime: result[9],
-              disputeTime: result[10],
-              status: result[11],
+              creator: dareResult[0],
+              accepter: dareResult[1],
+              description: dareResult[2],
+              token: dareResult[3],
+              stake: dareResult[4],
+              createdAt: dareResult[5],
+              deadline: dareResult[6],
+              proofSubmitted: dareResult[7],
+              proofURI: dareResult[8],
+              proofTime: dareResult[9],
+              disputeTime: dareResult[10],
+              status: dareResult[11],
+              proofRequired: dareMeta[0],
+              proofDeadline: dareMeta[2],
             } as DareData;
           })();
         }),
@@ -103,7 +110,7 @@ export function DareFeed() {
       {/* Top Banner - Frosted Glass Soft Panel */}
       <section className="glass-panel relative overflow-hidden max-md:rounded-2xl max-md:p-4 rounded-[26px] p-5 sm:p-7 md:p-8 shadow-[0_8px_35px_rgba(15,23,42,0.03)]">
         {/* Subtle Ambient Glow Orb */}
-        <div className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full bg-blue-100/30 blur-3xl animate-drift" />
+        <div className="pointer-events-none max-md:hidden absolute -top-16 -right-16 h-48 w-48 rounded-full bg-blue-100/30 blur-3xl animate-drift" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
@@ -118,7 +125,7 @@ export function DareFeed() {
             <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-tight">
               Explore Dares
             </h1>
-            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600 font-medium">
+            <p className="mt-2 text-xs sm:text-sm leading-relaxed text-[#36506f] font-medium">
               Discover real challenges with matched stakes, countdown deadlines, and smart contract escrow proof on Base.
             </p>
           </div>
@@ -161,7 +168,7 @@ export function DareFeed() {
                   <div className={`mt-2 font-mono text-base sm:text-lg font-black tracking-tight ${numColor}`}>
                     {value}
                   </div>
-                  <div className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider">
+                  <div className="text-[9.5px] font-bold text-[#4f6b8a] uppercase tracking-wider">
                     {label}
                   </div>
                 </div>
@@ -189,7 +196,7 @@ export function DareFeed() {
           </label>
 
           {/* Dropdown Filters & Refresh Actions */}
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2 max-md:overflow-x-auto no-scrollbar">
             <select
               value={tokenFilter}
               onChange={(e) => setTokenFilter(e.target.value as "all" | "ETH" | "USDC")}
@@ -214,7 +221,7 @@ export function DareFeed() {
               type="button"
               onClick={fetchDares}
               disabled={loading}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-slate-600 hover:text-[#0052FF] hover:border-blue-200/80 hover:bg-blue-50/50 hover:scale-105 active:scale-90 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200/80 bg-white text-[#36506f] hover:text-[#0052FF] hover:border-blue-200/80 hover:bg-blue-50/50 hover:scale-105 active:scale-90 disabled:opacity-50 transition-all cursor-pointer shadow-xs"
               aria-label="Refresh dares"
             >
               <RefreshCw className={loading ? "h-4 w-4 animate-spin text-[#0052FF]" : "h-4 w-4 stroke-[2.2]"} />
@@ -235,11 +242,11 @@ export function DareFeed() {
                 className={`shrink-0 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black transition-all active:scale-95 cursor-pointer ${
                   active
                     ? "bg-gradient-to-r from-[#0052FF] to-[#0045d8] text-white shadow-[0_4px_16px_rgba(0,82,255,0.28)] scale-[1.02]"
-                    : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-xs"
+                    : "border border-slate-200/80 bg-white text-[#36506f] hover:bg-slate-50 hover:text-slate-900 shadow-xs"
                 }`}
               >
                 <span>{label}</span>
-                <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${active ? "bg-white/20 text-white" : "bg-slate-100 text-slate-500"}`}>
+                <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${active ? "bg-white/20 text-white" : "bg-slate-100 text-[#36506f]"}`}>
                   {count}
                 </span>
               </button>
@@ -257,7 +264,7 @@ export function DareFeed() {
 
       {/* Loading Skeleton */}
       {loading && (
-        <div className="glass-panel rounded-3xl py-20 text-center text-xs font-bold text-slate-500 shadow-xs">
+        <div className="glass-panel rounded-3xl py-20 text-center text-xs font-bold text-[#36506f] shadow-xs">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-[#0052FF] shadow-xs">
             <RefreshCw className="h-5 w-5 animate-spin" />
           </div>
@@ -268,11 +275,11 @@ export function DareFeed() {
       {/* Empty State View */}
       {!loading && !error && visible.length === 0 && (
         <div className="glass-panel rounded-3xl border border-dashed border-slate-200 bg-white/80 py-20 text-center shadow-xs">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/70 text-slate-400 shadow-xs">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/80 border border-slate-200/70 text-[#4f6b8a] shadow-xs">
             <SlidersHorizontal className="h-6 w-6 stroke-[2]" />
           </div>
           <p className="mt-3.5 text-base font-black text-slate-900">No dares match these filters</p>
-          <p className="mt-1 text-xs text-slate-400 font-medium">Try changing the status, token, or searching for different keywords.</p>
+          <p className="mt-1 text-xs text-[#4f6b8a] font-medium">Try changing the status, token, or searching for different keywords.</p>
         </div>
       )}
 
@@ -286,7 +293,7 @@ export function DareFeed() {
       )}
 
       {!loading && !error && dares.length > 0 && (
-        <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+        <p className="text-center text-[11px] font-bold text-[#4f6b8a] uppercase tracking-wider">
           Showing {visible.length} of {dares.length} live on-chain dares
         </p>
       )}

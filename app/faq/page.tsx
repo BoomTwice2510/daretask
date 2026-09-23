@@ -61,9 +61,9 @@ export default function FAQ() {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-white text-slate-900">
       {/* Background Ambient Moving Light Spheres */}
-      <div className="pointer-events-none max-md:hidden absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
+      <div className="pointer-events-none absolute -top-24 -left-20 h-96 w-96 rounded-full bg-gradient-to-br from-blue-200/20 via-indigo-100/15 to-transparent blur-3xl animate-drift" />
       <div
-        className="pointer-events-none max-md:hidden absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
+        className="pointer-events-none absolute top-1/3 -right-24 h-[420px] w-[420px] rounded-full bg-gradient-to-bl from-rose-100/15 via-amber-100/15 to-blue-100/15 blur-3xl animate-drift"
         style={{ animationDelay: "-6s" }}
       />
 
@@ -81,7 +81,7 @@ export default function FAQ() {
             Frequently Asked <span className="text-gradient-soothing">Questions</span>
           </h1>
 
-          <p className="max-w-2xl text-xs sm:text-sm leading-relaxed text-slate-500 font-medium">
+          <p className="max-w-2xl text-xs sm:text-sm leading-relaxed text-[#4f6b8a] font-medium">
             Everything you need to know about peer-to-peer escrow, proof verification, and dispute resolution on Base.
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function FAQ() {
                   {/* Rotating Chevron Glass Capsule */}
                   <div
                     className={cn(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200/70 bg-white text-slate-400 transition-all duration-300 shadow-xs",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200/70 bg-white text-[#4f6b8a] transition-all duration-300 shadow-xs",
                       isOpen && "rotate-180 text-[#0052FF] border-blue-200/80 bg-blue-50/50 shadow-xs"
                     )}
                   >
@@ -141,7 +141,7 @@ export default function FAQ() {
                 {/* Animated Answer Drawer */}
                 {isOpen && (
                   <div className="border-t border-slate-100 px-5 pb-6 pt-4 sm:px-6 animate-menu-slide">
-                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600 font-medium pl-0 sm:pl-[58px]">
+                    <p className="text-xs sm:text-sm leading-relaxed text-[#36506f] font-medium pl-0 sm:pl-[58px]">
                       {item.answer}
                     </p>
                   </div>
@@ -163,7 +163,7 @@ export default function FAQ() {
               <div className="text-xs sm:text-sm font-black text-slate-900">
                 Important Rule: Proof is Human-Verifiable Evidence
               </div>
-              <p className="text-xs leading-relaxed text-slate-600 font-medium">
+              <p className="text-xs leading-relaxed text-[#36506f] font-medium">
                 Proof serves as inspectable evidence for human and judge review, not an automated oracle. To ensure swift, fair resolution, always make tasks specific, measurable, time-bounded, and independently verifiable.
               </p>
             </div>

@@ -38,13 +38,13 @@ export function CreateDareForm() {
   const searchParams = useSearchParams();
 
   const [step, setStep] = useState<1 | 2>(1);
-  const [description, setDescription] = useState<string>(SAMPLE_TASKS[0].task);
+  const [description, setDescription] = useState<string>("");
   const [durationValue, setDurationValue] = useState(3);
   const [durationType, setDurationType] = useState<"hours" | "days">("days");
   const [token, setToken] = useState<string>(ZERO_ADDRESS);
   const [stake, setStake] = useState("");
   const [proofMode, setProofMode] = useState<ProofMode>("required");
-  const [proofSample, setProofSample] = useState<string>(SAMPLE_TASKS[0].proof);
+  const [proofSample, setProofSample] = useState<string>("");
   const [samplesExpanded, setSamplesExpanded] = useState(false);
   const [provable, setProvable] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -347,62 +347,71 @@ export function CreateDareForm() {
             {/* Left Configuration Column */}
             <div className="space-y-6">
               
-              {/* Sample Task Picker + Task Description */}
+              {/* Sample Tasks + Task Description */}
               <section className="space-y-3">
-                <div className="relative z-30">
+                <div className="rounded-2xl border border-pink-200 bg-pink-50/90 p-4 shadow-xs">
                   <button
                     type="button"
                     onClick={() => setSamplesExpanded((value) => !value)}
-                    className="flex min-h-11 w-full items-center gap-3 rounded-full border border-pink-200 bg-pink-50 px-3.5 py-2 text-left shadow-xs transition-colors hover:bg-pink-100/80 touch-manipulation"
+                    className="flex min-h-11 w-full items-start gap-3 text-left touch-manipulation"
                     aria-expanded={samplesExpanded}
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-pink-100 text-pink-600">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
                       <Sparkles className="h-4 w-4" />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-pink-600">
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[10px] font-black uppercase tracking-[0.14em] text-pink-600">
                         Sample Tasks
-                      </span>
-                      <span className="block truncate text-xs font-black text-slate-900">
-                        {SAMPLE_TASKS.find((sample) => sample.task === description)?.title ?? "Choose a sample task"}
-                      </span>
-                    </span>
+                      </div>
+                      <div className="mt-0.5 text-sm font-black text-slate-900">
+                        Need an idea? Pick a proven challenge
+                      </div>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-700">
+                        Tap to browse examples. Selecting one will fill the form below.
+                      </p>
+                    </div>
                     <ChevronRight
                       className={cn(
-                        "h-4 w-4 shrink-0 text-pink-500 transition-transform duration-200",
+                        "mt-1 h-4 w-4 shrink-0 text-pink-500 transition-transform duration-200",
                         samplesExpanded && "rotate-90",
                       )}
                     />
                   </button>
 
                   {samplesExpanded && (
-                    <div className="absolute left-0 right-0 top-full mt-2 max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-pink-200 bg-white p-2 shadow-[0_18px_45px_rgba(15,23,42,0.16)]">
-                      <div className="grid gap-1.5 sm:grid-cols-2">
-                        {SAMPLE_TASKS.map((sample) => (
-                          <button
-                            key={sample.title}
-                            type="button"
-                            onClick={() => {
-                              setDescription(sample.task);
-                              setProofMode("required");
-                              setProofSample(sample.proof);
-                              setError("");
-                              setSamplesExpanded(false);
-                            }}
-                            className={cn(
-                              "w-full rounded-xl border p-3 text-left transition-colors touch-manipulation",
-                              description === sample.task
-                                ? "border-pink-300 bg-pink-50"
-                                : "border-slate-100 bg-white hover:border-pink-200 hover:bg-pink-50/60",
-                            )}
-                          >
+                    <div className="mt-3 grid max-h-[min(58vh,460px)] gap-1.5 overflow-y-auto sm:grid-cols-2">
+                      {SAMPLE_TASKS.map((sample) => (
+                        <button
+                          key={sample.title}
+                          type="button"
+                          onClick={() => {
+                            setDescription(sample.task);
+                            setProofMode("required");
+                            setProofSample(sample.proof);
+                            setError("");
+                            setSamplesExpanded(false);
+                          }}
+                          className={cn(
+                            "w-full rounded-xl border p-3 text-left transition-colors touch-manipulation",
+                            description === sample.task
+                              ? "border-pink-300 bg-pink-50"
+                              : "border-pink-100 bg-white/90 hover:border-pink-200 hover:bg-white",
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
                             <div className="text-xs font-black text-slate-900">{sample.title}</div>
-                            <div className="mt-1 text-[11px] leading-snug text-slate-500 font-medium">
-                              {sample.task}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                            <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700">
+                              Provable
+                            </span>
+                          </div>
+                          <div className="mt-1 text-[11px] leading-snug text-slate-600 font-medium">
+                            {sample.task}
+                          </div>
+                          <div className="mt-2 rounded-lg border border-pink-100 bg-pink-50/60 px-2.5 py-1.5 text-[10px] leading-relaxed text-pink-800">
+                            <span className="font-black">Proof:</span> {sample.proof}
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -411,7 +420,7 @@ export function CreateDareForm() {
                   What exactly must happen?
                 </label>
                 <p className="text-xs leading-relaxed text-slate-500 font-medium">
-                  Start from the sample or write your own clear, objective challenge.
+                  Write your own clear, objective challenge, or select a sample above.
                 </p>
                 <textarea
                   id="description"
@@ -425,13 +434,17 @@ export function CreateDareForm() {
                   <span>Objective, verifiable & measurable</span>
                   <span>{description.length}/500</span>
                 </div>
+
               </section>
 
               {/* Duration Settings */}
               <section className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="block text-sm font-black text-slate-900">Duration</span>
+                    <div className="flex items-center justify-between gap-3">
+                  <span className="block text-sm font-black text-slate-900">Duration</span>
+                  <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-black text-blue-700 ring-1 ring-blue-200">{durationValue} {durationType}</span>
+                </div>
                     <span className="text-[11px] font-medium text-slate-400">
                       Contract limit: {limitsLoading ? "loading..." : formatDuration(maxDurationSeconds)}
                     </span>
@@ -455,7 +468,7 @@ export function CreateDareForm() {
                       className={cn(
                         "rounded-xl py-2 text-xs font-bold transition-all cursor-pointer",
                         durationType === type
-                          ? "bg-white text-[#0052FF] shadow-[0_2px_8px_rgba(15,23,42,0.04)] font-black scale-[1.01]"
+                          ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200 shadow-[0_2px_8px_rgba(66,133,244,0.10)] font-black scale-[1.01]"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -468,14 +481,14 @@ export function CreateDareForm() {
                   aria-label="Duration"
                   type="range"
                   min={1}
-                  max={durationType === "hours" ? maxHours : maxDays}
-                  value={durationValue}
+                  max={Math.max(1, durationType === "hours" ? maxHours : maxDays)}
+                  value={Math.min(durationValue, Math.max(1, durationType === "hours" ? maxHours : maxDays))}
                   onChange={(e) => {
                     const next = Number(e.target.value);
-                    const max = durationType === "hours" ? maxHours : maxDays;
+                    const max = Math.max(1, durationType === "hours" ? maxHours : maxDays);
                     setDurationValue(Math.min(Math.max(1, next), max));
                   }}
-                  className="w-full accent-[#0052FF] cursor-pointer"
+                  className="w-full accent-[#7aa7ff] cursor-pointer touch-manipulation"
                 />
                 <div className="flex justify-between text-[11px] font-semibold text-slate-400">
                   <span>{durationType === "hours" ? "1 hour" : "1 day"}</span>
@@ -495,7 +508,7 @@ export function CreateDareForm() {
                       className={cn(
                         "glass-card-interactive group flex items-center gap-3.5 rounded-2xl p-3.5 text-left transition-all cursor-pointer",
                         token === item.address
-                          ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                          ? "border-[#6f9dff] bg-blue-50/80 ring-2 ring-blue-200 shadow-[0_4px_16px_rgba(66,133,244,0.16)]"
                           : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
                       )}
                     >
@@ -508,9 +521,14 @@ export function CreateDareForm() {
                           className="h-6 w-6 object-contain"
                         />
                       </div>
-                      <div>
-                        <span className="block text-sm font-black text-slate-900">{item.symbol}</span>
-                        <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Base Sepolia</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="block text-sm font-black text-slate-900">{item.symbol}</span>
+                          {token === item.address && (
+                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-blue-700">Selected</span>
+                          )}
+                        </div>
+                        <span className="block text-[10px] font-bold text-[#6683a5] uppercase tracking-wider">Base Sepolia</span>
                       </div>
                     </button>
                   ))}
@@ -560,11 +578,14 @@ export function CreateDareForm() {
                     className={cn(
                       "glass-card-interactive rounded-2xl p-4 text-left transition-all cursor-pointer",
                       proofMode === "none"
-                        ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                        ? "border-[#6f9dff] bg-blue-50/80 ring-2 ring-blue-200 shadow-[0_4px_16px_rgba(66,133,244,0.16)]"
                         : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
                     )}
                   >
-                    <div className="text-xs sm:text-sm font-black text-slate-900">No Proof</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs sm:text-sm font-black text-slate-900">No Proof</div>
+                      {proofMode === "none" && <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-emerald-700">Selected</span>}
+                    </div>
                     <div className="mt-1 text-[11px] text-slate-500 font-medium">Outcome resolved strictly by contract deadline.</div>
                   </button>
 
@@ -574,11 +595,14 @@ export function CreateDareForm() {
                     className={cn(
                       "glass-card-interactive rounded-2xl p-4 text-left transition-all cursor-pointer",
                       proofMode === "required"
-                        ? "border-[#0052FF] bg-blue-50/50 ring-2 ring-blue-100 shadow-[0_4px_16px_rgba(0,82,255,0.12)]"
+                        ? "border-[#6f9dff] bg-blue-50/80 ring-2 ring-blue-200 shadow-[0_4px_16px_rgba(66,133,244,0.16)]"
                         : "border-slate-200/80 bg-white/90 hover:bg-slate-50"
                     )}
                   >
-                    <div className="text-xs sm:text-sm font-black text-slate-900">Proof Required</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs sm:text-sm font-black text-slate-900">Proof Required</div>
+                      {proofMode === "required" && <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-blue-700">Selected</span>}
+                    </div>
                     <div className="mt-1 text-[11px] text-slate-500 font-medium">Accepter must upload verifiable proof before deadline.</div>
                   </button>
                 </div>
@@ -771,6 +795,11 @@ const SAMPLE_TASKS = [
   { title: "Publish 3 Farcaster casts", task: "Publish three original Farcaster casts before the deadline.", proof: "Links to the three public casts, each timestamped before the deadline." },
   { title: "10 coding problems", task: "Complete 10 specified coding problems before the deadline.", proof: "Public submission links or repository commits showing all 10 completed problems." },
   { title: "10 acts of kindness", task: "Complete 10 distinct, documented acts of kindness before the deadline.", proof: "A dated list with independently inspectable evidence for each act where practical." },
+  { title: "Cycle 10 km", task: "Complete a 10 km outdoor cycling session before the deadline.", proof: "Strava, Garmin or equivalent activity link showing 10 km, date and one continuous ride." },
+  { title: "Read 30 pages", task: "Read at least 30 pages of a specified book before the deadline.", proof: "A dated reading log plus a photo of the completed pages or a verifiable reading-app record." },
+  { title: "Ship a GitHub PR", task: "Open and merge one specified GitHub pull request containing the required change.", proof: "Public pull request URL showing the required changes and merged status before the deadline." },
+  { title: "20-min meditation", task: "Complete one uninterrupted 20-minute meditation session before the deadline.", proof: "Timestamped meditation-app session record or another independently inspectable activity record." },
+  { title: "Deploy a project", task: "Deploy the specified project to a public URL with the required feature working before the deadline.", proof: "Public deployment URL plus repository commit or release showing the required feature." },
 ] as const;
 
 function formatDuration(seconds: number) {
