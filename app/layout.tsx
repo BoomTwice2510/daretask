@@ -52,6 +52,22 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Dare Protocol",
   },
+  icons: {
+    icon: [
+      {
+        url: "/icons/dare-icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+    apple: [
+      {
+        url: "/icons/dare-icon-180.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+  },
   other: {
     "fc:miniapp": JSON.stringify(dareMiniAppEmbed),
     "fc:frame": JSON.stringify(dareMiniAppEmbed),
@@ -67,6 +83,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/icons/dare-icon-180.png"
+        />
         <meta name="base:app_id" content="697782ba88e3bac59cf3d9c8" />
 
         {/* Talent Protocol Verification */}
